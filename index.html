@@ -19,6 +19,9 @@
             --color-accent-yellow: #eab308; /* yellow-500 */
             --color-blue-400: #60a5fa;
             --color-blue-500: #3b82f6;
+            --color-green-400: #34d399;
+            --color-green-700-t: rgba(4, 120, 87, 0.3); /* green-700 transparent */
+            --color-blue-700-t: rgba(29, 78, 216, 0.3); /* blue-700 transparent */
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -64,22 +67,16 @@
         .edit-icon.has-note:hover { color: #fde047; /* yellow-300 */ }
 
         #toast {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); /* Start hidden below */
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px);
             padding: 10px 15px; border-radius: 50px; font-weight: 600;
             display: flex; align-items: center; gap: 8px; z-index: 100;
             transition: opacity 0.3s, transform 0.3s; opacity: 0;
         }
-        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); } /* Slide up */
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         @media (min-width: 768px) {
-            #toast {
-                left: auto; right: 20px;
-                transform: translateY(20px); /* Keep starting position */
-            }
-            #toast.show {
-                transform: translateY(0); /* Slide up */
-            }
+            #toast { left: auto; right: 20px; transform: translateY(20px); }
+            #toast.show { transform: translateY(0); }
         }
-
 
         @keyframes spin { to { transform: rotate(360deg); } }
         .spinner {
@@ -90,11 +87,9 @@
 
         .topic-item.dragging { opacity: 0.5; background: var(--color-bg-header); transform: scale(1.02); }
         .column-section.drag-over {
-            border: 2px dashed var(--color-accent-blue);
-            background-color: rgba(59, 130, 246, 0.1);
+            border: 2px dashed var(--color-accent-blue); background-color: rgba(59, 130, 246, 0.1);
             border-radius: 8px; margin: -2px; padding-bottom: 0.5rem;
         }
-
 
         [contenteditable="true"]:empty:before {
             content: attr(placeholder); color: var(--color-text-dim); opacity: 0.7;
@@ -117,18 +112,24 @@
         }
         .date-header-text {
             font-size: 1.125rem; font-weight: 700; color: white;
-            padding: 0.25rem; margin: -0.25rem; border-radius: 0.375rem;
+            background-color: var(--color-blue-700-t); padding: 0.35rem 0.75rem;
+            margin: -0.25rem; border-radius: 6px; border: 1px solid var(--color-accent-blue);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         
-        .column-section {
-            padding: 1rem 1.25rem; border-bottom: 1px solid var(--color-border);
-        }
+        .column-section { padding: 1rem 1.25rem; border-bottom: 1px solid var(--color-border); }
         .column-section:last-child { border-bottom: none; }
         
         .column-title {
-            font-size: 0.9rem; font-weight: 600; color: var(--color-text-dim);
-            text-transform: uppercase; letter-spacing: 0.5px;
-            margin-bottom: 0.75rem; display: block;
+            display: inline-block; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.8px; padding: 0.25rem 0.6rem;
+            border-radius: 6px; margin-bottom: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .date-card[data-table-id="table1"] .column-title {
+             background-color: var(--color-green-700-t); color: var(--color-green-400); border: 1px solid var(--color-accent-green);
+        }
+         .date-card[data-table-id="table2"] .column-title {
+             background-color: var(--color-blue-700-t); color: var(--color-blue-400); border: 1px solid var(--color-accent-blue);
         }
         
         .delete-row-btn {
@@ -136,16 +137,20 @@
         }
         .delete-row-btn:hover { color: var(--color-accent-red); opacity: 1; transform: scale(1.1); }
         
-        /* Add Topic Button in Card */
         .add-topic-btn-card {
              width: 100%; text-align: left; font-size: 0.875rem; color: var(--color-text-dim);
              padding: 0.5rem; margin-top: 0.25rem; border: 2px dashed var(--color-border);
              border-radius: 0.375rem; transition: color 0.2s, border-color 0.2s;
         }
-        .add-topic-btn-card:hover {
-            color: var(--color-blue-400); /* blue-400 */
-            border-color: var(--color-blue-500); /* blue-500 */
+        .add-topic-btn-card:hover { color: var(--color-blue-400); border-color: var(--color-blue-500); }
+
+        /* View Toggle Button Styles */
+        .view-toggle-btn {
+            padding: 0.5rem 1rem; font-weight: 600; color: var(--color-text-dim);
+            border-bottom: 3px solid transparent; transition: color 0.2s, border-color 0.2s;
         }
+        .view-toggle-btn.active { color: var(--color-accent-blue); border-bottom-color: var(--color-accent-blue); }
+        .view-toggle-btn:hover:not(.active) { color: var(--color-text-main); }
 
     </style>
 </head>
@@ -154,12 +159,13 @@
     <!-- Header -->
     <div class="max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
-            <h1 class="text-3xl md:text-4xl font-bold text-white">Last Fight <span class="text-green-500">Tracker</span></h1>
+            <h1 class="text-3xl md:text-4xl font-bold text-white text-center md:text-left">Last Fight <span class="text-green-500">Tracker</span></h1>
             
-            <div class="flex items-center gap-4">
+            <!-- Centered Countdown Card Container -->
+            <div class="flex justify-center md:justify-end w-full md:w-auto">
                 <!-- Countdown Card -->
-                <div class="bg-gray-800 p-3 md:p-4 rounded-lg shadow-lg border border-gray-700">
-                    <h3 class="text-xs md:text-lg font-semibold text-center text-yellow-400 mb-1 md:mb-2">Countdown</h3>
+                <div class="bg-gray-800 p-3 md:p-4 rounded-lg shadow-lg border border-gray-700 w-fit">
+                    <h3 class="text-sm md:text-base font-semibold text-center text-yellow-400 mb-1 md:mb-2">Countdown</h3>
                     <div id="countdown" class="flex justify-center gap-2 md:gap-3 text-center">
                         <div><span id="days" class="text-xl md:text-3xl font-bold text-white">00</span><span class="block text-xs text-gray-400">Days</span></div>
                         <div><span id="hours" class="text-xl md:text-3xl font-bold text-white">00</span><span class="block text-xs text-gray-400">Hours</span></div>
@@ -169,6 +175,42 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Moved Progress Bars Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Table 1 Progress -->
+            <div class="bg-gray-800 p-5 rounded-lg shadow-lg border border-gray-700">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-lg font-semibold text-white">Overall Progress (Syllabus)</span>
+                    <span id="overall-progress-text" class="text-lg font-bold text-green-400">0%</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
+                    <div id="overall-progress-bar" class="bg-green-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <div class="text-right mt-1">
+                    <span id="t1_task_counter" class="bg-green-500/20 text-green-300 text-xs font-semibold px-2 py-0.5 rounded-full opacity-0 transition-opacity">0 / 0 Done</span>
+                </div>
+            </div>
+            <!-- Table 2 Progress -->
+            <div class="bg-gray-800 p-5 rounded-lg shadow-lg border border-gray-700">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-lg font-semibold text-white">Daily Progress (Plan)</span>
+                    <span id="t2-overall-progress-text" class="text-lg font-bold text-blue-400">0%</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
+                    <div id="t2-overall-progress-bar" class="bg-blue-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                 <div class="text-right mt-1">
+                    <span id="t2_task_counter" class="bg-blue-500/20 text-blue-300 text-xs font-semibold px-2 py-0.5 rounded-full opacity-0 transition-opacity">0 / 0 Done</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Toggle Buttons -->
+        <div class="mb-6 border-b border-gray-700 flex justify-center md:justify-start">
+            <button id="view-toggle-table1" class="view-toggle-btn active" data-view="table1">Syllabus View</button>
+            <button id="view-toggle-table2" class="view-toggle-btn" data-view="table2">Daily Plan View</button>
+        </div>
 
         <!-- Loading / Content -->
         <div id="loading" class="text-center py-20">
@@ -177,52 +219,22 @@
         </div>
 
         <div id="content" class="hidden">
-            <!-- Overall Progress Bars -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <!-- Table 1 Progress -->
-                <div class="bg-gray-800 p-5 rounded-lg shadow-lg border border-gray-700">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-lg font-semibold text-white">Overall Progress (Syllabus)</span>
-                        <span id="overall-progress-text" class="text-lg font-bold text-green-400">0%</span>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
-                        <div id="overall-progress-bar" class="bg-green-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                    <div class="text-right mt-1">
-                        <span id="t1_task_counter" class="bg-green-500/20 text-green-300 text-xs font-semibold px-2 py-0.5 rounded-full opacity-0 transition-opacity">0 / 0 Done</span>
-                    </div>
-                </div>
-                <!-- Table 2 Progress -->
-                <div class="bg-gray-800 p-5 rounded-lg shadow-lg border border-gray-700">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-lg font-semibold text-white">Daily Progress (Plan)</span>
-                        <span id="t2-overall-progress-text" class="text-lg font-bold text-blue-400">0%</span>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
-                        <div id="t2-overall-progress-bar" class="bg-blue-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                     <div class="text-right mt-1">
-                        <span id="t2_task_counter" class="bg-blue-500/20 text-blue-300 text-xs font-semibold px-2 py-0.5 rounded-full opacity-0 transition-opacity">0 / 0 Done</span>
-                    </div>
-                </div>
-            </div>
-
+           
             <!-- Main Content Area for Cards -->
             <div id="main-content-area">
-                <!-- Table 1 Cards Section -->
-                <div class="mb-10">
-                    <h2 class="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Syllabus Tracker (Table 1)</h2>
+                <!-- Table 1 Cards Section (Initially Visible) -->
+                <div id="table1-section" class="mb-10">
                     <div id="table1-cards"><!-- Cards generated here --></div>
                     <button id="add-row-t1" class="mt-4 w-full text-lg text-gray-400 hover:text-white font-semibold p-3 border-2 border-dashed border-gray-600 rounded-lg hover:border-gray-500 transition-colors">+ Add New Date Card</button>
                 </div>
                 
-                <!-- Table 2 Cards Section -->
-                <div>
-                    <h2 class="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Daily Plan Tracker (Table 2)</h2>
+                <!-- Table 2 Cards Section (Initially Hidden) -->
+                <div id="table2-section" class="mb-10 hidden">
                      <div id="table2-cards"><!-- Cards generated here --></div>
                      <button id="add-row-t2" class="mt-4 w-full text-lg text-gray-400 hover:text-white font-semibold p-3 border-2 border-dashed border-gray-600 rounded-lg hover:border-gray-500 transition-colors">+ Add New Date Card</button>
                 </div>
             </div>
+            
         </div>
     </div>
 
@@ -232,7 +244,7 @@
         <span id="toast-message">Syncing...</span>
     </div>
     
-    <!-- Add Topic Modal -->
+    <!-- Modals remain the same -->
     <div id="add-topic-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center hidden p-4">
         <div class="bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-md border border-gray-700">
             <h3 class="text-xl font-semibold mb-4">Add New Topic</h3>
@@ -247,7 +259,6 @@
         </div>
     </div>
 
-    <!-- Edit Modal -->
     <div id="edit-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-lg border border-gray-700">
             <h3 class="text-xl font-semibold mb-4">Edit Topic</h3>
@@ -269,6 +280,7 @@
         </div>
     </div>
 
+
     <script type="module">
         // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -280,6 +292,7 @@
         let countdownInterval, saveTimeout;
         let isFirstLoad = true;
         let pendingChanges = false;
+        let currentView = 'table1'; // Default view
         
         const appData = { completedTopics: {} };
         const tableData = {
@@ -313,11 +326,21 @@
         const modalTopicNote = document.getElementById('modal-topic-note');
         const addTopicModalEl = document.getElementById('add-topic-modal');
         const addTopicModalName = document.getElementById('add-topic-modal-name');
+        const table1Section = document.getElementById('table1-section');
+        const table2Section = document.getElementById('table2-section');
         const table1CardsContainer = document.getElementById('table1-cards');
         const table2CardsContainer = document.getElementById('table2-cards');
+        const viewToggleBtnTable1 = document.getElementById('view-toggle-table1');
+        const viewToggleBtnTable2 = document.getElementById('view-toggle-table2');
+        const addRowBtnTable1 = document.getElementById('add-row-t1');
+        const addRowBtnTable2 = document.getElementById('add-row-t2');
+
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
+            const savedView = localStorage.getItem('lastFightTrackerView');
+            if (savedView === 'table2') currentView = 'table2';
+            updateViewToggleUI(); 
             initializeAppFirebase();
             startCountdown();
             setupGlobalEventListeners();
@@ -369,11 +392,9 @@
                     appData.completedTopics = data.completedTopics || {};
                     if (data.tableData) {
                         const firestoreTableData = data.tableData;
-                        // Deep merge to preserve existing static structure if Firestore data is partial
                         Object.keys(firestoreTableData).forEach(tableId => {
-                            if (!tableData[tableId]) tableData[tableId] = {}; // Initialize if table doesn't exist statically
+                            if (!tableData[tableId]) tableData[tableId] = {};
                             Object.keys(firestoreTableData[tableId]).forEach(date => {
-                                // If date exists statically, merge columns, otherwise assign directly
                                 if (tableData[tableId][date]) {
                                     Object.keys(firestoreTableData[tableId][date]).forEach(colName => {
                                         tableData[tableId][date][colName] = firestoreTableData[tableId][date][colName];
@@ -386,10 +407,8 @@
                     }
                 } else {
                     appData.completedTopics = {};
-                    // Reset tableData to static version if no doc exists
-                    // This logic might need adjustment based on desired behavior for a new user
                 }
-                renderData();
+                renderData(); 
                 showToast(doc.metadata.fromCache ? "cached" : "synced");
             }, (error) => {
                 console.error("Firestore snapshot error:", error);
@@ -400,12 +419,12 @@
         
         // --- Data Rendering ---
         function renderData() {
-            // Always re-render cards on data change to ensure consistency
             renderAllCards(); 
             updateAllProgressBars();
+            updateViewToggleUI(); 
             loadingEl.classList.add('hidden');
             contentEl.classList.remove('hidden');
-            isFirstLoad = false; // Set flag after first render
+            isFirstLoad = false; 
         }
 
         function renderAllCards() {
@@ -427,7 +446,7 @@
                     container.appendChild(card);
                 });
             });
-             updateExistingTopics(); // Apply progress/notes after structure is built
+             updateExistingTopics(); 
         }
         
         function createDateCard(tableId, date, dateData) {
@@ -449,8 +468,7 @@
             card.appendChild(cardHeader);
             const headers = columnHeaders[tableId];
             headers.forEach(colName => {
-                const topics = dateData ? dateData[colName] : []; // Handle potentially undefined dateData
-                // Ensure section is created if dateData exists or it's a new card placeholder
+                const topics = dateData ? dateData[colName] : []; 
                 if (dateData && (Array.isArray(topics) && topics.length > 0 || date === "New Date")) {
                     const section = document.createElement('div');
                     section.className = 'column-section';
@@ -458,7 +476,6 @@
                     section.innerHTML = `<span class="column-title">${colName}</span>`;
                     if (Array.isArray(topics)) {
                         topics.forEach(topicName => {
-                            // Ensure topicName is a string before creating ID
                             if (typeof topicName === 'string') {
                                 const topicId = createTopicId(tableId, date, colName, topicName);
                                 const topicEl = createTopicElement(topicId, topicName);
@@ -470,7 +487,7 @@
                     }
                     section.appendChild(createAddTopicButton(true));
                     card.appendChild(section);
-                } else if (!dateData && date === "New Date") { // Case for adding a truly new card structure
+                } else if (!dateData && date === "New Date") { 
                      const section = document.createElement('div');
                      section.className = 'column-section';
                      section.dataset.colName = colName;
@@ -545,19 +562,11 @@
          }
         
         function createTopicId(tableId, date, colName, topicName) {
-            // Ensure topicName is a string before processing
-            if (typeof topicName !== 'string') {
-                console.error(`Invalid topicName type for ID creation: ${topicName}`);
-                topicName = 'invalid-topic'; // Default placeholder
-            }
+            if (typeof topicName !== 'string') { console.error(`Invalid topicName type for ID creation: ${topicName}`); topicName = 'invalid-topic'; }
             const t = tableId.replace('table', 't');
             const d = date.replace(/\//g, '-');
             const c = colName.toLowerCase().replace(/[^a-z0-9]/g, '');
-            // FIX 3: More robust sanitization for topic names
-            const n = topicName.toLowerCase()
-                         .replace(/\s+/g, '-') // Replace spaces with dashes
-                         .replace(/[^\w\-]/g, '') // Remove non-word chars except dashes
-                         .substring(0, 50); // Limit length
+            const n = topicName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]/g, '').substring(0, 50); 
             return `${t}_${d}_${c}_${n}`;
         }
         
@@ -566,6 +575,7 @@
             const container = document.body;
             container.addEventListener('click', (e) => {
                 const target = e.target;
+                if (target.id === 'view-toggle-table1' || target.id === 'view-toggle-table2') { handleViewToggle(target.dataset.view); return; }
                 if (target.classList.contains('progress-box')) { handleProgressClick(target, false); return; }
                 if (target.closest('.edit-icon')) { handleEditClick(target.closest('.edit-icon')); return; }
                 if (target.classList.contains('add-topic-btn-card') || target.classList.contains('add-topic-btn')) { handleAddTopicClick(target); return; }
@@ -578,27 +588,19 @@
                 if (target.id === 'add-topic-modal-cancel' || (target.id === 'add-topic-modal' && target === addTopicModalEl)) { addTopicModalEl.classList.add('hidden'); return; }
             });
             container.addEventListener('contextmenu', (e) => {
-                if (e.target.classList.contains('progress-box')) {
-                    e.preventDefault(); handleProgressClick(e.target, true);
-                }
+                if (e.target.classList.contains('progress-box')) { e.preventDefault(); handleProgressClick(e.target, true); }
             });
             container.addEventListener('focusin', (e) => {
                 const target = e.target;
-                if (target.contentEditable === 'true' && target.dataset.label === 'Date') {
-                    target.dataset.originalDate = target.textContent.trim();
-                }
+                if (target.contentEditable === 'true' && target.dataset.label === 'Date') { target.dataset.originalDate = target.textContent.trim(); }
             });
             container.addEventListener('blur', (e) => {
                 const target = e.target;
-                if (target.contentEditable === 'true' && target.dataset.label === 'Date') {
-                    handleDateChange(target);
-                }
+                if (target.contentEditable === 'true' && target.dataset.label === 'Date') { handleDateChange(target); }
             }, true);
             let draggedElement = null;
             container.addEventListener('dragstart', (e) => {
-                if (e.target.classList.contains('topic-item')) {
-                    draggedElement = e.target; setTimeout(() => e.target.classList.add('dragging'), 0);
-                }
+                if (e.target.classList.contains('topic-item')) { draggedElement = e.target; setTimeout(() => e.target.classList.add('dragging'), 0); }
             });
             container.addEventListener('dragend', (e) => {
                 if (draggedElement) draggedElement.classList.remove('dragging'); draggedElement = null;
@@ -606,9 +608,7 @@
             });
             container.addEventListener('dragenter', (e) => {
                 const section = e.target.closest('.column-section');
-                if (section && draggedElement) {
-                    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); section.classList.add('drag-over');
-                }
+                if (section && draggedElement) { document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); section.classList.add('drag-over'); }
             });
             container.addEventListener('drop', (e) => {
                 e.preventDefault();
@@ -674,8 +674,6 @@
             }
             const card = document.querySelector(`.date-card[data-table-id="${tableId}"][data-date="${date}"]`);
             let targetSection = card ? card.querySelector(`.column-section[data-col-name="${colName}"]`) : null;
-
-            // FIX 5: Avoid recursion, create section directly if needed
             if (!targetSection && card) {
                 targetSection = document.createElement('div');
                 targetSection.className = 'column-section';
@@ -683,21 +681,13 @@
                 targetSection.innerHTML = `<span class="column-title">${colName}</span>`;
                 targetSection.appendChild(createAddTopicButton(true));
                 card.appendChild(targetSection);
-                // Ensure tableData reflects this new section existence
                 if (!tableData[tableId][date]) tableData[tableId][date] = {};
                 if (!tableData[tableId][date][colName]) tableData[tableId][date][colName] = [];
             }
-
             if (!targetSection) { console.error("Could not find or create target section to add topic."); return; }
             if (!tableData[tableId][date]) tableData[tableId][date] = {};
-            if (!tableData[tableId][date][colName]) tableData[tableId][date][colName] = [];
-            
-            // Ensure topics array exists before pushing
-             if (!Array.isArray(tableData[tableId][date][colName])) {
-                  tableData[tableId][date][colName] = [];
-             }
+            if (!tableData[tableId][date][colName] || !Array.isArray(tableData[tableId][date][colName])) tableData[tableId][date][colName] = [];
             tableData[tableId][date][colName].push(newTopicName);
-            
             const topicEl = createTopicElement(topicId, newTopicName);
             const addBtn = targetSection.querySelector('.add-topic-btn-card');
             targetSection.insertBefore(topicEl, addBtn);
@@ -722,93 +712,62 @@
             if (newName === '') { alert("Topic name cannot be empty."); return; }
             const currentData = appData.completedTopics[topicId] || { progress: 0 };
             const itemElement = document.querySelector(`.topic-item [data-topic-id="${topicId}"]`)?.closest('.topic-item');
-            
-            let newTopicId = topicId; // Initialize newTopicId with the current ID
-
+            let newTopicId = topicId; 
             if (itemElement) {
                 const nameEl = itemElement.querySelector('.topic-name');
                 const oldName = nameEl ? nameEl.textContent : '';
-                
                 if (oldName !== newName) {
                     const section = itemElement.closest('.column-section'), card = itemElement.closest('.date-card');
                     if (section && card) {
                         const date = card.dataset.date, tableId = card.dataset.tableId, colName = section.dataset.colName;
-                        newTopicId = createTopicId(tableId, date, colName, newName); // Generate new ID
-                        
+                        newTopicId = createTopicId(tableId, date, colName, newName); 
                         if (newTopicId !== topicId && (appData.completedTopics[newTopicId] || document.querySelector(`[data-topic-id="${newTopicId}"]`))) {
                             alert("A topic with this name already exists in this section."); return;
                         }
-                        
-                        // Update tableData with newName using oldName to find it
                         if (tableData[tableId]?.[date]?.[colName]) {
-                            const topics = tableData[tableId][date][colName]; 
-                            const index = topics.indexOf(oldName); 
-                            if (index > -1) { 
-                                topics[index] = newName; 
-                            } else {
-                                console.warn(`Old name "${oldName}" not found in tableData for update.`);
-                                // Attempt to find by ID's original name part if possible (more complex)
-                            }
+                            const topics = tableData[tableId][date][colName]; const index = topics.indexOf(oldName); 
+                            if (index > -1) topics[index] = newName; 
+                            else console.warn(`Old name "${oldName}" not found in tableData for update.`);
                         }
-                        
-                        // Update DOM display name (all instances)
                         document.querySelectorAll(`.topic-item [data-topic-id="${topicId}"]`).forEach(box => {
-                            const parentItem = box.closest('.topic-item'), nameDisplay = parentItem?.querySelector('.topic-name'); 
-                            if(nameDisplay) nameDisplay.textContent = newName;
+                            const parentItem = box.closest('.topic-item'), nameDisplay = parentItem?.querySelector('.topic-name'); if(nameDisplay) nameDisplay.textContent = newName;
                         });
-                        
-                        // If ID changed, migrate data and update DOM references
                         if (newTopicId !== topicId) {
-                            appData.completedTopics[newTopicId] = { ...currentData, name: newName, note: newNote }; // Create new entry
-                            delete appData.completedTopics[topicId]; // Delete old entry
-                            
-                            // Update data-topic-id attributes in the DOM
+                            appData.completedTopics[newTopicId] = { ...currentData, name: newName, note: newNote }; 
+                            delete appData.completedTopics[topicId]; 
                             document.querySelectorAll(`[data-topic-id="${topicId}"]`).forEach(el => el.dataset.topicId = newTopicId);
                         } else {
-                             // ID didn't change (e.g., only case changed), update existing entry
                              appData.completedTopics[topicId] = { ...currentData, name: newName, note: newNote };
                         }
                     }
                 } else {
-                    // Name didn't change, just update note
                     appData.completedTopics[topicId] = { ...currentData, name: newName, note: newNote };
                 }
-                
-                // Update note icon (using the potentially new ID)
                 document.querySelectorAll(`.edit-icon[data-topic-id="${newTopicId}"]`).forEach(iconEl => iconEl.classList.toggle('has-note', !!newNote));
-                
             } else {
                  console.warn(`Could not find DOM element for topicId: ${topicId} during save.`);
-                 // Still try to update appData if name didn't change (only note)
-                 if(appData.completedTopics[topicId]) {
-                    appData.completedTopics[topicId].note = newNote;
-                 }
+                 if(appData.completedTopics[topicId]) appData.completedTopics[topicId].note = newNote;
             }
-            
-            saveDataToFirestore(); 
-            modalEl.classList.add('hidden');
+            saveDataToFirestore(); modalEl.classList.add('hidden');
         }
-
 
         function handleModalDelete() {
             const topicId = modalEl.dataset.currentTopicId; if (!topicId || !confirm("Are you sure you want to delete this topic?")) return;
             const itemElement = document.querySelector(`.topic-item [data-topic-id="${topicId}"]`)?.closest('.topic-item');
-            let section = null; // Keep track of the section
+            let section = null; 
             if (itemElement) {
-                section = itemElement.closest('.column-section'); // Get section before potential removal
+                section = itemElement.closest('.column-section'); 
                 const card = itemElement.closest('.date-card');
                 if (section && card) {
                     const date = card.dataset.date, tableId = card.dataset.tableId, colName = section.dataset.colName;
                     const nameEl = itemElement.querySelector('.topic-name'), actualTopicName = nameEl ? nameEl.textContent : '';
                     if (tableData[tableId]?.[date]?.[colName]) {
-                        const topics = tableData[tableId][date][colName]; const index = topics.indexOf(actualTopicName); if (index > -1) topics.splice(index, 1);
+                        const topics = tableData[tableId][date][colName]; const index = topics.indexOf(actualTopicName); 
+                        if (index > -1) topics.splice(index, 1);
                         else console.warn("Could not find topic in tableData to delete:", actualTopicName);
-                        // FIX 7: Remove section if empty AFTER removing the DOM element
-                        // Check is moved below
                     }
                 }
                 document.querySelectorAll(`.topic-item [data-topic-id="${topicId}"]`).forEach(box => box.closest('.topic-item')?.remove());
-                 // Now check if section is empty
                  if (section && !section.querySelector('.topic-item')) {
                      section.remove();
                  }
@@ -818,12 +777,8 @@
 
         function addNewRow(tableId) {
              const container = tableId === 'table1' ? table1CardsContainer : table2CardsContainer; if (!container) return;
-             // Ensure dateData is initialized as an empty object for createDateCard
-             const newCardData = {}; 
-             columnHeaders[tableId].forEach(colName => newCardData[colName] = []); // Initialize columns
-             
-             const card = createDateCard(tableId, "New Date", newCardData); 
-             container.appendChild(card);
+             const newCardData = {}; columnHeaders[tableId].forEach(colName => newCardData[colName] = []); 
+             const card = createDateCard(tableId, "New Date", newCardData); container.appendChild(card);
              const dateDiv = card.querySelector('.date-header-text');
              if(dateDiv) {
                  dateDiv.focus(); const range = document.createRange(); range.selectNodeContents(dateDiv);
@@ -843,13 +798,9 @@
         
         function handleDateChange(dateDiv) {
             const card = dateDiv.closest('.date-card'); const newDate = dateDiv.textContent.trim(), oldDate = dateDiv.dataset.originalDate;
-            // Prevent trigger if date hasn't actually changed or is still placeholder
             if (!card || !newDate || newDate === oldDate || newDate === 'New Date') { 
-                if (newDate !== oldDate && (newDate === '' || newDate === 'New Date')) {
-                     dateDiv.textContent = oldDate; // Revert if cleared or set back to placeholder
-                } else if (!newDate) {
-                     dateDiv.textContent = oldDate; // Revert if completely empty
-                }
+                if (newDate !== oldDate && (newDate === '' || newDate === 'New Date')) { dateDiv.textContent = oldDate; } 
+                else if (!newDate) { dateDiv.textContent = oldDate; }
                 return; 
             }
             const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/; if (!dateRegex.test(newDate)) { alert('Please enter a valid date in DD/MM/YYYY format'); dateDiv.textContent = oldDate; return; }
@@ -858,141 +809,88 @@
             const tableId = card.dataset.tableId, container = tableId === 'table1' ? table1CardsContainer : table2CardsContainer;
             const allDateDivs = container.querySelectorAll('.date-header-text'), existingDates = Array.from(allDateDivs).filter(div => div !== dateDiv).map(div => div.textContent.trim());
             if (existingDates.includes(newDate)) { alert('A card with this date already exists!'); dateDiv.textContent = oldDate; return; }
-            
             dateDiv.dataset.originalDate = newDate; card.dataset.date = newDate;
-            
-            // Handle tableData update
             const oldDateData = tableData[tableId]?.[oldDate];
-            if (oldDateData && oldDate !== 'New Date') { // If it was an existing, valid date
-                 tableData[tableId][newDate] = oldDateData; // Move data
-                 delete tableData[tableId][oldDate];      // Delete old entry
-            } else { // This was a new row ("New Date") or somehow invalid old date
-                 tableData[tableId][newDate] = tableData[tableId][newDate] || {}; // Ensure new date exists
+            if (oldDateData && oldDate !== 'New Date') { 
+                 tableData[tableId][newDate] = oldDateData; delete tableData[tableId][oldDate]; 
+            } else { 
+                 tableData[tableId][newDate] = tableData[tableId][newDate] || {}; 
                  columnHeaders[tableId].forEach(colName => {
-                      // Initialize column if it doesn't exist under the new date
-                     if (!tableData[tableId][newDate][colName]) {
-                          tableData[tableId][newDate][colName] = [];
-                     }
+                     if (!tableData[tableId][newDate][colName]) tableData[tableId][newDate][colName] = [];
                  });
-                 // If oldDate was 'New Date', there's nothing to delete from tableData
             }
-
-            const newDateDashed = newDate.replace(/\//g, '-');
-            let idsChanged = false; // Flag to check if save is needed
-
+            const newDateDashed = newDate.replace(/\//g, '-'); let idsChanged = false; 
             card.querySelectorAll('.progress-box').forEach(box => {
-                const topicId = box.dataset.topicId; 
-                const oldData = appData.completedTopics[topicId]; if (!oldData) return; // Only migrate existing topics
+                const topicId = box.dataset.topicId; const oldData = appData.completedTopics[topicId]; if (!oldData) return; 
                 const parts = topicId.split('_'); if (parts.length < 4) return;
-                
-                // Regenerate ID with the new dashed date
                 const tablePart = parts[0], colPart = parts[2], topicPart = parts.slice(3).join('_');
                 const newTopicId = `${tablePart}_${newDateDashed}_${colPart}_${topicPart}`;
-                
                 if (newTopicId !== topicId) {
-                    idsChanged = true;
-                    delete appData.completedTopics[topicId]; 
-                    appData.completedTopics[newTopicId] = oldData; 
-                    box.dataset.topicId = newTopicId; // Update DOM ID
-                    const icon = box.closest('.topic-item')?.querySelector('.edit-icon'); 
-                    if (icon) icon.dataset.topicId = newTopicId;
+                    idsChanged = true; delete appData.completedTopics[topicId]; appData.completedTopics[newTopicId] = oldData; box.dataset.topicId = newTopicId; 
+                    const icon = box.closest('.topic-item')?.querySelector('.edit-icon'); if (icon) icon.dataset.topicId = newTopicId;
                 }
             });
-            
-            // Only save if dates or IDs actually changed
             if (oldDate !== newDate || idsChanged) {
-                saveDataToFirestore(); 
-                dateDiv.style.borderColor = 'var(--color-accent-green)'; 
-                setTimeout(() => { dateDiv.style.borderColor = ''; }, 1000);
-            } else {
-                 // No actual change needed, remove potential green border
-                 dateDiv.style.borderColor = '';
-            }
+                saveDataToFirestore(); dateDiv.style.borderColor = 'var(--color-accent-green)'; setTimeout(() => { dateDiv.style.borderColor = ''; }, 1000);
+            } else { dateDiv.style.borderColor = ''; }
         }
 
         function handleDragDrop(draggedElement, toSection) {
             const oldSection = draggedElement.closest('.column-section');
             if (!oldSection || oldSection === toSection) return; 
-        
             const topicId = draggedElement.querySelector('[data-topic-id]')?.dataset.topicId;
             if(!topicId) { console.error("Dragged item missing topic ID"); return; }
-
-            // Use the topicId to find the potentially updated data in appData
             const currentTopicData = appData.completedTopics[topicId];
-            const topicName = currentTopicData?.name || draggedElement.querySelector('.topic-name')?.textContent || 'Unknown Topic'; // Get potentially updated name
-
-            const toCard = toSection.closest('.date-card');
-            const newDate = toCard.dataset.date;
-            const newColName = toSection.dataset.colName;
-            const newTableId = toCard.dataset.tableId;
-        
-            const oldCard = oldSection.closest('.date-card');
-            const oldDate = oldCard.dataset.date;
-            const oldColName = oldSection.dataset.colName;
-            const oldTableId = oldCard.dataset.tableId;
-        
-            const oldTopicId = topicId; // Keep old ID for deletion reference
-            const oldData = appData.completedTopics[oldTopicId]; // Get data before potential deletion
-            
+            const topicName = currentTopicData?.name || draggedElement.querySelector('.topic-name')?.textContent || 'Unknown Topic'; 
+            const toCard = toSection.closest('.date-card'); const newDate = toCard.dataset.date, newColName = toSection.dataset.colName, newTableId = toCard.dataset.tableId;
+            const oldCard = oldSection.closest('.date-card'); const oldDate = oldCard.dataset.date, oldColName = oldSection.dataset.colName, oldTableId = oldCard.dataset.tableId;
+            const oldTopicId = topicId; const oldData = appData.completedTopics[oldTopicId]; 
             const newTopicId = createTopicId(newTableId, newDate, newColName, topicName);
-            
             if (oldTopicId === newTopicId) return; 
-            
-            if (appData.completedTopics[newTopicId] || toSection.querySelector(`.topic-item [data-topic-id="${newTopicId}"]`)) { // Check DOM of target section too
-                alert("A topic with this name already exists in the target section.");
-                return;
-            }
-        
-            // Update tableData
+            if (appData.completedTopics[newTopicId] || toSection.querySelector(`.topic-item [data-topic-id="${newTopicId}"]`)) { alert("A topic with this name already exists in the target section."); return; }
             if (tableData[oldTableId]?.[oldDate]?.[oldColName]) {
-                const topics = tableData[oldTableId][oldDate][oldColName];
-                // Use the potentially updated topicName to find and remove
-                const index = topics.indexOf(topicName); 
+                const topics = tableData[oldTableId][oldDate][oldColName]; const index = topics.indexOf(topicName); 
                 if (index > -1) {
                     topics.splice(index, 1);
-                     // If old section becomes empty after removing, remove it from DOM
-                     if (topics.length === 0 && !oldSection.querySelector('.topic-item:not(.dragging)')) { 
-                         oldSection.remove();
-                     }
-                } else {
-                    console.warn(`Topic "${topicName}" not found in old tableData section during drag.`);
-                }
+                     if (topics.length === 0 && !oldSection.querySelector('.topic-item:not(.dragging)')) oldSection.remove();
+                } else console.warn(`Topic "${topicName}" not found in old tableData section during drag.`);
             }
-            
-            // Ensure target structure exists in tableData
              if (!tableData[newTableId]) tableData[newTableId] = {};
              if (!tableData[newTableId][newDate]) tableData[newTableId][newDate] = {};
              if (!tableData[newTableId][newDate][newColName]) tableData[newTableId][newDate][newColName] = [];
-             
-             // Add to new location if not already present (shouldn't be, based on earlier check)
-             if (!tableData[newTableId][newDate][newColName].includes(topicName)) {
-                 tableData[newTableId][newDate][newColName].push(topicName);
-             }
-        
-            // Update appData
-            if (oldData) { // Only migrate if data existed
-                 appData.completedTopics[newTopicId] = oldData; 
-                 delete appData.completedTopics[oldTopicId]; 
-            } else {
-                 // If oldData didn't exist (e.g., box was 0% and never interacted with), create a basic entry
-                 appData.completedTopics[newTopicId] = { progress: 0, name: topicName, note: '' };
-            }
-            
-            // --- Direct DOM Manipulation ---
+             if (!tableData[newTableId][newDate][newColName].includes(topicName)) tableData[newTableId][newDate][newColName].push(topicName);
+            if (oldData) { appData.completedTopics[newTopicId] = oldData; delete appData.completedTopics[oldTopicId]; } 
+            else { appData.completedTopics[newTopicId] = { progress: 0, name: topicName, note: '' }; }
              draggedElement.querySelectorAll('[data-topic-id]').forEach(el => el.dataset.topicId = newTopicId);
-             const addBtn = toSection.querySelector('.add-topic-btn-card');
-             toSection.insertBefore(draggedElement, addBtn);
-            // --- End Direct DOM Manipulation ---
-        
-            saveDataToFirestore();
-            updateAllProgressBars(); 
+             const addBtn = toSection.querySelector('.add-topic-btn-card'); toSection.insertBefore(draggedElement, addBtn);
+            saveDataToFirestore(); updateAllProgressBars(); 
         }
+
+        // --- View Toggle Functions ---
+        function handleViewToggle(viewId) {
+            if (currentView === viewId) return; 
+            currentView = viewId;
+            localStorage.setItem('lastFightTrackerView', currentView); 
+            updateViewToggleUI();
+        }
+
+        function updateViewToggleUI() {
+            if (currentView === 'table1') {
+                table1Section.classList.remove('hidden'); addRowBtnTable1.classList.remove('hidden');
+                table2Section.classList.add('hidden'); addRowBtnTable2.classList.add('hidden');
+                viewToggleBtnTable1.classList.add('active'); viewToggleBtnTable2.classList.remove('active');
+            } else {
+                table1Section.classList.add('hidden'); addRowBtnTable1.classList.add('hidden');
+                table2Section.classList.remove('hidden'); addRowBtnTable2.classList.remove('hidden');
+                viewToggleBtnTable1.classList.remove('active'); viewToggleBtnTable2.classList.add('active');
+            }
+        }
+
 
         // --- Progress Bar Functions ---
         function updateAllProgressBars() {
             updateOverallProgress(); updateTable2Progress(); updateTaskCounters();
         }
-        // updateProgressBarForCell remains a simple wrapper
         function updateProgressBarForCell(cellElement) { updateAllProgressBars(); } 
 
         function updateOverallProgress() {
@@ -1001,7 +899,7 @@
             const allBoxes = container.querySelectorAll('.progress-box'), totalBoxes = allBoxes.length;
             if (totalBoxes === 0) { bar.style.width = '0%'; text.textContent = '0%'; return; }
             let totalProgress = 0; allBoxes.forEach(box => totalProgress += appData.completedTopics[box.dataset.topicId]?.progress || 0);
-            const overallAvg = totalBoxes > 0 ? (totalProgress / (totalBoxes * 100)) * 100 : 0; // Avoid division by zero
+            const overallAvg = totalBoxes > 0 ? (totalProgress / (totalBoxes * 100)) * 100 : 0; 
             bar.style.width = `${overallAvg}%`; text.textContent = `${Math.round(overallAvg)}%`;
         }
         
@@ -1011,7 +909,7 @@
             const allBoxes = container.querySelectorAll('.progress-box'), totalBoxes = allBoxes.length;
             if (totalBoxes === 0) { bar.style.width = '0%'; text.textContent = '0%'; return; }
             let totalProgress = 0; allBoxes.forEach(box => totalProgress += appData.completedTopics[box.dataset.topicId]?.progress || 0);
-            const overallAvg = totalBoxes > 0 ? (totalProgress / (totalBoxes * 100)) * 100 : 0; // Avoid division by zero
+            const overallAvg = totalBoxes > 0 ? (totalProgress / (totalBoxes * 100)) * 100 : 0; 
             bar.style.width = `${overallAvg}%`; text.textContent = `${Math.round(overallAvg)}%`;
         }
 
@@ -1031,46 +929,31 @@
             pendingChanges = true; 
             if (saveTimeout) clearTimeout(saveTimeout);
             
-            // Create a deep copy of tableData to save, ensuring no undefined values within arrays
             const tableDataToSave = JSON.parse(JSON.stringify(tableData, (key, value) => {
-                 // Ensure topics arrays don't contain undefined accidentally
-                if (Array.isArray(value)) {
-                    return value.filter(item => typeof item === 'string'); // Only keep strings
-                }
-                return value;
+                if (Array.isArray(value)) return value.filter(item => typeof item === 'string');
+                return value === undefined ? null : value; 
             }));
-
-            // Sanitize completedTopics just before saving
             const topicsToSave = {};
             for (const topicId in appData.completedTopics) {
                 const topicData = appData.completedTopics[topicId];
-                if (topicData && typeof topicData === 'object') {
+                if (topicData && typeof topicData === 'object' && topicData.name !== undefined) { 
                     topicsToSave[topicId] = {
                         progress: typeof topicData.progress === 'number' ? topicData.progress : 0,
-                        name: typeof topicData.name === 'string' ? topicData.name : 'Unnamed Topic', 
+                        name: typeof topicData.name === 'string' ? topicData.name : 'Recovered Topic', 
                         note: typeof topicData.note === 'string' ? topicData.note : '',
                     };
-                } else {
-                     console.warn(`Sanitizing invalid topic data for ID: ${topicId}`, topicData);
-                     // Assign a default valid object to prevent saving undefined
-                     topicsToSave[topicId] = { progress: 0, name: 'Recovered Topic', note: '' };
-                }
+                } else { console.warn(`Attempted to save invalid topic data for ID: ${topicId}`, topicData); }
             }
 
             saveTimeout = setTimeout(async () => {
-                if (!pendingChanges) return; 
-                pendingChanges = false;
+                if (!pendingChanges) return; pendingChanges = false;
                 try {
                     showToast('syncing'); 
                     await setDoc(dbDocRef, { 
-                        completedTopics: topicsToSave, // Use sanitized version
-                        tableData: tableDataToSave     // Use sanitized version
-                    }, { merge: true });
-                } catch (error) { 
-                    console.error("Error saving to Firestore:", error); 
-                    showToast('error'); 
-                    pendingChanges = true; 
-                }
+                        completedTopics: topicsToSave, 
+                        tableData: tableDataToSave     
+                    }, { merge: true }); 
+                } catch (error) { console.error("Error saving to Firestore:", error); showToast('error'); pendingChanges = true; }
             }, 1000); 
         }
         
@@ -1078,13 +961,12 @@
         function showToast(type) {
              const toast=document.getElementById('toast'), msg=document.getElementById('toast-message'), spinner=document.getElementById('toast-spinner'); if (!toast || !msg || !spinner) return; clearTimeout(toastTimeout);
              switch(type) {
-                 case 'syncing': msg.textContent='Syncing...'; spinner.style.display='block'; toast.className='bg-blue-600 text-white show'; break;
-                 case 'synced': msg.textContent='Synced'; spinner.style.display='none'; toast.className='bg-green-600 text-white show'; break;
-                 case 'cached': msg.textContent='Offline (Cached)'; spinner.style.display='none'; toast.className='bg-yellow-500 text-gray-900 show'; break;
-                 case 'error': msg.textContent='Sync Error'; spinner.style.display='none'; toast.className='bg-red-600 text-white show'; break;
+                 case 'syncing': toast.className='bg-blue-600 text-white'; msg.textContent='Syncing...'; spinner.style.display='block'; break;
+                 case 'synced': toast.className='bg-green-600 text-white'; msg.textContent='Synced'; spinner.style.display='none'; break;
+                 case 'cached': toast.className='bg-yellow-500 text-gray-900'; msg.textContent='Offline (Cached)'; spinner.style.display='none'; break;
+                 case 'error': toast.className='bg-red-600 text-white'; msg.textContent='Sync Error'; spinner.style.display='none'; break;
              }
-             // Ensure 'show' is added *after* class changes
-             requestAnimationFrame(() => toast.classList.add('show'));
+             requestAnimationFrame(() => toast.classList.add('show')); 
              if (type !== 'syncing') toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 2000);
          }
         
@@ -1101,4 +983,3 @@
     </script>
 </body>
 </html>
-
