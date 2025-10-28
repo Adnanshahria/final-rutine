@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Last Fight (v4.0 - Bug Fixed)</title>
+    <title>Last Fight (v4.1 - Bug Fixed)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -35,7 +35,7 @@
             --color-blue-700-t: rgba(29, 78, 216, 0.3);
             --color-green-700-t: rgba(21, 128, 61, 0.3);
             --color-purple-700-t: rgba(126, 34, 206, 0.2);
-        }
+         }
         body { 
             font-family: 'Inter', sans-serif; 
             overscroll-behavior: none; 
@@ -43,7 +43,7 @@
             background-image: linear-gradient(to bottom, var(--color-bg-gradient-start), var(--color-bg-gradient-end));
             color: var(--color-text-main); 
             min-height: 100vh;
-        }
+         }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: var(--color-bg-main); }
         ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
@@ -54,7 +54,7 @@
             padding: 0.6rem 1.1rem; border-radius: 8px; font-weight: 600; 
             transition: all 0.2s ease; cursor: pointer; border: none;
             box-shadow: 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.1);
-        }
+         }
         .modern-button:hover { transform: translateY(-1px); box-shadow: 0 3px 6px rgba(0,0,0,0.2), 0 5px 10px rgba(0,0,0,0.1); }
         .modern-button:active { transform: translateY(0); }
         .button-primary { background-color: var(--color-accent-blue); color: white; } .button-primary:hover { background-color: #2563eb; }
@@ -76,6 +76,10 @@
         .study-rev { border-color: var(--color-accent-green); color: var(--color-accent-green); background-color: rgba(34, 197, 94, 0.1); }
         .study-new { border-color: var(--color-accent-blue); color: var(--color-accent-blue); background-color: rgba(59, 130, 246, 0.1); }
         .study-secret { border-color: var(--color-accent-purple); color: var(--color-accent-purple); background-color: var(--color-purple-700-t); }
+        /* NEW Hardness Styles */
+        .study-easy { border-color: var(--color-accent-green); color: var(--color-accent-green); background-color: rgba(34, 197, 94, 0.1); }
+        .study-medium { border-color: var(--color-accent-yellow); color: var(--color-accent-yellow); background-color: rgba(234, 179, 8, 0.1); }
+        .study-hard { border-color: var(--color-accent-red); color: var(--color-accent-red); background-color: rgba(239, 68, 68, 0.1); }
 
         .progress-box { display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.7rem; cursor: pointer; user-select: none; transition: all 0.2s ease-in-out; color: white; border-radius: 8px; width: 40px; min-width: 40px; max-width: 40px; height: 40px; flex-shrink: 0; box-sizing: border-box; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.1); }
         .progress-box::before { content: ''; position: absolute; inset: 0; border-radius: 7px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); z-index: 1; }
@@ -90,7 +94,6 @@
         .topic-name { font-weight: 500; color: var(--color-text-main); white-space: normal; word-break: break-word; display: flex; align-items: center; }
         .topic-name-text {}
         .timed-note-display { font-size: 0.75rem; font-style: italic; color: var(--color-text-dim); line-height: 1; margin-top: 2px; }
-
         .edit-icon { flex-shrink: 0; color: var(--color-text-dim); cursor: pointer; padding: 5px; border-radius: 50%; transition: background-color 0.2s, color 0.2s; background: none; border: none; }
         .edit-icon:hover { background-color: var(--color-border); color: white; } .edit-icon.has-note { color: var(--color-accent-yellow); } .edit-icon.has-note:hover { color: #fde047; }
         
@@ -114,7 +117,7 @@
             overflow: hidden; position: relative; 
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -2px rgba(0, 0, 0, 0.1); 
             transition: box-shadow 0.2s ease; 
-        }
+         }
         .date-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.1); }
         
         .date-header { background-color: var(--color-bg-header); padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
@@ -157,6 +160,9 @@
         .modal-backdrop.show .modal-content { transform: scale(1); }
         #confirm-modal .modal-content { max-width: 400px; } #calendar-modal .modal-content { max-width: 400px; }
         
+        /* Z-INDEX FIX */
+        #confirm-modal { z-index: 60; } 
+
         .custom-dropdown { position: relative; }
         .custom-dropdown-button { display: flex; align-items: center; justify-content: space-between; width: 100%; background-color: var(--color-bg-header); border: 1px solid var(--color-border); border-radius: 8px; padding: 0.6rem 0.8rem; color: var(--color-text-main); transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer; text-align: left; }
         .custom-dropdown-button:focus, .custom-dropdown-button.active { outline: none; border-color: var(--color-accent-blue); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
@@ -184,7 +190,6 @@
         .calendar-day.disabled { background: var(--color-bg-card); color: var(--color-text-dim); opacity: 0.5; cursor: not-allowed; border-color: transparent; }
         .calendar-day.has-card { border-color: var(--color-accent-blue); box-shadow: 0 0 5px var(--color-accent-blue); }
         .calendar-day.has-card::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; border-radius: 50%; background-color: var(--color-accent-blue); }
-
         @keyframes pulse-gold { 0%, 100% { text-shadow: 0 0 5px rgba(245, 158, 11, 0.4); } 50% { text-shadow: 0 0 15px rgba(245, 158, 11, 0.8); } }
         #countdown-card { background-image: linear-gradient(100deg, var(--color-red-900) 0%, #1e1b1b 100%); border: 1px solid var(--color-accent-red); border-radius: 10px; box-shadow: 0 0 15px rgba(239, 68, 68, 0.1), 0 4px 10px rgba(0,0,0,0.3); padding: 0.7rem 1.2rem; display: flex; align-items: center; gap: 1.5rem; }
         #countdown-card h3 { color: white; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.8rem; margin: 0; text-shadow: 0 1px 2px rgba(0,0,0,0.5); writing-mode: vertical-lr; transform: rotate(180deg); border-right: 1px solid var(--color-border); padding-right: 0.8rem; margin-right: -0.8rem; }
@@ -202,13 +207,11 @@
             background-color: var(--color-bg-header); border: 1px solid var(--color-border); border-radius: 8px;
             padding: 0.5rem; line-height: 1; cursor: pointer; transition: all 0.2s;
             color: var(--color-text-dim);
-        }
+         }
         #calendar-nav-btn:hover { background-color: var(--color-border); color: var(--color-text-main); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-
     </style>
 </head>
 <body ondragover="event.preventDefault()">
-
     <div class="max-w-7xl mx-auto px-4 md:px-8 pt-6 md:pt-8">
         <div class="flex flex-col md:flex-row justify-between md:items-center gap-6 mb-8">
             <div class="flex items-center justify-center md:justify-start gap-4">
@@ -233,7 +236,6 @@
                 </div>
             </div>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div class="bg-slate-800 p-5 rounded-lg card-shadow border border-slate-700">
                 <div class="flex justify-between items-center mb-2"> <span class="text-lg font-semibold text-white">Overall Progress (Targets)</span> <span id="overall-progress-text" class="text-lg font-bold text-green-400">0%</span> </div>
@@ -246,12 +248,10 @@
                  <div class="text-right mt-1"> <span id="t2_task_counter" class="bg-blue-700/30 text-blue-300 text-xs font-semibold px-2 py-0.5 rounded-full opacity-0 transition-opacity">0 / 0 Done</span> </div>
             </div>
         </div>
-
         <div class="mb-8 border-b border-slate-700 flex justify-center md:justify-start">
             <button id="view-toggle-table1" class="view-toggle-btn active" data-view="table1">Targets</button>
             <button id="view-toggle-table2" class="view-toggle-btn" data-view="table2">Daily Plan View</button>
         </div>
-
         <div id="loading" class="text-center py-20"> <div class="spinner" style="margin: 0 auto; width: 40px; height: 40px; border-width: 4px;"></div> <p class="mt-4 text-lg text-slate-400">Loading Dashboard...</p> </div>
         <div id="content" class="hidden pb-8">
             <div id="main-content-area">
@@ -260,134 +260,143 @@
             </div>
         </div>
     </div>
-
     <div id="toast"> <div id="toast-spinner" class="spinner"></div> <span id="toast-message">Syncing...</span> </div>
-
     <div id="add-topic-modal" class="modal-backdrop">
         <div class="modal-content">
              <h3 class="text-xl font-semibold mb-6 text-white">Add New Topic</h3>
-            <div class="mb-5">
-                <label for="add-topic-modal-name" class="block text-sm font-medium text-slate-300 mb-1">Topic Name</label>
-                <input type="text" id="add-topic-modal-name" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+             <div class="mb-5">
+                 <label for="add-topic-modal-name" class="block text-sm font-medium text-slate-300 mb-1">Topic Name</label>
+                 <input type="text" id="add-topic-modal-name" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+             </div>
+
+            <div class="mb-4">
+                <label for="add-topic-modal-timed-note" class="block text-sm font-medium text-slate-300 mb-1">Timed Note <span class="text-xs text-slate-400">(Visible on card)</span></label>
+                <input type="text" id="add-topic-modal-timed-note" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white" placeholder="e.g., '30 min' or '10:00 AM'">
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Hardness</label>
-                    <div class="custom-dropdown" data-target-input="add-topic-modal-hardness-value">
-                        <button type="button" class="custom-dropdown-button"> <span class="selected-value">Medium</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
-                        <div class="custom-dropdown-options"> <div class="custom-dropdown-option" data-value="easy">Easy</div> <div class="custom-dropdown-option selected" data-value="medium">Medium</div> <div class="custom-dropdown-option" data-value="hard">Hard</div> </div>
-                        <input type="hidden" id="add-topic-modal-hardness-value" value="medium">
-                    </div>
-                </div>
-                <div id="add-topic-targets-fields">
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Subject</label>
-                    <div class="custom-dropdown" data-target-input="add-topic-modal-subject-value">
-                        <button type="button" class="custom-dropdown-button"> <span class="selected-value">Phy</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
-                        <div class="custom-dropdown-options" id="add-topic-modal-subject-options"> </div>
-                        <input type="hidden" id="add-topic-modal-subject-value" value="Phy">
-                    </div>
-                </div>
-                <div id="add-topic-daily-fields">
+
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                 <div>
+                     <label class="block text-sm font-medium text-slate-300 mb-1">Hardness</label>
+                     <div class="custom-dropdown" data-target-input="add-topic-modal-hardness-value">
+                         <button type="button" class="custom-dropdown-button"> <span class="selected-value">Medium</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
+                         <div class="custom-dropdown-options"> <div class="custom-dropdown-option" data-value="easy">Easy</div> <div class="custom-dropdown-option selected" data-value="medium">Medium</div> <div class="custom-dropdown-option" data-value="hard">Hard</div> </div>
+                         <input type="hidden" id="add-topic-modal-hardness-value" value="medium">
+                     </div>
+                 </div>
+                 <div id="add-topic-targets-fields">
+                     <label class="block text-sm font-medium text-slate-300 mb-1">Subject</label>
+                     <div class="custom-dropdown" data-target-input="add-topic-modal-subject-value">
+                         <button type="button" class="custom-dropdown-button"> <span class="selected-value">Phy</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
+                         <div class="custom-dropdown-options" id="add-topic-modal-subject-options"> </div>
+                         <input type="hidden" id="add-topic-modal-subject-value" value="Phy">
+                     </div>
+                 </div>
+                 <div id="add-topic-daily-fields">
                      <label class="block text-sm font-medium text-slate-300 mb-1">Session</label>
                      <div class="custom-dropdown" data-target-input="add-topic-modal-session-value">
-                        <button type="button" class="custom-dropdown-button"> <span class="selected-value">Morning Session</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
-                        <div class="custom-dropdown-options" id="add-topic-modal-session-options"> </div>
-                        <input type="hidden" id="add-topic-modal-session-value" value="Morning Session">
+                         <button type="button" class="custom-dropdown-button"> <span class="selected-value">Morning Session</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
+                         <div class="custom-dropdown-options" id="add-topic-modal-session-options"> </div>
+                         <input type="hidden" id="add-topic-modal-session-value" value="Morning Session">
                      </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Study Type</label>
-                    <div class="custom-dropdown" data-target-input="add-topic-modal-study-value">
-                        <button type="button" class="custom-dropdown-button"> <span class="selected-value">MQB</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
-                        <div class="custom-dropdown-options">
-                            <div class="custom-dropdown-option selected" data-value="mqb">MQB</div> <div class="custom-dropdown-option" data-value="ret">Retina QB</div> 
-                            <div class="custom-dropdown-option" data-value="med">Meditrics</div> <div class="custom-dropdown-option" data-value="camp">Campus Exam</div> 
-                            <div class="custom-dropdown-option" data-value="week">Weekly Exam</div> <div class="custom-dropdown-option" data-value="rev">Revision Class</div> 
-                            <div class="custom-dropdown-option" data-value="new">1st Time Reading</div> <div class="custom-dropdown-option" data-value="secret">Secret Files</div>
-                        </div>
-                        <input type="hidden" id="add-topic-modal-study-value" value="mqb">
-                    </div>
+                 </div>
+                 <div>
+                     <label class="block text-sm font-medium text-slate-300 mb-1">Study Type</label>
+                     <div class="custom-dropdown" data-target-input="add-topic-modal-study-value">
+                         <button type="button" class="custom-dropdown-button"> <span class="selected-value">MQB</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
+                         <div class="custom-dropdown-options">
+                             <div class="custom-dropdown-option selected" data-value="mqb">MQB</div> <div class="custom-dropdown-option" data-value="ret">Retina QB</div> 
+                             <div class="custom-dropdown-option" data-value="med">Meditrics</div> <div class="custom-dropdown-option" data-value="camp">Campus Exam</div> 
+                             <div class="custom-dropdown-option" data-value="week">Weekly Exam</div> <div class="custom-dropdown-option" data-value="rev">Revision Class</div> 
+                             <div class="custom-dropdown-option" data-value="new">1st Time Reading</div> <div class="custom-dropdown-option" data-value="secret">Secret Files</div>
+                         </div>
+                         <input type="hidden" id="add-topic-modal-study-value" value="mqb">
+                     </div>
+                 </div>
+             </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-300 mb-2">Priority</label>
+                <div id="add-topic-priority-selector" class="flex flex-wrap gap-2">
+                    <button type="button" data-priority="high" class="priority-btn group"><span class="priority-indicator priority-high"></span> High</button>
+                    <button type="button" data-priority="medium" class="priority-btn group"><span class="priority-indicator priority-medium"></span> Medium</button>
+                    <button type="button" data-priority="low" class="priority-btn group active"><span class="priority-indicator priority-low"></span> Low</button>
                 </div>
             </div>
-            <div class="flex justify-end gap-3 mt-8"> <button id="add-topic-modal-cancel" class="modern-button button-secondary">Cancel</button> <button id="add-topic-modal-save" class="modern-button button-primary">Save Topic</button> </div>
+
+             <div class="flex justify-end gap-3 mt-8"> <button id="add-topic-modal-cancel" class="modern-button button-secondary">Cancel</button> <button id="add-topic-modal-save" class="modern-button button-primary">Save Topic</button> </div>
         </div>
     </div>
-
     <div id="edit-modal" class="modal-backdrop" style="z-index: 50;">
         <div class="modal-content">
-            <h3 class="text-xl font-semibold mb-5 text-white">Edit Topic</h3>
-            <div class="mb-4">
-                <label for="modal-topic-name" class="block text-sm font-medium text-slate-300 mb-1">Topic Name</label>
-                <input type="text" id="modal-topic-name" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
-            </div>
-            
-            <div class="mb-4">
-                <label for="modal-topic-timed-note" class="block text-sm font-medium text-slate-300 mb-1">Timed Note <span class="text-xs text-slate-400">(Visible on card)</span></label>
-                <input type="text" id="modal-topic-timed-note" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white" placeholder="e.g., '30 min' or '10:00 AM'">
-            </div>
-            
-            <div class="mb-4">
-                <label for="modal-topic-note" class="block text-sm font-medium text-slate-300 mb-1">Main Notes <span class="text-xs text-slate-400">(Hidden)</span></label>
-                <textarea id="modal-topic-note" rows="4" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white" placeholder="Add your detailed notes here..."></textarea>
-            </div>
-            <div class="grid grid-cols-2 gap-4 mb-5">
+             <h3 class="text-xl font-semibold mb-5 text-white">Edit Topic</h3>
+             <div class="mb-4">
+                 <label for="modal-topic-name" class="block text-sm font-medium text-slate-300 mb-1">Topic Name</label>
+                 <input type="text" id="modal-topic-name" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+             </div>
+             
+             <div class="mb-4">
+                 <label for="modal-topic-timed-note" class="block text-sm font-medium text-slate-300 mb-1">Timed Note <span class="text-xs text-slate-400">(Visible on card)</span></label>
+                 <input type="text" id="modal-topic-timed-note" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white" placeholder="e.g., '30 min' or '10:00 AM'">
+             </div>
+             
+             <div class="mb-4">
+                 <label for="modal-topic-note" class="block text-sm font-medium text-slate-300 mb-1">Main Notes <span class="text-xs text-slate-400">(Hidden)</span></label>
+                 <textarea id="modal-topic-note" rows="4" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white" placeholder="Add your detailed notes here..."></textarea>
+             </div>
+             <div class="grid grid-cols-2 gap-4 mb-5">
                  <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Hardness</label>
-                    <div class="custom-dropdown" data-target-input="modal-topic-hardness-value">
-                        <button type="button" class="custom-dropdown-button"> <span class="selected-value">Medium</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
-                        <div class="custom-dropdown-options"> <div class="custom-dropdown-option" data-value="easy">Easy</div> <div class="custom-dropdown-option" data-value="medium">Medium</div> <div class="custom-dropdown-option" data-value="hard">Hard</div> </div>
-                        <input type="hidden" id="modal-topic-hardness-value" value="medium">
-                    </div>
+                     <label class="block text-sm font-medium text-slate-300 mb-1">Hardness</label>
+                     <div class="custom-dropdown" data-target-input="modal-topic-hardness-value">
+                         <button type="button" class="custom-dropdown-button"> <span class="selected-value">Medium</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
+                         <div class="custom-dropdown-options"> <div class="custom-dropdown-option" data-value="easy">Easy</div> <div class="custom-dropdown-option" data-value="medium">Medium</div> <div class="custom-dropdown-option" data-value="hard">Hard</div> </div>
+                         <input type="hidden" id="modal-topic-hardness-value" value="medium">
+                     </div>
                  </div>
                  <div>
                      <label class="block text-sm font-medium text-slate-300 mb-1">Study Type</label>
                      <div class="custom-dropdown" data-target-input="modal-topic-study-value">
                          <button type="button" class="custom-dropdown-button"> <span class="selected-value">MQB</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
                          <div class="custom-dropdown-options">
-                            <div class="custom-dropdown-option" data-value="mqb">MQB</div> <div class="custom-dropdown-option" data-value="ret">Retina QB</div> 
-                            <div class="custom-dropdown-option" data-value="med">Meditrics</div> <div class="custom-dropdown-option" data-value="camp">Campus Exam</div> 
-                            <div class="custom-dropdown-option" data-value="week">Weekly Exam</div> <div class="custom-dropdown-option" data-value="rev">Revision Class</div> 
-                            <div class="custom-dropdown-option" data-value="new">1st Time Reading</div> <div class="custom-dropdown-option" data-value="secret">Secret Files</div>
+                             <div class="custom-dropdown-option" data-value="mqb">MQB</div> <div class="custom-dropdown-option" data-value="ret">Retina QB</div> 
+                             <div class="custom-dropdown-option" data-value="med">Meditrics</div> <div class="custom-dropdown-option" data-value="camp">Campus Exam</div> 
+                             <div class="custom-dropdown-option" data-value="week">Weekly Exam</div> <div class="custom-dropdown-option" data-value="rev">Revision Class</div> 
+                             <div class="custom-dropdown-option" data-value="new">1st Time Reading</div> <div class="custom-dropdown-option" data-value="secret">Secret Files</div>
                          </div>
                          <input type="hidden" id="modal-topic-study-value" value="mqb">
                      </div>
                  </div>
-            </div>
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-slate-300 mb-2">Priority</label>
-                <div id="modal-priority-selector" class="flex flex-wrap gap-2">
-                    <button type="button" data-priority="high" class="priority-btn group"><span class="priority-indicator priority-high"></span> High</button>
-                    <button type="button" data-priority="medium" class="priority-btn group"><span class="priority-indicator priority-medium"></span> Medium</button>
-                    <button type="button" data-priority="low" class="priority-btn group"><span class="priority-indicator priority-low"></span> Low</button>
-                </div>
-            </div>
-            <div class="flex justify-between items-center flex-wrap gap-4 mt-8"> <button id="modal-delete" class="modern-button button-danger">Delete Topic</button> <div class="flex gap-3"> <button id="modal-cancel" class="modern-button button-secondary">Cancel</button> <button id="modal-save" class="modern-button button-success">Save Changes</button> </div> </div>
+             </div>
+             <div class="mb-6">
+                 <label class="block text-sm font-medium text-slate-300 mb-2">Priority</label>
+                 <div id="modal-priority-selector" class="flex flex-wrap gap-2">
+                     <button type="button" data-priority="high" class="priority-btn group"><span class="priority-indicator priority-high"></span> High</button>
+                     <button type="button" data-priority="medium" class="priority-btn group"><span class="priority-indicator priority-medium"></span> Medium</button>
+                     <button type="button" data-priority="low" class="priority-btn group"><span class="priority-indicator priority-low"></span> Low</button>
+                 </div>
+             </div>
+             <div class="flex justify-between items-center flex-wrap gap-4 mt-8"> <button id="modal-delete" class="modern-button button-danger">Delete Topic</button> <div class="flex gap-3"> <button id="modal-cancel" class="modern-button button-secondary">Cancel</button> <button id="modal-save" class="modern-button button-success">Save Changes</button> </div> </div>
         </div>
     </div>
-
     <div id="confirm-modal" class="modal-backdrop">
         <div class="modal-content">
-            <h3 class="text-xl font-semibold mb-2 text-white">Are you sure?</h3>
-            <p id="confirm-message" class="text-slate-300 mb-6">Action cannot be undone.</p>
-            <div class="flex justify-end gap-3"> <button id="confirm-cancel" class="modern-button button-secondary">Cancel</button> <button id="confirm-yes" class="modern-button button-danger">Yes, Delete</button> </div>
+             <h3 class="text-xl font-semibold mb-2 text-white">Are you sure?</h3>
+             <p id="confirm-message" class="text-slate-300 mb-6">Action cannot be undone.</p>
+             <div class="flex justify-end gap-3"> <button id="confirm-cancel" class="modern-button button-secondary">Cancel</button> <button id="confirm-yes" class="modern-button button-danger">Yes, Delete</button> </div>
         </div>
     </div>
-
     <div id="calendar-modal" class="modal-backdrop" style="z-index: 55;">
         <div class="modal-content">
-            <div id="calendar-header"> <button type="button" id="calendar-prev-month"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="text-slate-400" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg></button> <div id="calendar-month-year" class="text-white">Month Year</div> <button type="button" id="calendar-next-month"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="text-slate-400" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg></button> </div>
-            <div id="calendar-weekdays" class="text-slate-400"><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></div>
-            <div id="calendar-days"></div>
-            <button id="calendar-cancel" class="w-full modern-button button-secondary mt-4">Cancel</button>
+             <div id="calendar-header"> <button type="button" id="calendar-prev-month"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="text-slate-400" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg></button> <div id="calendar-month-year" class="text-white">Month Year</div> <button type="button" id="calendar-next-month"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="text-slate-400" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg></button> </div>
+             <div id="calendar-weekdays" class="text-slate-400"><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></div>
+             <div id="calendar-days"></div>
+             <button id="calendar-cancel" class="w-full modern-button button-secondary mt-4">Cancel</button>
         </div>
     </div>
-
     <script type="module">
         // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
         // App State
         let db, auth, dbDocRef, unsubscribeSnapshot; 
         let countdownInterval, saveTimeout, toastTimeout; 
@@ -412,38 +421,38 @@
         const columnHeaders = { 
             table1: ["Phy", "Chem", "Bio", "GK", "English"], 
             table2: ["Morning Session", "Noon Session", "Night Session", "Exam"] // "Secret Files" renamed to "Exam"
-        };
+         };
         
         const progressSteps = [0, 20, 40, 60, 80, 100];
         
         // *** BUG FIX: Use real 'today' date ***
         const today = new Date(); 
         // const today = new Date(2025, 9, 28); // OLD BUGGY LINE
-
         // *** UPDATED PER REQUEST ***
         const studyStatusMap = { mqb: "MQB", ret: "RET", med: "MED", camp: "CAMP", week: "WEEK", rev: "REV", new: "NEW", secret: "SECRET" };
         const studyStatusFullNames = { mqb: "MQB", ret: "Retina QB", med: "Meditrics", camp: "Campus Exam", week: "Weekly Exam", rev: "Revision Class", new: "1st Time Reading", secret: "Secret Files" };
+        // NEW FEATURE: Hardness Map
+        const hardnessMap = { easy: "E", medium: "M", hard: "H" };
 
         // DOM Elements
         const loadingEl = document.getElementById('loading'), contentEl = document.getElementById('content'), 
-              modalEl = document.getElementById('edit-modal'), modalTopicName = document.getElementById('modal-topic-name'), 
-              modalTopicNote = document.getElementById('modal-topic-note'), modalTopicTimedNote = document.getElementById('modal-topic-timed-note'),
-              addTopicModalEl = document.getElementById('add-topic-modal'), addTopicModalName = document.getElementById('add-topic-modal-name'), 
-              table1Section = document.getElementById('table1-section'), table2Section = document.getElementById('table2-section'), 
-              table1CardsContainer = document.getElementById('table1-cards'), table2CardsContainer = document.getElementById('table2-cards'), 
-              viewToggleBtnTable1 = document.getElementById('view-toggle-table1'), viewToggleBtnTable2 = document.getElementById('view-toggle-table2'), 
-              addRowBtnTable1 = document.getElementById('add-row-t1'), addRowBtnTable2 = document.getElementById('add-row-t2'), 
-              confirmModalEl = document.getElementById('confirm-modal'), confirmMessageEl = document.getElementById('confirm-message'), 
-              calendarModalEl = document.getElementById('calendar-modal'), calendarDaysEl = document.getElementById('calendar-days'), 
-              calendarMonthYearEl = document.getElementById('calendar-month-year'), calendarNavBtn = document.getElementById('calendar-nav-btn');
-              
+            modalEl = document.getElementById('edit-modal'), modalTopicName = document.getElementById('modal-topic-name'), 
+            modalTopicNote = document.getElementById('modal-topic-note'), modalTopicTimedNote = document.getElementById('modal-topic-timed-note'),
+            addTopicModalEl = document.getElementById('add-topic-modal'), addTopicModalName = document.getElementById('add-topic-modal-name'), 
+            table1Section = document.getElementById('table1-section'), table2Section = document.getElementById('table2-section'), 
+            table1CardsContainer = document.getElementById('table1-cards'), table2CardsContainer = document.getElementById('table2-cards'), 
+            viewToggleBtnTable1 = document.getElementById('view-toggle-table1'), viewToggleBtnTable2 = document.getElementById('view-toggle-table2'), 
+            addRowBtnTable1 = document.getElementById('add-row-t1'), addRowBtnTable2 = document.getElementById('add-row-t2'), 
+            confirmModalEl = document.getElementById('confirm-modal'), confirmMessageEl = document.getElementById('confirm-message'), 
+            calendarModalEl = document.getElementById('calendar-modal'), calendarDaysEl = document.getElementById('calendar-days'), 
+            calendarMonthYearEl = document.getElementById('calendar-month-year'), calendarNavBtn = document.getElementById('calendar-nav-btn');
+            
         const addHardnessInput = document.getElementById('add-topic-modal-hardness-value'), 
-              addSubjectInput = document.getElementById('add-topic-modal-subject-value'), 
-              addSessionInput = document.getElementById('add-topic-modal-session-value'), 
-              addStudyInput = document.getElementById('add-topic-modal-study-value'), 
-              editHardnessInput = document.getElementById('modal-topic-hardness-value'), 
-              editStudyInput = document.getElementById('modal-topic-study-value');
-
+            addSubjectInput = document.getElementById('add-topic-modal-subject-value'), 
+            addSessionInput = document.getElementById('add-topic-modal-session-value'), 
+            addStudyInput = document.getElementById('add-topic-modal-study-value'), 
+            editHardnessInput = document.getElementById('modal-topic-hardness-value'), 
+            editStudyInput = document.getElementById('modal-topic-study-value');
         // Initialization
         document.addEventListener('DOMContentLoaded', () => {
             calendarState = { month: today.getMonth(), year: today.getFullYear() };
@@ -454,8 +463,7 @@
             initializeAppFirebase();
             startCountdown();
             setupGlobalEventListeners();
-        });
-
+         });
         // Populate Static Dropdowns
         function populateAddTopicDropdowns() {
             const subjectOptionsContainer = document.getElementById('add-topic-modal-subject-options');
@@ -467,9 +475,8 @@
                 option.dataset.value = subject;
                 option.textContent = subject;
                 subjectOptionsContainer.appendChild(option);
-            });
+             });
             if (columnHeaders.table1.length > 0) addSubjectInput.value = columnHeaders.table1[0];
-
             const sessionOptionsContainer = document.getElementById('add-topic-modal-session-options');
             sessionOptionsContainer.innerHTML = '';
             columnHeaders.table2.forEach((session, index) => {
@@ -479,11 +486,10 @@
                 option.dataset.value = session;
                 option.textContent = session;
                 sessionOptionsContainer.appendChild(option);
-            });
+             });
             if (columnHeaders.table2.length > 0) addSessionInput.value = columnHeaders.table2[0];
             initDropdownDisplay(addTopicModalEl);
-        }
-
+         }
         // Firebase Initialization
         async function initializeAppFirebase() {
             try {
@@ -491,18 +497,18 @@
                 let firebaseConfig;
                 if (typeof __firebase_config !== 'undefined') {
                     try { firebaseConfig = JSON.parse(__firebase_config); } catch (e) { firebaseConfig = null; console.warn("Could not parse __firebase_config"); }
-                }
+                 }
                 if (!firebaseConfig || !firebaseConfig.apiKey) {
                     firebaseConfig = { apiKey: "AIzaSyDTLhIkrW9qk6KPT_gTDibIiJeVwWYTowk", authDomain: "my-study-dashboard.firebaseapp.com", databaseURL: "https://my-study-dashboard-default-rtdb.firebaseio.com", projectId: "my-study-dashboard", storageBucket: "my-study-dashboard.firebasestorage.app", messagingSenderId: "66307909031", appId: "1:66307909031:web:a077b8cf1a046069f80282" };
-                }
+                 }
                 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 try { await enableIndexedDbPersistence(db); } catch (err) { console.warn("Offline persistence failed:", err.code); }
                 await authenticateUser(initialAuthToken, appId);
-            } catch (error) { console.error("Firebase Init Error:", error); loadingEl.innerHTML = `<p class="text-red-400">Error: Init failed.</p>`; }
-        }
+             } catch (error) { console.error("Firebase Init Error:", error); loadingEl.innerHTML = `<p class="text-red-400">Error: Init failed.</p>`; }
+         }
         async function authenticateUser(token, appId) {
             try {
                 if (token) { await signInWithCustomToken(auth, token); } else { await signInAnonymously(auth); }
@@ -510,9 +516,8 @@
                 const docPath = `artifacts/${appId}/users/${userId}/studyProgress/data_v4`; // New path for new structure
                 dbDocRef = doc(db, docPath);
                 loadDataFromFirestore();
-            } catch (error) { console.error("Auth Error:", error); loadingEl.innerHTML = `<p class="text-red-400">Error: Auth failed.</p>`; }
-        }
-
+             } catch (error) { console.error("Auth Error:", error); loadingEl.innerHTML = `<p class="text-red-400">Error: Auth failed.</p>`; }
+         }
         // *** DATA VALIDATION & MIGRATION LOGIC ***
         function isOldDataStructure(data) {
              if (!data || (!data.table1 && !data.table2)) return false; // Empty is not old
@@ -522,20 +527,19 @@
                      if (Array.isArray(data.table1[date][col]) && data.table1[date][col].length > 0) {
                          // If the first item is a STRING (topic name) and not an ID (topic_...), it's old.
                          return typeof data.table1[date][col][0] === 'string' && !data.table1[date][col][0].startsWith('topic_');
-                     }
-                 }
-             }
+                      }
+                  }
+              }
              // Check table2
              for (const date in data.table2) {
                  for (const col in data.table2[date]) {
                      if (Array.isArray(data.table2[date][col]) && data.table2[date][col].length > 0) {
                          return typeof data.table2[date][col][0] === 'string' && !data.table2[date][col][0].startsWith('topic_');
-                     }
-                 }
-             }
+                      }
+                  }
+              }
              return false; // No data or already new structure
-        }
-
+         }
         function runExamMigration() {
             let migrated = false;
             if (tableData.table2) {
@@ -545,15 +549,14 @@
                         tableData.table2[date]['Exam'] = tableData.table2[date]['Secret Files'];
                         delete tableData.table2[date]['Secret Files'];
                         migrated = true;
-                    }
-                });
-            }
+                     }
+                 });
+             }
             if (migrated) {
                 console.log("Migrated 'Secret Files' to 'Exam'.");
                 pendingChanges = true;
-            }
-        }
-
+             }
+         }
         function loadDataFromFirestore() {
             if (!dbDocRef) return;
             showToastQueued('syncing');
@@ -563,7 +566,6 @@
                 if (doc.exists()) {
                     const data = doc.data();
                     let loadedTableData = data.tableData ? JSON.parse(JSON.stringify(data.tableData)) : null;
-
                     // *** DATA VALIDATION & RESET ***
                     if (isOldDataStructure(loadedTableData)) {
                         console.warn("Old data structure detected. Resetting to default.");
@@ -571,40 +573,35 @@
                         tableData = JSON.parse(JSON.stringify(DEFAULT_TABLE_DATA));
                         appData.completedTopics = {}; // Clear old topics
                         pendingChanges = true; // Mark to save the new empty state
-                    } else if (loadedTableData) {
+                     } else if (loadedTableData) {
                         tableData = loadedTableData;
                         appData.completedTopics = data.completedTopics || {};
-                    } else {
+                     } else {
                         // Document exists but no data, or new user
                         tableData = JSON.parse(JSON.stringify(DEFAULT_TABLE_DATA));
                         appData.completedTopics = {};
                         pendingChanges = true; // Save the default state
-                    }
-                } else {
+                     }
+                 } else {
                     // No document at all, new user
                     tableData = JSON.parse(JSON.stringify(DEFAULT_TABLE_DATA));
                     appData.completedTopics = {};
                     pendingChanges = true; // Save the default state
-                }
-
+                 }
                 // Run migration for 'Secret Files' -> 'Exam'
                 runExamMigration(); 
-
                 if (pendingChanges) {
                     setTimeout(saveDataToFirestore, 1500); // Save any migrations or resets
-                }
-
+                 }
                 renderData();
                 showToastQueued(doc.metadata.fromCache ? "cached" : "synced");
-
-            }, (error) => {
+             }, (error) => {
                 console.error("Firestore snapshot error:", error);
                 loadingEl.innerHTML = `<p class="text-red-400">Error: Load failed.</p>`;
                 showToastQueued('error');
-            });
-        }
-
-        // Data Rendering (NEW STRUCTURE)
+             });
+         }
+        // *** DATA RENDERING (NEW STRUCTURE) ***
         function renderData() {
             renderAllCards();
             updateAllProgressUI();
@@ -613,45 +610,39 @@
             loadingEl.classList.add('hidden');
             contentEl.classList.remove('hidden');
             isFirstLoad = false;
-        }
-
+         }
         function renderAllCards() {
             table1CardsContainer.innerHTML = '';
             table2CardsContainer.innerHTML = '';
             if (!tableData.table1) tableData.table1 = {};
             if (!tableData.table2) tableData.table2 = {};
-
             Object.keys(tableData).forEach(tableId => {
                 const container = tableId === 'table1' ? table1CardsContainer : table2CardsContainer;
                 const data = tableData[tableId];
                 if (!container || !data) return;
-
                 const dates = Object.keys(data).sort((a, b) => {
                     try {
                         const dateA = new Date(a.split('/').reverse().join('-'));
                         const dateB = new Date(b.split('/').reverse().join('-'));
                         return dateA - dateB;
-                    } catch (e) { return 0; }
-                });
-
+                     } catch (e) { return 0; }
+                 });
                 dates.forEach(date => {
                     const cardData = data[date] || {};
                     const card = createDateCard(tableId, date, cardData);
                     container.appendChild(card);
-                });
-            });
+                 });
+             });
             
             // This function is now redundant as createTopicElement handles it.
             // updateExistingTopics(); 
             updateAllCardProgressBars();
-        }
-
+         }
         function createDateCard(tableId, date, dateData) {
             const card = document.createElement('div');
             card.className = 'date-card';
             card.dataset.tableId = tableId;
             card.dataset.date = date;
-
             const cardHeader = document.createElement('div');
             cardHeader.className = 'date-header';
             
@@ -663,7 +654,6 @@
             dateDiv.dataset.label = "Date";
             dateDiv.setAttribute('placeholder', 'DD/MM/YYYY');
             cardHeader.appendChild(dateDiv);
-
             const dateId = date.replace(/\//g, '-');
             const progressContainer = document.createElement('div');
             progressContainer.className = 'card-progress-container';
@@ -671,7 +661,6 @@
             cardHeader.appendChild(progressContainer);
             cardHeader.appendChild(createDeleteRowButton(card));
             card.appendChild(cardHeader);
-
             const headers = columnHeaders[tableId];
             headers.forEach(colName => {
                 const topicIdArray = dateData[colName]; // This is now an array of IDs
@@ -681,19 +670,18 @@
                     section.className = 'column-section';
                     section.dataset.colName = colName;
                     section.innerHTML = `<span class="column-title">${colName}</span>`;
-
                     if (Array.isArray(topicIdArray)) {
                         topicIdArray.forEach(topicId => {
                             if (typeof topicId === 'string') {
+                                // ORPHANED ID FIX: Check if topicEl is null
                                 const topicEl = createTopicElement(topicId);
-                                section.appendChild(topicEl);
-                            }
-                        });
-                    }
+                                if (topicEl) section.appendChild(topicEl);
+                             }
+                         });
+                     }
                     card.appendChild(section);
-                // }
-            });
-
+                 // }
+             });
             const cardFooter = document.createElement('div');
             cardFooter.className = 'card-footer';
             const addBtn = document.createElement('button');
@@ -703,29 +691,32 @@
             cardFooter.appendChild(addBtn);
             card.appendChild(cardFooter);
             return card;
-        }
-
+         }
         // createTopicElement (NEW)
         // Now just needs an ID, gets all data from appData
         function createTopicElement(topicId) {
-            const topicData = appData.completedTopics[topicId] || {};
+            // ORPHANED ID FIX: Check data exists
+            const topicData = appData.completedTopics[topicId];
+            if (!topicData) {
+                console.warn("Orphaned topic ID detected (will not render):", topicId);
+                return null;
+            }
+
             const progress = topicData.progress || 0;
             const note = topicData.note || '';
             const timedNote = topicData.timedNote || ''; // NEW
             const displayName = topicData.name || 'Unnamed Topic';
             const priority = topicData.priority || 'low';
             const studyStatus = topicData.studyStatus || 'new';
-
+            const hardness = topicData.hardness || 'medium'; // NEW FEATURE
             const topicEl = document.createElement('div');
             topicEl.className = 'topic-item';
             topicEl.draggable = true;
             topicEl.dataset.topicId = topicId; // Store ID on the item itself for drag-drop
-
             const priorityIndicator = document.createElement('span');
             priorityIndicator.className = `priority-indicator priority-${priority}`;
             priorityIndicator.title = `Priority: ${priority.charAt(0).toUpperCase() + priority.slice(1)}`;
             topicEl.appendChild(priorityIndicator);
-
             const progressBox = document.createElement('div');
             progressBox.className = `progress-box progress-${progress}`;
             progressBox.innerHTML = `<span>${progress}%</span>`;
@@ -734,30 +725,32 @@
             // NEW Structure for Name + Timed Note
             const nameContainer = document.createElement('div');
             nameContainer.className = 'topic-name-container';
-
             const nameEl = document.createElement('span');
             nameEl.className = 'topic-name';
             nameEl.dataset.topicName = displayName; // Store name here for reference
-
             const nameText = document.createElement('span');
             nameText.className = 'topic-name-text';
             nameText.textContent = displayName + ' ';
             nameEl.appendChild(nameText);
+            
+            // NEW FEATURE: Hardness Tag
+            const hardnessTag = document.createElement('span'); 
+            hardnessTag.className = `study-status study-${hardness}`; 
+            hardnessTag.textContent = hardnessMap[hardness] || 'M'; 
+            hardnessTag.title = `Hardness: ${hardness}`; 
+            nameEl.appendChild(hardnessTag); 
 
             const statusTag = document.createElement('span');
             statusTag.className = `study-status study-${studyStatus}`;
             statusTag.textContent = studyStatusMap[studyStatus] || 'NEW';
             nameEl.appendChild(statusTag);
-
             nameContainer.appendChild(nameEl); // Add name/status line
-
             if (timedNote) {
                 const timedNoteEl = document.createElement('span');
                 timedNoteEl.className = 'timed-note-display';
                 timedNoteEl.textContent = timedNote;
                 nameContainer.appendChild(timedNoteEl); // Add timed note line
-            }
-
+             }
             const editIcon = document.createElement('button');
             editIcon.type = 'button';
             editIcon.className = 'edit-icon';
@@ -765,13 +758,11 @@
             editIcon.dataset.topicId = topicId;
             editIcon.title = note || 'Add/Edit Note...';
             editIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
-
             topicEl.appendChild(progressBox);
             topicEl.appendChild(nameContainer);
             topicEl.appendChild(editIcon);
             return topicEl;
-        }
-
+         }
         function createDeleteRowButton(cardElement) {
             const deleteBtn = document.createElement('button');
             deleteBtn.type = 'button';
@@ -779,17 +770,21 @@
             deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
             deleteBtn.title = 'Delete Date Card';
             return deleteBtn;
-        }
-
+         }
         // *** NEW ID GENERATION (BUG FIX) ***
         function createTopicId() {
             // Creates a unique, immutable ID. Not dependent on name.
             return 'topic_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
-        }
-
-        function showConfirmationModal(message, onConfirm) {
+         }
+        
+        // MODAL BUG FIX: Updated function to be generic
+        function showConfirmationModal(message, onConfirm, confirmText = "Yes, Delete", buttonClass = "button-danger") {
             confirmMessageEl.textContent = message;
             confirmCallback = onConfirm;
+            const confirmBtn = document.getElementById('confirm-yes');
+            confirmBtn.textContent = confirmText;
+            // Remove all existing button classes and add new ones
+            confirmBtn.className = `modern-button ${buttonClass}`;
             openModal(confirmModalEl);
         }
         
@@ -798,38 +793,33 @@
             const m = String(date.getMonth() + 1).padStart(2, '0');
             const y = date.getFullYear();
             return `${d}/${m}/${y}`;
-        }
-
+         }
         // Event Handlers
         let calendarClickTimer = null;
         function setupGlobalEventListeners() {
             const container = document.body;
-
             calendarNavBtn.addEventListener('click', () => {
                 if (calendarClickTimer) {
                     // Double click detected
                     clearTimeout(calendarClickTimer);
                     calendarClickTimer = null;
                     handleOpenCalendar(); // Open modal
-                } else {
+                 } else {
                     // Single click
                     calendarClickTimer = setTimeout(() => {
                         handleGoToToday(); // Go to today's card
                         calendarClickTimer = null;
-                    }, 250); // 250ms window for double click
-                }
-            });
-
+                     }, 250); // 250ms window for double click
+                 }
+             });
             container.addEventListener('click', (e) => {
                 const target = e.target;
                 const closestTarget = (selector) => target.closest(selector);
-
                 if (!closestTarget('.custom-dropdown')) { closeAllDropdowns(); }
                 const dropdownButton = closestTarget('.custom-dropdown-button');
                 if (dropdownButton) { toggleDropdown(dropdownButton.closest('.custom-dropdown')); return; }
                 const dropdownOption = closestTarget('.custom-dropdown-option');
                 if (dropdownOption) { selectDropdownOption(dropdownOption); return; }
-
                 if (target.id === 'view-toggle-table1' || target.id === 'view-toggle-table2') { handleViewToggle(target.dataset.view); return; }
                 
                 const progressBox = closestTarget('.progress-box');
@@ -846,12 +836,18 @@
                 if (target.id === 'modal-save') { handleModalSave(); return; }
                 if (target.id === 'modal-cancel' || (closestTarget('#edit-modal') && target === modalEl)) { closeModal(modalEl); return; }
                 if (target.id === 'modal-delete') { handleModalDelete(); return; }
+                
+                // Priority button click in ANY modal
                 if (closestTarget('.priority-btn')) {
                     const btn = closestTarget('.priority-btn');
-                    document.querySelectorAll('#modal-priority-selector .priority-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
+                    const selector = btn.closest('#modal-priority-selector, #add-topic-priority-selector');
+                    if (selector) {
+                        selector.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    }
                     return;
-                }
+                 }
+
                 if (target.id === 'add-topic-modal-save') { handleModalAddSave(); return; }
                 if (target.id === 'add-topic-modal-cancel' || (closestTarget('#add-topic-modal') && target === addTopicModalEl)) { closeModal(addTopicModalEl); return; }
                 if (target.id === 'confirm-yes') {
@@ -859,12 +855,12 @@
                     confirmCallback = null;
                     closeModal(confirmModalEl);
                     return;
-                }
+                 }
                 if (target.id === 'confirm-cancel' || target === confirmModalEl) {
                     confirmCallback = null;
                     closeModal(confirmModalEl);
                     return;
-                }
+                 }
                 
                 // Calendar
                 if (target.id === 'calendar-prev-month' || closestTarget('#calendar-prev-month')) {
@@ -872,76 +868,73 @@
                     if (calendarState.month < 0) { calendarState.month = 11; calendarState.year--; }
                     renderCalendar(calendarState.month, calendarState.year);
                     return;
-                }
+                 }
                 if (target.id === 'calendar-next-month' || closestTarget('#calendar-next-month')) {
                     calendarState.month++;
                     if (calendarState.month > 11) { calendarState.month = 0; calendarState.year++; }
                     renderCalendar(calendarState.month, calendarState.year);
                     return;
-                }
+                 }
                 if (closestTarget('.calendar-day') && !target.closest('.calendar-day').classList.contains('empty') && !target.closest('.calendar-day').classList.contains('disabled')) {
                     handleCalendarDateClick(closestTarget('.calendar-day'));
                     return;
-                }
-                if (target.id === 'calendar-cancel' || target === calendarModalEl) { closeModal(calendarModalEl); return; }
-            });
-
+                 }
+                // MODAL BACKDROP CLICK FIX
+                if (target.id === 'calendar-cancel' || (closestTarget('#calendar-modal') && target === calendarModalEl)) { closeModal(calendarModalEl); return; }
+             });
             container.addEventListener('contextmenu', (e) => {
                 if (e.target.closest('.progress-box')) {
                     e.preventDefault();
                     handleProgressClick(e.target.closest('.progress-box'), true);
-                }
-            });
-
+                 }
+             });
             container.addEventListener('focusin', (e) => {
                 const target = e.target;
                 if (target.contentEditable === 'true' && target.dataset.label === 'Date') {
                     target.dataset.originalDate = target.textContent.trim();
-                }
-            });
+                 }
+             });
             container.addEventListener('blur', (e) => {
                 const target = e.target;
                 if (target.contentEditable === 'true' && target.dataset.label === 'Date') {
                     handleDateChange(target);
-                }
-            }, true);
-
+                 }
+             }, true);
             let draggedElement = null;
             container.addEventListener('dragstart', (e) => {
                 if (e.target.classList.contains('topic-item')) {
                     draggedElement = e.target;
                     setTimeout(() => { e.target.classList.add('dragging'); }, 0);
-                }
-            });
+                 }
+             });
             container.addEventListener('dragend', (e) => {
                 if (draggedElement) draggedElement.classList.remove('dragging');
                 draggedElement = null;
                 document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-            });
+             });
             container.addEventListener('dragenter', (e) => {
                 const section = e.target.closest('.column-section');
                 if (section && draggedElement) {
                     document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
                     section.classList.add('drag-over');
-                }
-            });
+                 }
+             });
             container.addEventListener('drop', (e) => {
                 e.preventDefault();
                 const section = e.target.closest('.column-section');
                 document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
                 if (section && draggedElement) handleDragDrop(draggedElement, section);
-            });
-
+             });
             document.addEventListener('keydown', (e) => {
                  const target = e.target;
                  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') {
                      if (target.contentEditable === 'true' && target.dataset.label === 'Date' && e.key === 'Enter') {
                          e.preventDefault();
                          target.blur();
-                     }
+                      }
                      return; 
-                 }
-                
+                  }
+                 
                  if (e.key === 'n' && !modalEl.classList.contains('show') && !addTopicModalEl.classList.contains('show') && !confirmModalEl.classList.contains('show') && !calendarModalEl.classList.contains('show')) {
                      e.preventDefault();
                      const currentCardsContainer = currentView === 'table1' ? table1CardsContainer : table2CardsContainer;
@@ -949,26 +942,24 @@
                      if (firstCard && firstCard.dataset.date !== 'New Date') {
                          const addBtn = firstCard.querySelector('.add-topic-btn-card-single');
                          if (addBtn) addBtn.click();
-                     } else if (firstCard) {
+                      } else if (firstCard) {
                          showToastQueued('error', 'Set date for "New Date" card first.');
-                     } else {
+                      } else {
                          showToastQueued('error', 'Add a card first.');
-                     }
+                      }
                      return;
-                 }
-                
+                  }
+                 
                  if (e.key === 'Escape') {
-                    if (modalEl.classList.contains('show')) { closeModal(modalEl); return; }
-                    if (addTopicModalEl.classList.contains('show')) { closeModal(addTopicModalEl); return; }
-                    if (confirmModalEl.classList.contains('show')) { confirmCallback = null; closeModal(confirmModalEl); return; }
-                    if (calendarModalEl.classList.contains('show')) { closeModal(calendarModalEl); return; }
-                 }
+                     if (modalEl.classList.contains('show')) { closeModal(modalEl); return; }
+                     if (addTopicModalEl.classList.contains('show')) { closeModal(addTopicModalEl); return; }
+                     if (confirmModalEl.classList.contains('show')) { confirmCallback = null; closeModal(confirmModalEl); return; }
+                     if (calendarModalEl.classList.contains('show')) { closeModal(calendarModalEl); return; }
+                  }
                  if (addTopicModalEl.classList.contains('show') && e.key === 'Enter') { e.preventDefault(); handleModalAddSave(); return; }
-            });
-
+             });
             window.addEventListener('beforeunload', window.cleanupAppListeners);
-        }
-
+         }
         // Custom Dropdown Functions
         function toggleDropdown(dropdownElement) {
             const button = dropdownElement.querySelector('.custom-dropdown-button');
@@ -976,13 +967,13 @@
             const isOpen = options.classList.contains('show');
             closeAllDropdowns();
             if (!isOpen) { options.classList.add('show'); button.classList.add('active'); }
-        }
+         }
         function closeAllDropdowns() {
             document.querySelectorAll('.custom-dropdown-options.show').forEach(options => {
                 options.classList.remove('show');
                 options.closest('.custom-dropdown').querySelector('.custom-dropdown-button').classList.remove('active');
-            });
-        }
+             });
+         }
         function selectDropdownOption(optionElement) {
             const dropdownElement = optionElement.closest('.custom-dropdown');
             const button = dropdownElement.querySelector('.custom-dropdown-button');
@@ -995,7 +986,7 @@
             dropdownElement.querySelectorAll('.custom-dropdown-option').forEach(opt => opt.classList.remove('selected'));
             optionElement.classList.add('selected');
             closeAllDropdowns();
-        }
+         }
         function setDropdownValue(dropdownElement, newValue) {
             const hiddenInput = document.getElementById(dropdownElement.dataset.targetInput);
             const options = dropdownElement.querySelectorAll('.custom-dropdown-option');
@@ -1008,34 +999,33 @@
                     buttonText.textContent = option.textContent;
                     hiddenInput.value = newValue;
                     found = true;
-                }
-            });
+                 }
+             });
             if (!found && options.length > 0) {
                 options[0].classList.add('selected');
                 buttonText.textContent = options[0].textContent;
                 hiddenInput.value = options[0].dataset.value;
-            } else if (!found) {
+             } else if (!found) {
                 buttonText.textContent = 'Select...';
                 hiddenInput.value = '';
-            }
-        }
+             }
+         }
         function initDropdownDisplay(modalContainer) {
             modalContainer.querySelectorAll('.custom-dropdown').forEach(dropdown => {
                 const selectedOption = dropdown.querySelector('.custom-dropdown-option.selected');
                 const buttonText = dropdown.querySelector('.selected-value');
                 if (selectedOption) {
                     buttonText.textContent = selectedOption.textContent;
-                } else if (dropdown.querySelectorAll('.custom-dropdown-option').length > 0) {
+                 } else if (dropdown.querySelectorAll('.custom-dropdown-option').length > 0) {
                     const firstOption = dropdown.querySelector('.custom-dropdown-option');
                     firstOption.classList.add('selected');
                     buttonText.textContent = firstOption.textContent;
                     document.getElementById(dropdown.dataset.targetInput).value = firstOption.dataset.value;
-                }
-            });
-        }
+                 }
+             });
+         }
         function openModal(modalElement) { modalElement.classList.add('show'); }
         function closeModal(modalElement) { modalElement.classList.remove('show'); }
-
         // Core Logic Functions
         function handleProgressClick(box, isReverse = false) {
             const topicId = box.dataset.topicId;
@@ -1045,26 +1035,23 @@
             let nextIndex;
             if (isReverse) {
                 nextIndex = Math.max(0, currentIndex - 1);
-            } else {
+             } else {
                 nextIndex = (currentIndex + 1) % progressSteps.length;
-            }
+             }
             const newProgress = progressSteps[nextIndex];
-
             document.querySelectorAll(`.progress-box[data-topic-id="${topicId}"]`).forEach(b => {
                 b.className = `progress-box progress-${newProgress}`;
                 b.innerHTML = `<span>${newProgress}%</span>`;
-            });
-
+             });
             if (!appData.completedTopics[topicId]) {
                  // This should not happen with the new structure, but as a fallback...
                  appData.completedTopics[topicId] = { progress: newProgress, note: '', timedNote: '', name: 'Unknown', priority: 'low', hardness: 'medium', studyStatus: 'new' };
-            } else {
+             } else {
                 appData.completedTopics[topicId].progress = newProgress;
-            }
+             }
             saveDataToFirestore();
             updateAllProgressUI();
-        }
-
+         }
         function handleEditClick(iconEl) {
             closeAllDropdowns();
             closeModal(addTopicModalEl);
@@ -1078,69 +1065,72 @@
             const currentPriority = currentData.priority || 'low';
             const currentHardness = currentData.hardness || 'medium';
             const currentStudy = currentData.studyStatus || 'new';
-
             modalEl.dataset.currentTopicId = topicId;
             modalTopicName.value = currentName;
             modalTopicNote.value = currentNote;
             modalTopicTimedNote.value = currentTimedNote; // NEW
-
             setDropdownValue(editHardnessInput.closest('.custom-dropdown'), currentHardness);
             setDropdownValue(editStudyInput.closest('.custom-dropdown'), currentStudy);
             
             document.querySelectorAll('#modal-priority-selector .priority-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.priority === currentPriority);
-            });
+             });
             
             openModal(modalEl);
             modalTopicName.focus();
-        }
-
+         }
         function handleAddTopicClick(button) {
             closeAllDropdowns();
             closeModal(modalEl);
             const card = button.closest('.date-card');
             if (!card) { console.error("No card context"); return; }
             const tableId = card.dataset.tableId, date = card.dataset.date;
-
             if (date === 'New Date') {
                 showToastQueued('error', 'Set date first.');
                 const dateDiv = card.querySelector('.date-header-text');
                 if (dateDiv) dateDiv.focus();
                 return;
-            }
-
+             }
             addTopicModalEl.dataset.tableId = tableId;
             addTopicModalEl.dataset.date = date;
-
             const targetsFields = document.getElementById('add-topic-targets-fields');
             const dailyFields = document.getElementById('add-topic-daily-fields');
             if (tableId === 'table1') {
                 targetsFields.style.display = 'block';
                 dailyFields.style.display = 'none';
-            } else {
+             } else {
                 targetsFields.style.display = 'none';
                 dailyFields.style.display = 'block';
-            }
+             }
             
+            // NEW FEATURE: Reset new fields
             addTopicModalName.value = '';
+            document.getElementById('add-topic-modal-timed-note').value = '';
             setDropdownValue(addHardnessInput.closest('.custom-dropdown'), 'medium');
             setDropdownValue(addStudyInput.closest('.custom-dropdown'), 'mqb');
+            document.querySelectorAll('#add-topic-priority-selector .priority-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.priority === 'low');
+            });
+
             initDropdownDisplay(addTopicModalEl); // Ensure subject/session dropdowns are set
             openModal(addTopicModalEl);
             addTopicModalName.focus();
-        }
-
+         }
         // handleModalAddSave (NEW - BUG FIXED)
         function handleModalAddSave() {
             const tableId = addTopicModalEl.dataset.tableId, date = addTopicModalEl.dataset.date;
             const newTopicName = addTopicModalName.value.trim();
             const hardness = addHardnessInput.value;
             const studyStatus = addStudyInput.value;
-            let selectedColName = (tableId === 'table1') ? addSubjectInput.value : addSessionInput.value;
+            
+            // NEW FEATURE: Read new fields
+            const newTimedNote = document.getElementById('add-topic-modal-timed-note').value.trim();
+            const selectedPriorityBtn = document.querySelector('#add-topic-priority-selector .priority-btn.active');
+            const newPriority = selectedPriorityBtn ? selectedPriorityBtn.dataset.priority : 'low';
 
+            let selectedColName = (tableId === 'table1') ? addSubjectInput.value : addSessionInput.value;
             if (!newTopicName) { showToastQueued('error', 'Name empty.'); return; }
             if (!tableId || !date || !selectedColName) { console.error("Context missing"); return; }
-
             const card = document.querySelector(`.date-card[data-table-id="${tableId}"][data-date="${date}"]`);
             if (!card) { console.error("No card"); return; }
             
@@ -1154,7 +1144,7 @@
                 const cardFooter = card.querySelector('.card-footer');
                 if (cardFooter) card.insertBefore(targetSection, cardFooter);
                 else card.appendChild(targetSection);
-            }
+             }
             
             // Check for duplicate name *in the same section*
             const existingTopicIds = tableData[tableId]?.[date]?.[selectedColName] || [];
@@ -1162,8 +1152,7 @@
             if (isDuplicate) {
                 showToastQueued('error', `"${newTopicName}" exists.`);
                 return;
-            }
-
+             }
             // *** NEW LOGIC ***
             // 1. Create a new unique ID
             const topicId = createTopicId();
@@ -1172,20 +1161,19 @@
             appData.completedTopics[topicId] = {
                 progress: 0,
                 note: '',
-                timedNote: '',
+                timedNote: newTimedNote, // NEW
                 name: newTopicName,
-                priority: 'low',
+                priority: newPriority, // NEW
                 hardness: hardness,
                 studyStatus: studyStatus
-            };
+             };
             
             // 3. Add the ID to tableData
             if (!tableData[tableId][date]) tableData[tableId][date] = {};
             if (!tableData[tableId][date][selectedColName] || !Array.isArray(tableData[tableId][date][selectedColName])) {
                 tableData[tableId][date][selectedColName] = [];
-            }
+             }
             tableData[tableId][date][selectedColName].push(topicId);
-
             // 4. Create and append the element
             const topicEl = createTopicElement(topicId);
             targetSection.appendChild(topicEl);
@@ -1193,24 +1181,20 @@
             saveDataToFirestore();
             updateAllProgressUI();
             closeModal(addTopicModalEl);
-        }
-
+         }
         // handleModalSave (NEW - BUG FIXED)
         // Now only updates appData. No need to touch tableData.
         function handleModalSave() {
             const topicId = modalEl.dataset.currentTopicId;
             if (!topicId) return;
-
             const newName = modalTopicName.value.trim();
             const newNote = modalTopicNote.value.trim();
             const newTimedNote = modalTopicTimedNote.value.trim(); // NEW
             if (newName === '') { showToastQueued('error', 'Name empty.'); return; }
-
             const selectedPriorityBtn = document.querySelector('#modal-priority-selector .priority-btn.active');
             const newPriority = selectedPriorityBtn ? selectedPriorityBtn.dataset.priority : 'low';
             const newHardness = editHardnessInput.value;
             const newStudyStatus = editStudyInput.value;
-
             // *** SIMPLIFIED LOGIC ***
             // 1. Get current data (or create new)
             const currentData = appData.completedTopics[topicId] || { progress: 0 };
@@ -1224,8 +1208,7 @@
                 priority: newPriority,
                 hardness: newHardness,
                 studyStatus: newStudyStatus
-            };
-
+             };
             // 3. Update all DOM elements that use this ID
             document.querySelectorAll(`.topic-item[data-topic-id="${topicId}"]`).forEach(itemElement => {
                 const nameContainer = itemElement.querySelector('.topic-name-container');
@@ -1236,12 +1219,20 @@
                         const nameDisplay = nameEl.querySelector('.topic-name-text');
                         if (nameDisplay) nameDisplay.textContent = newName + ' ';
                         
-                        const statusTag = nameEl.querySelector('.study-status');
-                        if (statusTag) {
+                        // NEW: Update Hardness Tag
+                        const hardnessTag = nameEl.querySelector(`.study-status.study-${currentData.hardness || 'medium'}`);
+                        if (hardnessTag) {
+                            hardnessTag.className = `study-status study-${newHardness}`;
+                            hardnessTag.textContent = hardnessMap[newHardness] || 'M';
+                            hardnessTag.title = `Hardness: ${newHardness}`;
+                        }
+                        
+                        const statusTag = nameEl.querySelector(`.study-status.study-${currentData.studyStatus || 'new'}`);
+                        if (statusTag && hardnessTag !== statusTag) { // Ensure we don't grab the hardness tag by mistake
                             statusTag.className = `study-status study-${newStudyStatus}`;
                             statusTag.textContent = studyStatusMap[newStudyStatus] || 'NEW';
                         }
-                    }
+                     }
                     
                     // Handle timed note
                     let timedNoteEl = nameContainer.querySelector('.timed-note-display');
@@ -1250,35 +1241,32 @@
                             timedNoteEl = document.createElement('span');
                             timedNoteEl.className = 'timed-note-display';
                             nameContainer.appendChild(timedNoteEl);
-                        }
+                         }
                         timedNoteEl.textContent = newTimedNote;
-                    } else if (timedNoteEl) {
+                     } else if (timedNoteEl) {
                         timedNoteEl.remove(); // Remove it if it's now empty
-                    }
-                }
+                     }
+                 }
                 
                 const iconEl = itemElement.querySelector('.edit-icon');
                 if (iconEl) {
                     iconEl.classList.toggle('has-note', !!newNote);
                     iconEl.title = newNote || 'Add/Edit Note...';
-                }
+                 }
                 
                 const indicator = itemElement.querySelector('.priority-indicator');
                 if (indicator) {
                     indicator.className = `priority-indicator priority-${newPriority}`;
                     indicator.title = `Priority: ${newPriority.charAt(0).toUpperCase() + newPriority.slice(1)}`;
-                }
-            });
-
+                 }
+             });
             saveDataToFirestore();
             closeModal(modalEl);
-        }
-
+         }
         // handleModalDelete (NEW - BUG FIXED)
         function handleModalDelete() {
             const topicId = modalEl.dataset.currentTopicId;
             if (!topicId) return;
-
             showConfirmationModal("Delete this topic?", () => {
                 // 1. Find and remove DOM element
                 const itemElement = document.querySelector(`.topic-item[data-topic-id="${topicId}"]`);
@@ -1297,32 +1285,28 @@
                             const index = topics.indexOf(topicId);
                             if (index > -1) {
                                 topics.splice(index, 1);
-                            } else {
+                             } else {
                                 console.warn("Topic ID not found in tableData array:", topicId);
-                            }
-                        }
-                    }
+                             }
+                         }
+                     }
                     itemElement.remove(); // Remove from DOM
-                }
-
+                 }
                 // 3. Delete from appData
                 delete appData.completedTopics[topicId];
-
                 saveDataToFirestore();
                 updateAllProgressUI();
                 closeModal(modalEl);
-            });
-        }
+             });
+         }
         
         function addNewRow(tableId, dateString = "New Date") {
             const container = tableId === 'table1' ? table1CardsContainer : table2CardsContainer;
             if (!container) return;
-
             if (dateString !== "New Date") {
                 const dateRegexStrict = /^\d{2}\/\d{2}\/\d{4}$/;
                 if (!dateRegexStrict.test(dateString)) { showToastQueued('error', 'Invalid date format.'); return; }
-            }
-
+             }
             if (tableData[tableId] && tableData[tableId][dateString]) {
                 showToastQueued('error', `Card ${dateString} exists.`);
                 const existingCard = container.querySelector(`.date-card[data-date="${dateString}"]`);
@@ -1330,9 +1314,9 @@
                     existingCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     existingCard.classList.add('animate-pulse');
                     setTimeout(() => existingCard.classList.remove('animate-pulse'), 2000);
-                }
+                 }
                 return;
-            }
+             }
             if (dateString === "New Date") {
                 const existingNewDateCard = container.querySelector('.date-card[data-date="New Date"]');
                 if (existingNewDateCard) {
@@ -1340,17 +1324,14 @@
                     const dateDiv = existingNewDateCard.querySelector('.date-header-text');
                     if (dateDiv) dateDiv.focus();
                     return;
-                }
-            }
-
+                 }
+             }
             const newCardData = {};
             columnHeaders[tableId].forEach(colName => newCardData[colName] = []); // Empty arrays for topic IDs
             if (!tableData[tableId]) tableData[tableId] = {};
             tableData[tableId][dateString] = newCardData;
-
             const card = createDateCard(tableId, dateString, newCardData);
             container.appendChild(card);
-
             // Re-sort cards
             const cards = Array.from(container.children);
             cards.sort((a, b) => {
@@ -1362,10 +1343,9 @@
                     const dateA = new Date(dateAStr.split('/').reverse().join('-'));
                     const dateB = new Date(dateBStr.split('/').reverse().join('-'));
                     return dateA - dateB;
-                } catch (e) { return 0; }
-            });
+                 } catch (e) { return 0; }
+             });
             cards.forEach(c => container.appendChild(c));
-
             if (dateString === "New Date") {
                 const dateDiv = card.querySelector('.date-header-text');
                 if (dateDiv) {
@@ -1375,18 +1355,17 @@
                     const selection = window.getSelection();
                     selection.removeAllRanges();
                     selection.addRange(range);
-                }
-            } else {
+                 }
+             } else {
                 card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+             }
             updateCardProgress(card);
             saveDataToFirestore();
-        }
+         }
         
         function handleDeleteRowClick(button) {
             const cardElement = button.closest('.date-card');
             if (!cardElement) return;
-
             showConfirmationModal("Delete this entire card?", () => {
                 const tableId = cardElement.dataset.tableId, date = cardElement.dataset.date;
                 
@@ -1397,65 +1376,60 @@
                         if (Array.isArray(topicIdArray)) {
                             topicIdArray.forEach(topicId => {
                                 delete appData.completedTopics[topicId];
-                            });
-                        }
-                    });
+                             });
+                         }
+                     });
                     
                     // Delete the card entry from tableData
                     delete tableData[tableId][date];
-                }
+                 }
                 
                 cardElement.remove();
                 saveDataToFirestore();
                 updateAllProgressUI();
-            });
-        }
+             });
+         }
         
         function handleDateChange(dateDiv) {
             const card = dateDiv.closest('.date-card');
             const newDateRaw = dateDiv.textContent.trim();
             const oldDateRaw = dateDiv.dataset.originalDate.trim();
-
             if (!card || !newDateRaw || newDateRaw === oldDateRaw || newDateRaw === 'New Date') {
                 if (newDateRaw !== oldDateRaw && (newDateRaw === '' || newDateRaw === 'New Date')) {
                     dateDiv.textContent = oldDateRaw;
-                } else if (!newDateRaw) {
+                 } else if (!newDateRaw) {
                     dateDiv.textContent = oldDateRaw;
-                }
+                 }
                 return;
-            }
-
+             }
             const dateRegexStrict = /^\d{2}\/\d{2}\/\d{4}$/;
             if (!dateRegexStrict.test(newDateRaw)) {
                 showToastQueued('error', 'Use DD/MM/YYYY.');
                 dateDiv.textContent = oldDateRaw;
                 return;
-            }
+             }
             const [day, month, year] = newDateRaw.split('/').map(Number);
             const testDate = new Date(year, month - 1, day);
             if (isNaN(testDate.getTime()) || testDate.getDate() !== day || testDate.getMonth() !== month - 1 || testDate.getFullYear() !== year) {
                 showToastQueued('error', 'Invalid date!');
                 dateDiv.textContent = oldDateRaw;
                 return;
-            }
+             }
             
             const newDate = newDateRaw;
             const oldDate = oldDateRaw;
             const tableId = card.dataset.tableId;
             const container = tableId === 'table1' ? table1CardsContainer : table2CardsContainer;
-
             const existingDates = Array.from(container.querySelectorAll('.date-header-text'))
-                                      .filter(div => div !== dateDiv)
-                                      .map(div => div.textContent.trim());
+                                         .filter(div => div !== dateDiv)
+                                         .map(div => div.textContent.trim());
             if (existingDates.includes(newDate)) {
                 showToastQueued('error', 'Date already exists!');
                 dateDiv.textContent = oldDate;
                 return;
-            }
-
+             }
             dateDiv.dataset.originalDate = newDate;
             card.dataset.date = newDate;
-
             // Update progress bar IDs
             const oldDateId = oldDate.replace(/\//g, '-');
             const newDateId = newDate.replace(/\//g, '-');
@@ -1465,12 +1439,11 @@
             if (bar) bar.id = `card-progress-bar-${tableId}-${newDateId}`;
             if (text) text.id = `card-progress-text-${tableId}-${newDateId}`;
             if (count) count.id = `card-progress-count-${tableId}-${newDateId}`;
-
             // Update tableData
             if (tableData[tableId]?.[oldDate]) {
                 tableData[tableId][newDate] = tableData[tableId][oldDate];
                 delete tableData[tableId][oldDate];
-            }
+             }
             
              // *** NO LONGER NEEDED ***
              // Topic IDs are no longer tied to the date!
@@ -1478,35 +1451,31 @@
              
             saveDataToFirestore();
             setTimeout(() => { updateCardProgress(card); }, 50);
-        }
-
+         }
         // handleDragDrop (NEW - BUG FIXED)
         function handleDragDrop(draggedElement, toSection) {
             const oldSection = draggedElement.closest('.column-section');
             const toCard = toSection.closest('.date-card');
             const oldCard = oldSection ? oldSection.closest('.date-card') : null;
-
             if (!oldSection || !toSection || !toCard || !oldCard || oldSection === toSection) {
                 draggedElement.classList.remove('dragging');
                 return;
-            }
-
+             }
             const topicId = draggedElement.dataset.topicId;
             if (!topicId) { console.error("Dragged item missing ID"); return; }
             
             const topicName = appData.completedTopics[topicId]?.name || 'Unknown Topic';
-
             const newDate = toCard.dataset.date, newColName = toSection.dataset.colName, newTableId = toCard.dataset.tableId;
             const oldDate = oldCard.dataset.date, oldColName = oldSection.dataset.colName, oldTableId = oldCard.dataset.tableId;
-
             // Check for duplicates in the new location
             const targetTopicIds = tableData[newTableId]?.[newDate]?.[newColName] || [];
             const isDuplicate = targetTopicIds.some(id => appData.completedTopics[id]?.name === topicName);
             if (isDuplicate) {
-                 showToastQueued('error', `"${topicName}" exists here.`);
-                 return;
-            }
-
+                showToastQueued('error', `"${topicName}" exists here.`);
+                // DRAG-DROP VISUAL FIX
+                document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                return;
+             }
             // *** SIMPLIFIED LOGIC ***
             // 1. Remove ID from old tableData array
             if (tableData[oldTableId]?.[oldDate]?.[oldColName]) {
@@ -1514,30 +1483,26 @@
                 const index = topics.indexOf(topicId);
                 if (index > -1) {
                     topics.splice(index, 1);
-                }
-            }
-
+                 }
+             }
             // 2. Add ID to new tableData array
             if (!tableData[newTableId]) tableData[newTableId] = {};
             if (!tableData[newTableId][newDate]) tableData[newTableId][newDate] = {};
             if (!tableData[newTableId][newDate][newColName]) tableData[newTableId][newDate][newColName] = [];
             tableData[newTableId][newDate][newColName].push(topicId);
-
             // 3. Move the DOM element
             toSection.appendChild(draggedElement);
-
             // appData.completedTopics[topicId] is UNTOUCHED. This is the fix.
             
             saveDataToFirestore();
             updateAllProgressUI(); // Update progress for both old and new cards
-        }
-
+         }
         function handleViewToggle(viewId) {
             if (currentView === viewId) return;
             currentView = viewId;
             localStorage.setItem('lastFightTrackerView', currentView);
             updateViewToggleUI();
-        }
+         }
         function updateViewToggleUI() {
             if (currentView === 'table1') {
                 table1Section.classList.remove('hidden');
@@ -1545,22 +1510,21 @@
                 table2Section.classList.add('hidden');
                 viewToggleBtnTable1.classList.add('active');
                 viewToggleBtnTable2.classList.remove('active');
-            } else {
+             } else {
                 table1Section.classList.add('hidden');
                 addRowBtnTable1.classList.add('hidden');
                 table2Section.classList.remove('hidden');
                 viewToggleBtnTable1.classList.remove('active');
                 viewToggleBtnTable2.classList.add('active');
-            }
-        }
-
+             }
+         }
         // Progress UI
         function updateAllProgressUI() {
             updateOverallProgress();
             updateTable2Progress();
             updateAllCardProgressBars();
             updateTaskCounters();
-        }
+         }
         function updateOverallProgress() {
             const bar = document.getElementById('overall-progress-bar'), text = document.getElementById('overall-progress-text');
             if (!bar || !text) return;
@@ -1574,7 +1538,7 @@
             const overallAvg = totalBoxes > 0 ? (totalProgress / (totalBoxes * 100)) * 100 : 0;
             bar.style.width = `${overallAvg}%`;
             text.textContent = `${Math.round(overallAvg)}%`;
-        }
+         }
         function updateTable2Progress() {
             const bar = document.getElementById('t2-overall-progress-bar'), text = document.getElementById('t2-overall-progress-text');
             if (!bar || !text) return;
@@ -1588,7 +1552,7 @@
             const overallAvg = totalBoxes > 0 ? (totalProgress / (totalBoxes * 100)) * 100 : 0;
             bar.style.width = `${overallAvg}%`;
             text.textContent = `${Math.round(overallAvg)}%`;
-        }
+         }
         function updateTaskCounters() {
             ['table1', 'table2'].forEach(tableId => {
                 const container = tableId === 'table1' ? table1CardsContainer : table2CardsContainer;
@@ -1599,14 +1563,14 @@
                 let completedTasks = 0;
                 allBoxes.forEach(box => {
                     if (appData.completedTopics[box.dataset.topicId]?.progress === 100) completedTasks++;
-                });
+                 });
                 counterEl.textContent = `${completedTasks} / ${totalTasks} Done`;
                 counterEl.classList.remove('opacity-0');
-            });
-        }
+             });
+         }
         function updateAllCardProgressBars() {
             document.querySelectorAll('.date-card').forEach(card => updateCardProgress(card));
-        }
+         }
         function updateCardProgress(cardElement) {
             if (!cardElement) return;
             const tableId = cardElement.dataset.tableId, date = cardElement.dataset.date;
@@ -1618,19 +1582,18 @@
             if (!bar || !text || !count) {
                 if (date !== "New Date") console.warn(`Progress elements missing for ${tableId}-${dateId}.`);
                 return;
-            }
+             }
             const allBoxes = cardElement.querySelectorAll('.progress-box');
             const totalTasks = allBoxes.length;
             let completedTasks = 0;
             allBoxes.forEach(box => {
                 if (appData.completedTopics[box.dataset.topicId]?.progress === 100) completedTasks++;
-            });
+             });
             const percentage = (totalTasks > 0) ? (completedTasks / totalTasks) * 100 : 0;
             bar.style.width = `${percentage}%`;
             text.textContent = `${Math.round(percentage)}%`;
             count.textContent = `${completedTasks} / ${totalTasks} Done`;
-        }
-
+         }
         // Calendar (NEW Features)
         function handleGoToToday() {
             const todayString = getFormattedDate(today);
@@ -1643,17 +1606,16 @@
                     todayCard.classList.add('animate-pulse');
                     setTimeout(() => todayCard.classList.remove('animate-pulse'), 2000);
                     showToastQueued('synced', `Jumped to today's card`);
-                } else {
+                 } else {
                     showToastQueued('error', `No card found for today (${todayString})`);
-                }
-            }, 100);
-        }
-
+                 }
+             }, 100);
+         }
         function handleOpenCalendar() {
             calendarState = { month: today.getMonth(), year: today.getFullYear() };
             renderCalendar(calendarState.month, calendarState.year);
             openModal(calendarModalEl);
-        }
+         }
         
         function renderCalendar(month, year) {
             calendarDaysEl.innerHTML = '';
@@ -1662,9 +1624,7 @@
             
             const firstDayOfMonth = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-
             for (let i = 0; i < firstDayOfMonth; i++) calendarDaysEl.innerHTML += `<div class="calendar-day empty"></div>`;
-
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayEl = document.createElement('div');
                 dayEl.className = 'calendar-day';
@@ -1678,26 +1638,25 @@
                 if (currentDate < todayDateOnly) {
                     dayEl.classList.add('disabled');
                     dayEl.title = "Cannot add past dates";
-                }
+                 }
                 
                 if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
                     dayEl.classList.add('today');
-                }
+                 }
                 
                 // NEW: Check if card exists
                 if (tableData.table2 && tableData.table2[dateStr]) {
                     dayEl.classList.add('has-card');
                     dayEl.title = "Go to this date's card";
-                }
+                 }
                 
                 calendarDaysEl.appendChild(dayEl);
-            }
-        }
+             }
+         }
         
         function handleCalendarDateClick(dayElement) {
             const dateString = dayElement.dataset.date;
             if (!dateString) return;
-
             // NEW: Check if card exists to redirect
             if (dayElement.classList.contains('has-card')) {
                 handleViewToggle('table2'); // Switch to daily plan
@@ -1708,24 +1667,21 @@
                         card.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         card.classList.add('animate-pulse');
                         setTimeout(() => card.classList.remove('animate-pulse'), 2000);
-                    }
-                }, 200);
+                     }
+                 }, 200);
                 return;
-            }
-
-            // Original logic: Add new card
+             }
+            // MODAL BUG FIX: Call the modified confirmation modal
             showConfirmationModal(`Add card for ${dateString}?`, () => {
                 try {
                     addNewRow('table2', dateString);
                     closeModal(calendarModalEl);
-                } catch (error) {
+                 } catch (error) {
                     console.error('Failed to add card:', error);
                     showToastQueued('error', 'Failed to create card');
-                }
-            });
-        }
-
-
+                 }
+             }, "Yes, Add", "button-success"); // Pass "Yes, Add" and "button-success"
+         }
         // Data Save & Toast
         function saveDataToFirestore() {
             if (!dbDocRef) return;
@@ -1745,20 +1701,20 @@
                     await setDoc(dbDocRef, { 
                         completedTopics: topicsToSave, 
                         tableData: tableDataToSave 
-                    }, { merge: false });
+                     }, { merge: false });
                     showToastQueued('synced');
-                } catch (error) {
+                 } catch (error) {
                     console.error("Firestore save error:", error);
                     showToastQueued('error', 'Sync Error');
                     pendingChanges = true; // Retry
-                }
-            }, 1000);
-        }
+                 }
+             }, 1000);
+         }
         
         function showToastQueued(type, customMessage = '') {
             toastQueue.push({ type, customMessage });
             if (!isToastShowing) processToastQueue();
-        }
+         }
         function processToastQueue() {
             if (toastQueue.length === 0) { isToastShowing = false; return; }
             isToastShowing = true;
@@ -1773,21 +1729,22 @@
                 case 'cached': toastClass = 'bg-yellow-500 text-gray-900'; msg.textContent = customMessage || 'Offline'; spinner.style.display = 'none'; break;
                 case 'error': toastClass = 'bg-red-500 text-white'; msg.textContent = customMessage || 'Error'; spinner.style.display = 'none'; break;
                 default: toastClass = 'bg-slate-700 text-white'; msg.textContent = customMessage || 'Info'; spinner.style.display = 'none'; break;
-            }
+             }
             toast.className = `${toastClass} show`;
-            const duration = (type === 'syncing' || type === 'cached') ? 4000 : 2500;
+            const duration = (type === 'syncing' || type === 'cached') (type === 'error') ? 3000 : 2500;
             toastTimeout = setTimeout(() => {
                 toast.classList.remove('show');
-                setTimeout(processToastQueue, 400);
-            }, duration);
-        }
-
+                isToastShowing = false; // Mark as not showing
+                setTimeout(processToastQueue, 400); // Check queue again
+             }, duration);
+         }
         // Countdown
         function startCountdown() {
             const els = { d: document.getElementById('days'), h: document.getElementById('hours'), m: document.getElementById('minutes'), s: document.getElementById('seconds') };
             if (!els.d || !els.h || !els.m || !els.s) return;
-            // *** BUG FIX: Hardcoded countdown date ***
-const countDownDate = new Date("2025-12-12T00:00:00Z").getTime(); // Set to user's request
+            
+            // *** BUG FIX: Hardcoded countdown date (removed 'Z' for local time) ***
+            const countDownDate = new Date("2025-12-12T00:00:00").getTime(); // Set to user's request
             
             countdownInterval = setInterval(() => {
                 const now = new Date().getTime(), dist = countDownDate - now;
@@ -1795,15 +1752,14 @@ const countDownDate = new Date("2025-12-12T00:00:00Z").getTime(); // Set to user
                     clearInterval(countdownInterval);
                     ['d', 'h', 'm', 's'].forEach(k => els[k].textContent = "00");
                     return;
-                }
+                 }
                 const d = Math.floor(dist / 864e5), h = Math.floor((dist % 864e5) / 36e5), m = Math.floor((dist % 36e5) / 6e4), s = Math.floor((dist % 6e4) / 1e3);
                 els.d.textContent = String(d).padStart(2, '0');
                 els.h.textContent = String(h).padStart(2, '0');
                 els.m.textContent = String(m).padStart(2, '0');
                 els.s.textContent = String(s).padStart(2, '0');
-            }, 1000);
-        }
-
+             }, 1000);
+         }
         // Cleanup
         window.cleanupAppListeners = () => {
             if (countdownInterval) clearInterval(countdownInterval);
@@ -1811,8 +1767,7 @@ const countDownDate = new Date("2025-12-12T00:00:00Z").getTime(); // Set to user
             if (toastTimeout) clearTimeout(toastTimeout);
             if (unsubscribeSnapshot) unsubscribeSnapshot();
             console.log("App listeners cleaned up.");
-        };
-
+         };
     </script>
 </body>
     </html>
