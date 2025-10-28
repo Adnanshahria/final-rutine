@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Last Fight (v4.1 - Bug Fixed)</title>
+    <title>Last Fight (v4.2 - Bug Fixed)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -35,7 +35,7 @@
             --color-blue-700-t: rgba(29, 78, 216, 0.3);
             --color-green-700-t: rgba(21, 128, 61, 0.3);
             --color-purple-700-t: rgba(126, 34, 206, 0.2);
-         }
+       }
         body { 
             font-family: 'Inter', sans-serif; 
             overscroll-behavior: none; 
@@ -43,7 +43,7 @@
             background-image: linear-gradient(to bottom, var(--color-bg-gradient-start), var(--color-bg-gradient-end));
             color: var(--color-text-main); 
             min-height: 100vh;
-         }
+       }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: var(--color-bg-main); }
         ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
@@ -54,7 +54,7 @@
             padding: 0.6rem 1.1rem; border-radius: 8px; font-weight: 600; 
             transition: all 0.2s ease; cursor: pointer; border: none;
             box-shadow: 0 1px 2px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.1);
-         }
+       }
         .modern-button:hover { transform: translateY(-1px); box-shadow: 0 3px 6px rgba(0,0,0,0.2), 0 5px 10px rgba(0,0,0,0.1); }
         .modern-button:active { transform: translateY(0); }
         .button-primary { background-color: var(--color-accent-blue); color: white; } .button-primary:hover { background-color: #2563eb; }
@@ -117,7 +117,7 @@
             overflow: hidden; position: relative; 
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -2px rgba(0, 0, 0, 0.1); 
             transition: box-shadow 0.2s ease; 
-         }
+       }
         .date-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.1); }
         
         .date-header { background-color: var(--color-bg-header); padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
@@ -207,7 +207,7 @@
             background-color: var(--color-bg-header); border: 1px solid var(--color-border); border-radius: 8px;
             padding: 0.5rem; line-height: 1; cursor: pointer; transition: all 0.2s;
             color: var(--color-text-dim);
-         }
+       }
         #calendar-nav-btn:hover { background-color: var(--color-border); color: var(--color-text-main); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
     </style>
 </head>
@@ -463,7 +463,7 @@
             initializeAppFirebase();
             startCountdown();
             setupGlobalEventListeners();
-         });
+           });
         // Populate Static Dropdowns
         function populateAddTopicDropdowns() {
             const subjectOptionsContainer = document.getElementById('add-topic-modal-subject-options');
@@ -475,7 +475,7 @@
                 option.dataset.value = subject;
                 option.textContent = subject;
                 subjectOptionsContainer.appendChild(option);
-             });
+               });
             if (columnHeaders.table1.length > 0) addSubjectInput.value = columnHeaders.table1[0];
             const sessionOptionsContainer = document.getElementById('add-topic-modal-session-options');
             sessionOptionsContainer.innerHTML = '';
@@ -486,10 +486,10 @@
                 option.dataset.value = session;
                 option.textContent = session;
                 sessionOptionsContainer.appendChild(option);
-             });
+               });
             if (columnHeaders.table2.length > 0) addSessionInput.value = columnHeaders.table2[0];
             initDropdownDisplay(addTopicModalEl);
-         }
+           }
         // Firebase Initialization
         async function initializeAppFirebase() {
             try {
@@ -497,18 +497,27 @@
                 let firebaseConfig;
                 if (typeof __firebase_config !== 'undefined') {
                     try { firebaseConfig = JSON.parse(__firebase_config); } catch (e) { firebaseConfig = null; console.warn("Could not parse __firebase_config"); }
-                 }
+                   }
                 if (!firebaseConfig || !firebaseConfig.apiKey) {
-                    firebaseConfig = { apiKey: "AIzaSyD8K4BwqwS9vQ-eldA1F865SvSs5Fv2J4M", authDomain: "gkeas-f93ec.firebaseapp.com", databaseURL: "https://gkeas-f93ec-default-rtdb.firebaseio.com", projectId: "gkeas-f93ec", storageBucket: "gkeas-f93ec.firebasestorage.app", messagingSenderId: "909744549158", appId: "1:909744549158:web:074ea3a35181960ec3e5e7" };
-                 }
+                    // *** NEW FIREBASE CONFIG AS REQUESTED ***
+                    firebaseConfig = {
+                        apiKey: "AIzaSyD8K4BwqwS9vQ-eldA1F865SvSs5Fv2J4M",
+                        authDomain: "gkeas-f93ec.firebaseapp.com",
+                        projectId: "gkeas-f93ec",
+                        storageBucket: "gkeas-f93ec.firebasestorage.app",
+                        messagingSenderId: "909744549158",
+                        appId: "1:909744549158:web:4b03a6d7f63c5bd3c3e5e7",
+                        measurementId: "G-BG6DBN77J4"
+                    };
+                   }
                 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 try { await enableIndexedDbPersistence(db); } catch (err) { console.warn("Offline persistence failed:", err.code); }
                 await authenticateUser(initialAuthToken, appId);
-             } catch (error) { console.error("Firebase Init Error:", error); loadingEl.innerHTML = `<p class="text-red-400">Error: Init failed.</p>`; }
-         }
+               } catch (error) { console.error("Firebase Init Error:", error); loadingEl.innerHTML = `<p class="text-red-400">Error: Init failed.</p>`; }
+           }
         async function authenticateUser(token, appId) {
             try {
                 if (token) { await signInWithCustomToken(auth, token); } else { await signInAnonymously(auth); }
@@ -516,8 +525,8 @@
                 const docPath = `artifacts/${appId}/users/${userId}/studyProgress/data_v4`; // New path for new structure
                 dbDocRef = doc(db, docPath);
                 loadDataFromFirestore();
-             } catch (error) { console.error("Auth Error:", error); loadingEl.innerHTML = `<p class="text-red-400">Error: Auth failed.</p>`; }
-         }
+               } catch (error) { console.error("Auth Error:", error); loadingEl.innerHTML = `<p class="text-red-400">Error: Auth failed.</p>`; }
+           }
         // *** DATA VALIDATION & MIGRATION LOGIC ***
         function isOldDataStructure(data) {
              if (!data || (!data.table1 && !data.table2)) return false; // Empty is not old
@@ -527,19 +536,19 @@
                      if (Array.isArray(data.table1[date][col]) && data.table1[date][col].length > 0) {
                          // If the first item is a STRING (topic name) and not an ID (topic_...), it's old.
                          return typeof data.table1[date][col][0] === 'string' && !data.table1[date][col][0].startsWith('topic_');
-                      }
-                  }
-              }
+                        }
+                    }
+                }
              // Check table2
              for (const date in data.table2) {
                  for (const col in data.table2[date]) {
                      if (Array.isArray(data.table2[date][col]) && data.table2[date][col].length > 0) {
                          return typeof data.table2[date][col][0] === 'string' && !data.table2[date][col][0].startsWith('topic_');
-                      }
-                  }
-              }
+                        }
+                    }
+                }
              return false; // No data or already new structure
-         }
+           }
         function runExamMigration() {
             let migrated = false;
             if (tableData.table2) {
@@ -549,14 +558,14 @@
                         tableData.table2[date]['Exam'] = tableData.table2[date]['Secret Files'];
                         delete tableData.table2[date]['Secret Files'];
                         migrated = true;
-                     }
-                 });
-             }
+                       }
+                   });
+               }
             if (migrated) {
                 console.log("Migrated 'Secret Files' to 'Exam'.");
                 pendingChanges = true;
-             }
-         }
+               }
+           }
         function loadDataFromFirestore() {
             if (!dbDocRef) return;
             showToastQueued('syncing');
@@ -573,34 +582,50 @@
                         tableData = JSON.parse(JSON.stringify(DEFAULT_TABLE_DATA));
                         appData.completedTopics = {}; // Clear old topics
                         pendingChanges = true; // Mark to save the new empty state
-                     } else if (loadedTableData) {
+                       } else if (loadedTableData) {
                         tableData = loadedTableData;
                         appData.completedTopics = data.completedTopics || {};
-                     } else {
+                       } else {
                         // Document exists but no data, or new user
                         tableData = JSON.parse(JSON.stringify(DEFAULT_TABLE_DATA));
                         appData.completedTopics = {};
                         pendingChanges = true; // Save the default state
-                     }
-                 } else {
+                       }
+                   } else {
                     // No document at all, new user
                     tableData = JSON.parse(JSON.stringify(DEFAULT_TABLE_DATA));
                     appData.completedTopics = {};
                     pendingChanges = true; // Save the default state
-                 }
+                   }
+
+                // *** NEW BUG FIX 2: Clean orphaned IDs ***
+                Object.keys(tableData).forEach(tableId => {
+                    if (!tableData[tableId]) return;
+                    Object.keys(tableData[tableId]).forEach(date => {
+                        if (!tableData[tableId][date]) return;
+                        Object.keys(tableData[tableId][date]).forEach(colName => {
+                            if (Array.isArray(tableData[tableId][date][colName])) {
+                                tableData[tableId][date][colName] = tableData[tableId][date][colName].filter(
+                                    topicId => appData.completedTopics[topicId]
+                                );
+                            }
+                        });
+                    });
+                });
+
                 // Run migration for 'Secret Files' -> 'Exam'
                 runExamMigration(); 
                 if (pendingChanges) {
                     setTimeout(saveDataToFirestore, 1500); // Save any migrations or resets
-                 }
+                   }
                 renderData();
                 showToastQueued(doc.metadata.fromCache ? "cached" : "synced");
-             }, (error) => {
+               }, (error) => {
                 console.error("Firestore snapshot error:", error);
                 loadingEl.innerHTML = `<p class="text-red-400">Error: Load failed.</p>`;
                 showToastQueued('error');
-             });
-         }
+               });
+           }
         // *** DATA RENDERING (NEW STRUCTURE) ***
         function renderData() {
             renderAllCards();
@@ -610,7 +635,7 @@
             loadingEl.classList.add('hidden');
             contentEl.classList.remove('hidden');
             isFirstLoad = false;
-         }
+           }
         function renderAllCards() {
             table1CardsContainer.innerHTML = '';
             table2CardsContainer.innerHTML = '';
@@ -625,19 +650,19 @@
                         const dateA = new Date(a.split('/').reverse().join('-'));
                         const dateB = new Date(b.split('/').reverse().join('-'));
                         return dateA - dateB;
-                     } catch (e) { return 0; }
-                 });
+                       } catch (e) { return 0; }
+                   });
                 dates.forEach(date => {
                     const cardData = data[date] || {};
                     const card = createDateCard(tableId, date, cardData);
                     container.appendChild(card);
-                 });
-             });
+                   });
+               });
             
             // This function is now redundant as createTopicElement handles it.
             // updateExistingTopics(); 
             updateAllCardProgressBars();
-         }
+           }
         function createDateCard(tableId, date, dateData) {
             const card = document.createElement('div');
             card.className = 'date-card';
@@ -676,12 +701,12 @@
                                 // ORPHANED ID FIX: Check if topicEl is null
                                 const topicEl = createTopicElement(topicId);
                                 if (topicEl) section.appendChild(topicEl);
-                             }
-                         });
-                     }
+                               }
+                           });
+                       }
                     card.appendChild(section);
-                 // }
-             });
+                // }
+               });
             const cardFooter = document.createElement('div');
             cardFooter.className = 'card-footer';
             const addBtn = document.createElement('button');
@@ -691,7 +716,7 @@
             cardFooter.appendChild(addBtn);
             card.appendChild(cardFooter);
             return card;
-         }
+           }
         // createTopicElement (NEW)
         // Now just needs an ID, gets all data from appData
         function createTopicElement(topicId) {
@@ -700,7 +725,7 @@
             if (!topicData) {
                 console.warn("Orphaned topic ID detected (will not render):", topicId);
                 return null;
-            }
+               }
 
             const progress = topicData.progress || 0;
             const note = topicData.note || '';
@@ -750,7 +775,7 @@
                 timedNoteEl.className = 'timed-note-display';
                 timedNoteEl.textContent = timedNote;
                 nameContainer.appendChild(timedNoteEl); // Add timed note line
-             }
+               }
             const editIcon = document.createElement('button');
             editIcon.type = 'button';
             editIcon.className = 'edit-icon';
@@ -762,7 +787,7 @@
             topicEl.appendChild(nameContainer);
             topicEl.appendChild(editIcon);
             return topicEl;
-         }
+           }
         function createDeleteRowButton(cardElement) {
             const deleteBtn = document.createElement('button');
             deleteBtn.type = 'button';
@@ -770,12 +795,12 @@
             deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
             deleteBtn.title = 'Delete Date Card';
             return deleteBtn;
-         }
+           }
         // *** NEW ID GENERATION (BUG FIX) ***
         function createTopicId() {
             // Creates a unique, immutable ID. Not dependent on name.
             return 'topic_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
-         }
+           }
         
         // MODAL BUG FIX: Updated function to be generic
         function showConfirmationModal(message, onConfirm, confirmText = "Yes, Delete", buttonClass = "button-danger") {
@@ -786,14 +811,14 @@
             // Remove all existing button classes and add new ones
             confirmBtn.className = `modern-button ${buttonClass}`;
             openModal(confirmModalEl);
-        }
+           }
         
         function getFormattedDate(date) {
             const d = String(date.getDate()).padStart(2, '0');
             const m = String(date.getMonth() + 1).padStart(2, '0');
             const y = date.getFullYear();
             return `${d}/${m}/${y}`;
-         }
+           }
         // Event Handlers
         let calendarClickTimer = null;
         function setupGlobalEventListeners() {
@@ -804,14 +829,14 @@
                     clearTimeout(calendarClickTimer);
                     calendarClickTimer = null;
                     handleOpenCalendar(); // Open modal
-                 } else {
+                   } else {
                     // Single click
                     calendarClickTimer = setTimeout(() => {
                         handleGoToToday(); // Go to today's card
                         calendarClickTimer = null;
-                     }, 250); // 250ms window for double click
-                 }
-             });
+                       }, 250); // 250ms window for double click
+                   }
+               });
             container.addEventListener('click', (e) => {
                 const target = e.target;
                 const closestTarget = (selector) => target.closest(selector);
@@ -844,9 +869,9 @@
                     if (selector) {
                         selector.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
-                    }
+                       }
                     return;
-                 }
+                   }
 
                 if (target.id === 'add-topic-modal-save') { handleModalAddSave(); return; }
                 if (target.id === 'add-topic-modal-cancel' || (closestTarget('#add-topic-modal') && target === addTopicModalEl)) { closeModal(addTopicModalEl); return; }
@@ -855,12 +880,12 @@
                     confirmCallback = null;
                     closeModal(confirmModalEl);
                     return;
-                 }
+                   }
                 if (target.id === 'confirm-cancel' || target === confirmModalEl) {
                     confirmCallback = null;
                     closeModal(confirmModalEl);
                     return;
-                 }
+                   }
                 
                 // Calendar
                 if (target.id === 'calendar-prev-month' || closestTarget('#calendar-prev-month')) {
@@ -868,72 +893,72 @@
                     if (calendarState.month < 0) { calendarState.month = 11; calendarState.year--; }
                     renderCalendar(calendarState.month, calendarState.year);
                     return;
-                 }
+                   }
                 if (target.id === 'calendar-next-month' || closestTarget('#calendar-next-month')) {
                     calendarState.month++;
                     if (calendarState.month > 11) { calendarState.month = 0; calendarState.year++; }
                     renderCalendar(calendarState.month, calendarState.year);
                     return;
-                 }
+                   }
                 if (closestTarget('.calendar-day') && !target.closest('.calendar-day').classList.contains('empty') && !target.closest('.calendar-day').classList.contains('disabled')) {
                     handleCalendarDateClick(closestTarget('.calendar-day'));
                     return;
-                 }
+                   }
                 // MODAL BACKDROP CLICK FIX
                 if (target.id === 'calendar-cancel' || (closestTarget('#calendar-modal') && target === calendarModalEl)) { closeModal(calendarModalEl); return; }
-             });
+               });
             container.addEventListener('contextmenu', (e) => {
                 if (e.target.closest('.progress-box')) {
                     e.preventDefault();
                     handleProgressClick(e.target.closest('.progress-box'), true);
-                 }
-             });
+                   }
+               });
             container.addEventListener('focusin', (e) => {
                 const target = e.target;
                 if (target.contentEditable === 'true' && target.dataset.label === 'Date') {
                     target.dataset.originalDate = target.textContent.trim();
-                 }
-             });
+                   }
+               });
             container.addEventListener('blur', (e) => {
                 const target = e.target;
                 if (target.contentEditable === 'true' && target.dataset.label === 'Date') {
                     handleDateChange(target);
-                 }
-             }, true);
+                   }
+               }, true);
             let draggedElement = null;
             container.addEventListener('dragstart', (e) => {
                 if (e.target.classList.contains('topic-item')) {
                     draggedElement = e.target;
                     setTimeout(() => { e.target.classList.add('dragging'); }, 0);
-                 }
-             });
+                   }
+               });
             container.addEventListener('dragend', (e) => {
                 if (draggedElement) draggedElement.classList.remove('dragging');
                 draggedElement = null;
                 document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-             });
+               });
             container.addEventListener('dragenter', (e) => {
                 const section = e.target.closest('.column-section');
                 if (section && draggedElement) {
                     document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
                     section.classList.add('drag-over');
-                 }
-             });
+                   }
+               });
             container.addEventListener('drop', (e) => {
                 e.preventDefault();
                 const section = e.target.closest('.column-section');
                 document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
                 if (section && draggedElement) handleDragDrop(draggedElement, section);
-             });
+               });
             document.addEventListener('keydown', (e) => {
                  const target = e.target;
                  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') {
                      if (target.contentEditable === 'true' && target.dataset.label === 'Date' && e.key === 'Enter') {
                          e.preventDefault();
                          target.blur();
-                      }
+                        }
                      return; 
-                  }
+                    }
                  
                  if (e.key === 'n' && !modalEl.classList.contains('show') && !addTopicModalEl.classList.contains('show') && !confirmModalEl.classList.contains('show') && !calendarModalEl.classList.contains('show')) {
                      e.preventDefault();
@@ -942,24 +967,24 @@
                      if (firstCard && firstCard.dataset.date !== 'New Date') {
                          const addBtn = firstCard.querySelector('.add-topic-btn-card-single');
                          if (addBtn) addBtn.click();
-                      } else if (firstCard) {
+                        } else if (firstCard) {
                          showToastQueued('error', 'Set date for "New Date" card first.');
-                      } else {
+                        } else {
                          showToastQueued('error', 'Add a card first.');
-                      }
+                        }
                      return;
-                  }
+                    }
                  
                  if (e.key === 'Escape') {
                      if (modalEl.classList.contains('show')) { closeModal(modalEl); return; }
                      if (addTopicModalEl.classList.contains('show')) { closeModal(addTopicModalEl); return; }
                      if (confirmModalEl.classList.contains('show')) { confirmCallback = null; closeModal(confirmModalEl); return; }
                      if (calendarModalEl.classList.contains('show')) { closeModal(calendarModalEl); return; }
-                  }
+                    }
                  if (addTopicModalEl.classList.contains('show') && e.key === 'Enter') { e.preventDefault(); handleModalAddSave(); return; }
-             });
+               });
             window.addEventListener('beforeunload', window.cleanupAppListeners);
-         }
+           }
         // Custom Dropdown Functions
         function toggleDropdown(dropdownElement) {
             const button = dropdownElement.querySelector('.custom-dropdown-button');
@@ -967,13 +992,13 @@
             const isOpen = options.classList.contains('show');
             closeAllDropdowns();
             if (!isOpen) { options.classList.add('show'); button.classList.add('active'); }
-         }
+           }
         function closeAllDropdowns() {
             document.querySelectorAll('.custom-dropdown-options.show').forEach(options => {
                 options.classList.remove('show');
                 options.closest('.custom-dropdown').querySelector('.custom-dropdown-button').classList.remove('active');
-             });
-         }
+               });
+           }
         function selectDropdownOption(optionElement) {
             const dropdownElement = optionElement.closest('.custom-dropdown');
             const button = dropdownElement.querySelector('.custom-dropdown-button');
@@ -986,7 +1011,7 @@
             dropdownElement.querySelectorAll('.custom-dropdown-option').forEach(opt => opt.classList.remove('selected'));
             optionElement.classList.add('selected');
             closeAllDropdowns();
-         }
+           }
         function setDropdownValue(dropdownElement, newValue) {
             const hiddenInput = document.getElementById(dropdownElement.dataset.targetInput);
             const options = dropdownElement.querySelectorAll('.custom-dropdown-option');
@@ -999,31 +1024,31 @@
                     buttonText.textContent = option.textContent;
                     hiddenInput.value = newValue;
                     found = true;
-                 }
-             });
+                   }
+               });
             if (!found && options.length > 0) {
                 options[0].classList.add('selected');
                 buttonText.textContent = options[0].textContent;
                 hiddenInput.value = options[0].dataset.value;
-             } else if (!found) {
+               } else if (!found) {
                 buttonText.textContent = 'Select...';
                 hiddenInput.value = '';
-             }
-         }
+               }
+           }
         function initDropdownDisplay(modalContainer) {
             modalContainer.querySelectorAll('.custom-dropdown').forEach(dropdown => {
                 const selectedOption = dropdown.querySelector('.custom-dropdown-option.selected');
                 const buttonText = dropdown.querySelector('.selected-value');
                 if (selectedOption) {
                     buttonText.textContent = selectedOption.textContent;
-                 } else if (dropdown.querySelectorAll('.custom-dropdown-option').length > 0) {
+                   } else if (dropdown.querySelectorAll('.custom-dropdown-option').length > 0) {
                     const firstOption = dropdown.querySelector('.custom-dropdown-option');
                     firstOption.classList.add('selected');
                     buttonText.textContent = firstOption.textContent;
                     document.getElementById(dropdown.dataset.targetInput).value = firstOption.dataset.value;
-                 }
-             });
-         }
+                   }
+               });
+           }
         function openModal(modalElement) { modalElement.classList.add('show'); }
         function closeModal(modalElement) { modalElement.classList.remove('show'); }
         // Core Logic Functions
@@ -1035,23 +1060,23 @@
             let nextIndex;
             if (isReverse) {
                 nextIndex = Math.max(0, currentIndex - 1);
-             } else {
+               } else {
                 nextIndex = (currentIndex + 1) % progressSteps.length;
-             }
+               }
             const newProgress = progressSteps[nextIndex];
             document.querySelectorAll(`.progress-box[data-topic-id="${topicId}"]`).forEach(b => {
                 b.className = `progress-box progress-${newProgress}`;
                 b.innerHTML = `<span>${newProgress}%</span>`;
-             });
+               });
             if (!appData.completedTopics[topicId]) {
                  // This should not happen with the new structure, but as a fallback...
                  appData.completedTopics[topicId] = { progress: newProgress, note: '', timedNote: '', name: 'Unknown', priority: 'low', hardness: 'medium', studyStatus: 'new' };
-             } else {
-                appData.completedTopics[topicId].progress = newProgress;
-             }
+               } else {
+                 appData.completedTopics[topicId].progress = newProgress;
+               }
             saveDataToFirestore();
             updateAllProgressUI();
-         }
+           }
         function handleEditClick(iconEl) {
             closeAllDropdowns();
             closeModal(addTopicModalEl);
@@ -1064,7 +1089,7 @@
             const currentTimedNote = currentData.timedNote || ''; // NEW
             const currentPriority = currentData.priority || 'low';
             const currentHardness = currentData.hardness || 'medium';
-            const currentStudy = currentData.studyStatus || 'new';
+            const currentStudy = currentData.studyStatus || 'mqb'; // *** NEW BUG FIX 4 ***
             modalEl.dataset.currentTopicId = topicId;
             modalTopicName.value = currentName;
             modalTopicNote.value = currentNote;
@@ -1074,11 +1099,11 @@
             
             document.querySelectorAll('#modal-priority-selector .priority-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.priority === currentPriority);
-             });
+               });
             
             openModal(modalEl);
             modalTopicName.focus();
-         }
+           }
         function handleAddTopicClick(button) {
             closeAllDropdowns();
             closeModal(modalEl);
@@ -1090,7 +1115,7 @@
                 const dateDiv = card.querySelector('.date-header-text');
                 if (dateDiv) dateDiv.focus();
                 return;
-             }
+               }
             addTopicModalEl.dataset.tableId = tableId;
             addTopicModalEl.dataset.date = date;
             const targetsFields = document.getElementById('add-topic-targets-fields');
@@ -1098,10 +1123,10 @@
             if (tableId === 'table1') {
                 targetsFields.style.display = 'block';
                 dailyFields.style.display = 'none';
-             } else {
+               } else {
                 targetsFields.style.display = 'none';
                 dailyFields.style.display = 'block';
-             }
+               }
             
             // NEW FEATURE: Reset new fields
             addTopicModalName.value = '';
@@ -1115,7 +1140,7 @@
             initDropdownDisplay(addTopicModalEl); // Ensure subject/session dropdowns are set
             openModal(addTopicModalEl);
             addTopicModalName.focus();
-         }
+           }
         // handleModalAddSave (NEW - BUG FIXED)
         function handleModalAddSave() {
             const tableId = addTopicModalEl.dataset.tableId, date = addTopicModalEl.dataset.date;
@@ -1144,7 +1169,7 @@
                 const cardFooter = card.querySelector('.card-footer');
                 if (cardFooter) card.insertBefore(targetSection, cardFooter);
                 else card.appendChild(targetSection);
-             }
+               }
             
             // Check for duplicate name *in the same section*
             const existingTopicIds = tableData[tableId]?.[date]?.[selectedColName] || [];
@@ -1152,7 +1177,7 @@
             if (isDuplicate) {
                 showToastQueued('error', `"${newTopicName}" exists.`);
                 return;
-             }
+               }
             // *** NEW LOGIC ***
             // 1. Create a new unique ID
             const topicId = createTopicId();
@@ -1166,13 +1191,13 @@
                 priority: newPriority, // NEW
                 hardness: hardness,
                 studyStatus: studyStatus
-             };
+               };
             
             // 3. Add the ID to tableData
             if (!tableData[tableId][date]) tableData[tableId][date] = {};
             if (!tableData[tableId][date][selectedColName] || !Array.isArray(tableData[tableId][date][selectedColName])) {
                 tableData[tableId][date][selectedColName] = [];
-             }
+               }
             tableData[tableId][date][selectedColName].push(topicId);
             // 4. Create and append the element
             const topicEl = createTopicElement(topicId);
@@ -1181,7 +1206,7 @@
             saveDataToFirestore();
             updateAllProgressUI();
             closeModal(addTopicModalEl);
-         }
+           }
         // handleModalSave (NEW - BUG FIXED)
         // Now only updates appData. No need to touch tableData.
         function handleModalSave() {
@@ -1208,7 +1233,7 @@
                 priority: newPriority,
                 hardness: newHardness,
                 studyStatus: newStudyStatus
-             };
+               };
             // 3. Update all DOM elements that use this ID
             document.querySelectorAll(`.topic-item[data-topic-id="${topicId}"]`).forEach(itemElement => {
                 const nameContainer = itemElement.querySelector('.topic-name-container');
@@ -1219,20 +1244,24 @@
                         const nameDisplay = nameEl.querySelector('.topic-name-text');
                         if (nameDisplay) nameDisplay.textContent = newName + ' ';
                         
-                        // NEW: Update Hardness Tag
-                        const hardnessTag = nameEl.querySelector(`.study-status.study-${currentData.hardness || 'medium'}`);
-                        if (hardnessTag) {
-                            hardnessTag.className = `study-status study-${newHardness}`;
-                            hardnessTag.textContent = hardnessMap[newHardness] || 'M';
-                            hardnessTag.title = `Hardness: ${newHardness}`;
+                        // *** NEW BUG FIX 6: Update Hardness/Status Tags ***
+                        const statusTags = nameEl.querySelectorAll('.study-status');
+                        
+                        // Update Hardness Tag (first tag)
+                        if (statusTags[0]) {
+                            statusTags[0].className = `study-status study-${newHardness}`;
+                            statusTags[0].textContent = hardnessMap[newHardness] || 'M';
+                            statusTags[0].title = `Hardness: ${newHardness}`;
                         }
                         
-                        const statusTag = nameEl.querySelector(`.study-status.study-${currentData.studyStatus || 'new'}`);
-                        if (statusTag && hardnessTag !== statusTag) { // Ensure we don't grab the hardness tag by mistake
-                            statusTag.className = `study-status study-${newStudyStatus}`;
-                            statusTag.textContent = studyStatusMap[newStudyStatus] || 'NEW';
+                        // Update Study Type Tag (second tag)
+                        if (statusTags[1]) {
+                            statusTags[1].className = `study-status study-${newStudyStatus}`;
+                            statusTags[1].textContent = studyStatusMap[newStudyStatus] || 'NEW';
+                            // Add title for consistency, reading from the full map
+                            statusTags[1].title = studyStatusFullNames[newStudyStatus] || 'Study Type';
                         }
-                     }
+                       }
                     
                     // Handle timed note
                     let timedNoteEl = nameContainer.querySelector('.timed-note-display');
@@ -1241,28 +1270,28 @@
                             timedNoteEl = document.createElement('span');
                             timedNoteEl.className = 'timed-note-display';
                             nameContainer.appendChild(timedNoteEl);
-                         }
+                           }
                         timedNoteEl.textContent = newTimedNote;
-                     } else if (timedNoteEl) {
+                       } else if (timedNoteEl) {
                         timedNoteEl.remove(); // Remove it if it's now empty
-                     }
-                 }
+                       }
+                   }
                 
                 const iconEl = itemElement.querySelector('.edit-icon');
                 if (iconEl) {
                     iconEl.classList.toggle('has-note', !!newNote);
                     iconEl.title = newNote || 'Add/Edit Note...';
-                 }
+                   }
                 
                 const indicator = itemElement.querySelector('.priority-indicator');
                 if (indicator) {
                     indicator.className = `priority-indicator priority-${newPriority}`;
                     indicator.title = `Priority: ${newPriority.charAt(0).toUpperCase() + newPriority.slice(1)}`;
-                 }
-             });
+                   }
+               });
             saveDataToFirestore();
             closeModal(modalEl);
-         }
+           }
         // handleModalDelete (NEW - BUG FIXED)
         function handleModalDelete() {
             const topicId = modalEl.dataset.currentTopicId;
@@ -1285,20 +1314,20 @@
                             const index = topics.indexOf(topicId);
                             if (index > -1) {
                                 topics.splice(index, 1);
-                             } else {
+                               } else {
                                 console.warn("Topic ID not found in tableData array:", topicId);
-                             }
-                         }
-                     }
+                               }
+                           }
+                       }
                     itemElement.remove(); // Remove from DOM
-                 }
+                   }
                 // 3. Delete from appData
                 delete appData.completedTopics[topicId];
                 saveDataToFirestore();
                 updateAllProgressUI();
                 closeModal(modalEl);
-             });
-         }
+               });
+           }
         
         function addNewRow(tableId, dateString = "New Date") {
             const container = tableId === 'table1' ? table1CardsContainer : table2CardsContainer;
@@ -1306,7 +1335,7 @@
             if (dateString !== "New Date") {
                 const dateRegexStrict = /^\d{2}\/\d{2}\/\d{4}$/;
                 if (!dateRegexStrict.test(dateString)) { showToastQueued('error', 'Invalid date format.'); return; }
-             }
+               }
             if (tableData[tableId] && tableData[tableId][dateString]) {
                 showToastQueued('error', `Card ${dateString} exists.`);
                 const existingCard = container.querySelector(`.date-card[data-date="${dateString}"]`);
@@ -1314,9 +1343,9 @@
                     existingCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     existingCard.classList.add('animate-pulse');
                     setTimeout(() => existingCard.classList.remove('animate-pulse'), 2000);
-                 }
+                   }
                 return;
-             }
+               }
             if (dateString === "New Date") {
                 const existingNewDateCard = container.querySelector('.date-card[data-date="New Date"]');
                 if (existingNewDateCard) {
@@ -1324,8 +1353,8 @@
                     const dateDiv = existingNewDateCard.querySelector('.date-header-text');
                     if (dateDiv) dateDiv.focus();
                     return;
-                 }
-             }
+                   }
+               }
             const newCardData = {};
             columnHeaders[tableId].forEach(colName => newCardData[colName] = []); // Empty arrays for topic IDs
             if (!tableData[tableId]) tableData[tableId] = {};
@@ -1343,8 +1372,8 @@
                     const dateA = new Date(dateAStr.split('/').reverse().join('-'));
                     const dateB = new Date(dateBStr.split('/').reverse().join('-'));
                     return dateA - dateB;
-                 } catch (e) { return 0; }
-             });
+                   } catch (e) { return 0; }
+               });
             cards.forEach(c => container.appendChild(c));
             if (dateString === "New Date") {
                 const dateDiv = card.querySelector('.date-header-text');
@@ -1355,13 +1384,13 @@
                     const selection = window.getSelection();
                     selection.removeAllRanges();
                     selection.addRange(range);
-                 }
-             } else {
+                   }
+               } else {
                 card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-             }
+               }
             updateCardProgress(card);
             saveDataToFirestore();
-         }
+           }
         
         function handleDeleteRowClick(button) {
             const cardElement = button.closest('.date-card');
@@ -1376,19 +1405,19 @@
                         if (Array.isArray(topicIdArray)) {
                             topicIdArray.forEach(topicId => {
                                 delete appData.completedTopics[topicId];
-                             });
-                         }
-                     });
+                               });
+                           }
+                       });
                     
                     // Delete the card entry from tableData
                     delete tableData[tableId][date];
-                 }
+                   }
                 
                 cardElement.remove();
                 saveDataToFirestore();
                 updateAllProgressUI();
-             });
-         }
+               });
+           }
         
         function handleDateChange(dateDiv) {
             const card = dateDiv.closest('.date-card');
@@ -1397,24 +1426,24 @@
             if (!card || !newDateRaw || newDateRaw === oldDateRaw || newDateRaw === 'New Date') {
                 if (newDateRaw !== oldDateRaw && (newDateRaw === '' || newDateRaw === 'New Date')) {
                     dateDiv.textContent = oldDateRaw;
-                 } else if (!newDateRaw) {
+                   } else if (!newDateRaw) {
                     dateDiv.textContent = oldDateRaw;
-                 }
+                   }
                 return;
-             }
+               }
             const dateRegexStrict = /^\d{2}\/\d{2}\/\d{4}$/;
             if (!dateRegexStrict.test(newDateRaw)) {
                 showToastQueued('error', 'Use DD/MM/YYYY.');
                 dateDiv.textContent = oldDateRaw;
                 return;
-             }
+               }
             const [day, month, year] = newDateRaw.split('/').map(Number);
             const testDate = new Date(year, month - 1, day);
             if (isNaN(testDate.getTime()) || testDate.getDate() !== day || testDate.getMonth() !== month - 1 || testDate.getFullYear() !== year) {
                 showToastQueued('error', 'Invalid date!');
                 dateDiv.textContent = oldDateRaw;
                 return;
-             }
+               }
             
             const newDate = newDateRaw;
             const oldDate = oldDateRaw;
@@ -1427,7 +1456,7 @@
                 showToastQueued('error', 'Date already exists!');
                 dateDiv.textContent = oldDate;
                 return;
-             }
+               }
             dateDiv.dataset.originalDate = newDate;
             card.dataset.date = newDate;
             // Update progress bar IDs
@@ -1443,7 +1472,7 @@
             if (tableData[tableId]?.[oldDate]) {
                 tableData[tableId][newDate] = tableData[tableId][oldDate];
                 delete tableData[tableId][oldDate];
-             }
+               }
             
              // *** NO LONGER NEEDED ***
              // Topic IDs are no longer tied to the date!
@@ -1451,7 +1480,7 @@
              
             saveDataToFirestore();
             setTimeout(() => { updateCardProgress(card); }, 50);
-         }
+           }
         // handleDragDrop (NEW - BUG FIXED)
         function handleDragDrop(draggedElement, toSection) {
             const oldSection = draggedElement.closest('.column-section');
@@ -1460,7 +1489,7 @@
             if (!oldSection || !toSection || !toCard || !oldCard || oldSection === toSection) {
                 draggedElement.classList.remove('dragging');
                 return;
-             }
+               }
             const topicId = draggedElement.dataset.topicId;
             if (!topicId) { console.error("Dragged item missing ID"); return; }
             
@@ -1475,7 +1504,7 @@
                 // DRAG-DROP VISUAL FIX
                 document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
                 return;
-             }
+               }
             // *** SIMPLIFIED LOGIC ***
             // 1. Remove ID from old tableData array
             if (tableData[oldTableId]?.[oldDate]?.[oldColName]) {
@@ -1483,8 +1512,8 @@
                 const index = topics.indexOf(topicId);
                 if (index > -1) {
                     topics.splice(index, 1);
-                 }
-             }
+                   }
+               }
             // 2. Add ID to new tableData array
             if (!tableData[newTableId]) tableData[newTableId] = {};
             if (!tableData[newTableId][newDate]) tableData[newTableId][newDate] = {};
@@ -1496,13 +1525,13 @@
             
             saveDataToFirestore();
             updateAllProgressUI(); // Update progress for both old and new cards
-         }
+           }
         function handleViewToggle(viewId) {
             if (currentView === viewId) return;
             currentView = viewId;
             localStorage.setItem('lastFightTrackerView', currentView);
             updateViewToggleUI();
-         }
+           }
         function updateViewToggleUI() {
             if (currentView === 'table1') {
                 table1Section.classList.remove('hidden');
@@ -1510,21 +1539,21 @@
                 table2Section.classList.add('hidden');
                 viewToggleBtnTable1.classList.add('active');
                 viewToggleBtnTable2.classList.remove('active');
-             } else {
+               } else {
                 table1Section.classList.add('hidden');
                 addRowBtnTable1.classList.add('hidden');
                 table2Section.classList.remove('hidden');
                 viewToggleBtnTable1.classList.remove('active');
                 viewToggleBtnTable2.classList.add('active');
-             }
-         }
+               }
+           }
         // Progress UI
         function updateAllProgressUI() {
             updateOverallProgress();
             updateTable2Progress();
             updateAllCardProgressBars();
             updateTaskCounters();
-         }
+           }
         function updateOverallProgress() {
             const bar = document.getElementById('overall-progress-bar'), text = document.getElementById('overall-progress-text');
             if (!bar || !text) return;
@@ -1538,7 +1567,7 @@
             const overallAvg = totalBoxes > 0 ? (totalProgress / (totalBoxes * 100)) * 100 : 0;
             bar.style.width = `${overallAvg}%`;
             text.textContent = `${Math.round(overallAvg)}%`;
-         }
+           }
         function updateTable2Progress() {
             const bar = document.getElementById('t2-overall-progress-bar'), text = document.getElementById('t2-overall-progress-text');
             if (!bar || !text) return;
@@ -1552,7 +1581,7 @@
             const overallAvg = totalBoxes > 0 ? (totalProgress / (totalBoxes * 100)) * 100 : 0;
             bar.style.width = `${overallAvg}%`;
             text.textContent = `${Math.round(overallAvg)}%`;
-         }
+           }
         function updateTaskCounters() {
             ['table1', 'table2'].forEach(tableId => {
                 const container = tableId === 'table1' ? table1CardsContainer : table2CardsContainer;
@@ -1563,14 +1592,14 @@
                 let completedTasks = 0;
                 allBoxes.forEach(box => {
                     if (appData.completedTopics[box.dataset.topicId]?.progress === 100) completedTasks++;
-                 });
+                   });
                 counterEl.textContent = `${completedTasks} / ${totalTasks} Done`;
                 counterEl.classList.remove('opacity-0');
-             });
-         }
+               });
+           }
         function updateAllCardProgressBars() {
             document.querySelectorAll('.date-card').forEach(card => updateCardProgress(card));
-         }
+           }
         function updateCardProgress(cardElement) {
             if (!cardElement) return;
             const tableId = cardElement.dataset.tableId, date = cardElement.dataset.date;
@@ -1582,18 +1611,18 @@
             if (!bar || !text || !count) {
                 if (date !== "New Date") console.warn(`Progress elements missing for ${tableId}-${dateId}.`);
                 return;
-             }
+               }
             const allBoxes = cardElement.querySelectorAll('.progress-box');
             const totalTasks = allBoxes.length;
             let completedTasks = 0;
             allBoxes.forEach(box => {
                 if (appData.completedTopics[box.dataset.topicId]?.progress === 100) completedTasks++;
-             });
+               });
             const percentage = (totalTasks > 0) ? (completedTasks / totalTasks) * 100 : 0;
             bar.style.width = `${percentage}%`;
             text.textContent = `${Math.round(percentage)}%`;
             count.textContent = `${completedTasks} / ${totalTasks} Done`;
-         }
+           }
         // Calendar (NEW Features)
         function handleGoToToday() {
             const todayString = getFormattedDate(today);
@@ -1606,16 +1635,16 @@
                     todayCard.classList.add('animate-pulse');
                     setTimeout(() => todayCard.classList.remove('animate-pulse'), 2000);
                     showToastQueued('synced', `Jumped to today's card`);
-                 } else {
+                   } else {
                     showToastQueued('error', `No card found for today (${todayString})`);
-                 }
-             }, 100);
-         }
+                   }
+               }, 100);
+           }
         function handleOpenCalendar() {
             calendarState = { month: today.getMonth(), year: today.getFullYear() };
             renderCalendar(calendarState.month, calendarState.year);
             openModal(calendarModalEl);
-         }
+           }
         
         function renderCalendar(month, year) {
             calendarDaysEl.innerHTML = '';
@@ -1632,27 +1661,28 @@
                 const dateStr = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
                 dayEl.dataset.date = dateStr;
                 
-                const currentDate = new Date(year, month, day);
-                const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                
-                if (currentDate < todayDateOnly) {
+                // *** NEW BUG FIX 3: Calendar Date Logic ***
+                const isPast = (year < today.getFullYear()) ||
+                             (year === today.getFullYear() && month < today.getMonth()) ||
+                             (year === today.getFullYear() && month === today.getMonth() && day < today.getDate());
+                if (isPast) {
                     dayEl.classList.add('disabled');
                     dayEl.title = "Cannot add past dates";
-                 }
+                }
                 
                 if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
                     dayEl.classList.add('today');
-                 }
+                   }
                 
                 // NEW: Check if card exists
                 if (tableData.table2 && tableData.table2[dateStr]) {
                     dayEl.classList.add('has-card');
                     dayEl.title = "Go to this date's card";
-                 }
+                   }
                 
                 calendarDaysEl.appendChild(dayEl);
-             }
-         }
+               }
+           }
         
         function handleCalendarDateClick(dayElement) {
             const dateString = dayElement.dataset.date;
@@ -1667,21 +1697,21 @@
                         card.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         card.classList.add('animate-pulse');
                         setTimeout(() => card.classList.remove('animate-pulse'), 2000);
-                     }
-                 }, 200);
+                       }
+                   }, 200);
                 return;
-             }
+               }
             // MODAL BUG FIX: Call the modified confirmation modal
             showConfirmationModal(`Add card for ${dateString}?`, () => {
                 try {
                     addNewRow('table2', dateString);
                     closeModal(calendarModalEl);
-                 } catch (error) {
+                   } catch (error) {
                     console.error('Failed to add card:', error);
                     showToastQueued('error', 'Failed to create card');
-                 }
-             }, "Yes, Add", "button-success"); // Pass "Yes, Add" and "button-success"
-         }
+                   }
+               }, "Yes, Add", "button-success"); // Pass "Yes, Add" and "button-success"
+           }
         // Data Save & Toast
         function saveDataToFirestore() {
             if (!dbDocRef) return;
@@ -1701,20 +1731,20 @@
                     await setDoc(dbDocRef, { 
                         completedTopics: topicsToSave, 
                         tableData: tableDataToSave 
-                     }, { merge: false });
+                       }, { merge: false });
                     showToastQueued('synced');
-                 } catch (error) {
+                   } catch (error) {
                     console.error("Firestore save error:", error);
                     showToastQueued('error', 'Sync Error');
                     pendingChanges = true; // Retry
-                 }
-             }, 1000);
-         }
+                   }
+               }, 1000);
+           }
         
         function showToastQueued(type, customMessage = '') {
             toastQueue.push({ type, customMessage });
             if (!isToastShowing) processToastQueue();
-         }
+           }
         function processToastQueue() {
             if (toastQueue.length === 0) { isToastShowing = false; return; }
             isToastShowing = true;
@@ -1729,15 +1759,16 @@
                 case 'cached': toastClass = 'bg-yellow-500 text-gray-900'; msg.textContent = customMessage || 'Offline'; spinner.style.display = 'none'; break;
                 case 'error': toastClass = 'bg-red-500 text-white'; msg.textContent = customMessage || 'Error'; spinner.style.display = 'none'; break;
                 default: toastClass = 'bg-slate-700 text-white'; msg.textContent = customMessage || 'Info'; spinner.style.display = 'none'; break;
-             }
+               }
             toast.className = `${toastClass} show`;
-            const duration = (type === 'syncing' || type === 'cached') (type === 'error') ? 3000 : 2500;
+            // *** NEW BUG FIX 1: Corrected syntax ***
+            const duration = (type === 'syncing' || type === 'cached') ? 4000 : (type === 'error') ? 3000 : 2500;
             toastTimeout = setTimeout(() => {
                 toast.classList.remove('show');
                 isToastShowing = false; // Mark as not showing
                 setTimeout(processToastQueue, 400); // Check queue again
-             }, duration);
-         }
+               }, duration);
+           }
         // Countdown
         function startCountdown() {
             const els = { d: document.getElementById('days'), h: document.getElementById('hours'), m: document.getElementById('minutes'), s: document.getElementById('seconds') };
@@ -1752,14 +1783,14 @@
                     clearInterval(countdownInterval);
                     ['d', 'h', 'm', 's'].forEach(k => els[k].textContent = "00");
                     return;
-                 }
+                   }
                 const d = Math.floor(dist / 864e5), h = Math.floor((dist % 864e5) / 36e5), m = Math.floor((dist % 36e5) / 6e4), s = Math.floor((dist % 6e4) / 1e3);
                 els.d.textContent = String(d).padStart(2, '0');
                 els.h.textContent = String(h).padStart(2, '0');
                 els.m.textContent = String(m).padStart(2, '0');
                 els.s.textContent = String(s).padStart(2, '0');
-             }, 1000);
-         }
+               }, 1000);
+           }
         // Cleanup
         window.cleanupAppListeners = () => {
             if (countdownInterval) clearInterval(countdownInterval);
@@ -1767,8 +1798,7 @@
             if (toastTimeout) clearTimeout(toastTimeout);
             if (unsubscribeSnapshot) unsubscribeSnapshot();
             console.log("App listeners cleaned up.");
-         };
+           };
     </script>
 </body>
-    </html>
-
+            </html>
