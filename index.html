@@ -912,47 +912,110 @@
             }
            }
 
-        function setupAuthStateListener() {
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    // User is SIGNED IN
-                    currentUserId = user.uid;
-                    const appId = "rutine-f2ac1";
-                    
-                    // Set user-specific doc paths
-                    const dataPath = `artifacts/${appId}/users/${currentUserId}/studyProgress/data_v4`;
-                    const settingsPath = `artifacts/${appId}/users/${currentUserId}/studyProgress/settings_v1`;
-                    dbDocRef = doc(db, dataPath);
-                    settingsDocRef = doc(db, settingsPath);
+     function setupAuthStateListener() {
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log(">>> Step 1: User signed in successfully. UID:", user.uid); // <-- Log 1
 
-                    // Update settings modal UI
-                    settingsUserImg.src = user.photoURL || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM5NDRhYjgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLXVzZXIiPjxwYXRoIGQ9Ik0yMCAyMWE4IDggMCAwIDAtMTYgMCI+PC9wYXRoPjxjaXJjbGUgY3g9IjEyIiBjeT0iNyIgcj0iNCI+PC9jaXJjbGU+PC9zdmc+';
-                    settingsUserName.textContent = user.displayName || 'App User';
-                    settingsUserEmail.textContent = user.email || 'No email provided';
+            // User is SIGNED IN
+            currentUserId = user.uid;
+            const appId = "rutine-f2ac1"; // <-- Ensure this is correct
 
-                    // Load user's data and settings
-                    loadSettingsFromFirestore(); // Must load settings first
+            // Set user-specific doc paths
+            const dataPath = `artifacts/${appId}/users/${currentUserId}/studyProgress/data_v4`;
+            const settingsPath = `artifacts/${appId}/users/${currentUserId}/studyProgress/settings_v1`;
+            dbDocRef = doc(db, dataPath);
+            settingsDocRef = doc(db, settingsPath);
+            console.log(">>> Step 2: Firestore paths set."); // <-- Log 2
 
-                    // Show the main app
-                    loginScreen.classList.add('hidden');
-                    mainAppContainer.classList.remove('hidden');
-                    loadingEl.classList.remove('hidden'); // Show "Loading Dashboard..."
+            // Update settings modal UI (Keep existing code)
+            settingsUserImg.src = user.photoURL || '...';
+            settingsUserName.textContent = user.displayName || 'App User';
+            settingsUserEmail.textContent = user.email || 'No email provided';
 
-                } else {
-                    // User is SIGNED OUT
-                    currentUserId = null;
-                    cleanupListenersAndState(); // Clear all data
-                    
-                    // Show the login screen
-                    loginScreen.classList.remove('hidden');
-                    mainAppContainer.classList.add('hidden');
-                    loadingEl.classList.add('hidden');
-                    googleLoginError.classList.add('hidden');
-                    googleLoginText.textContent = 'Sign In with Google';
-                    googleLoginBtn.disabled = false;
-                }
-            });
+            try {
+                console.log(">>> Step 3: Calling loadSettingsFromFirestore..."); // <-- Log 3
+                loadSettingsFromFirestore(); // Must load settings first
+                // Note: loadDataFromFirestore is called INSIDE loadSettingsFromFirestore upon success
+            } catch (error) {
+                console.error(">>> ERROR calling loadSettingsFromFirestore:", error); // <-- Error Log
+            }
+
+            // Show the main app (UI Update Logic)
+            console.log(">>> Step 6: Attempting to hide login screen..."); // <-- Log 6
+            loginScreen.classList.add('hidden');
+            console.log(">>> Step 7: Login screen hidden."); // <-- Log 7
+            mainAppContainer.classList.remove('hidden');
+            console.log(">>> Step 8: Main app container shown."); // <-- Log 8
+            loadingEl.classList.remove('hidden'); // Show "Loading Dashboard..."
+            console.log(">>> Step 9: Loading spinner shown."); // <-- Log 9
+
+
+        } else {
+            // User is SIGNED OUT (Keep existing code)
+            console.log(">>> User signed out."); // <-- Sign Out Log
+            currentUserId = null;
+            cleanupListenersAndState();
+            loginScreen.classList.remove('hidden');
+            mainAppContainer.classList.add('hidden');
+            loadingEl.classList.add('hidden');
+            googleLoginError.classList.add('hidden');
+            googleLoginText.textContent = 'Sign In with Google';
+            googleLoginBtn.disabled = false;
         }
+    });
+}
+
+// --- Add logs inside Firestore loading functions ---
+
+function loadSettingsFromFirestore() {
+    if (!settingsDocRef) {
+         console.error(">>> ERROR in loadSettingsFromFirestore: settingsDocRef is not defined.");
+         return;
+    }
+    if (unsubscribeSettings) unsubscribeSettings();
+
+    console.log(">>> Step 4: Inside loadSettingsFromFirestore, setting up snapshot..."); // <-- Log 4
+
+    unsubscribeSettings = onSnapshot(settingsDocRef, (doc) => {
+        console.log(">>> Settings snapshot received. Exists:", doc.exists()); // <-- Snapshot Log 1
+        // ... (keep existing code for handling settings data) ...
+
+        // Once settings are loaded, populate dropdowns
+        populateAllStudyTypeDropdowns();
+
+        // Now load data after settings are loaded
+        console.log(">>> Step 5: Settings processed, calling loadDataFromFirestore..."); // <-- Log 5
+        loadDataFromFirestore();
+
+    }, (error) => {
+        console.error(">>> ERROR loading settings snapshot:", error); // <-- Error Log
+        showToastQueued('error', 'Failed to load settings.');
+    });
+}
+
+function loadDataFromFirestore() {
+     if (!dbDocRef) {
+         console.error(">>> ERROR in loadDataFromFirestore: dbDocRef is not defined.");
+         return;
+    }
+    if (unsubscribeSnapshot) unsubscribeSnapshot();
+
+    console.log(">>> Inside loadDataFromFirestore, setting up snapshot..."); // <-- Data Log 1
+    showToastQueued('syncing');
+
+    unsubscribeSnapshot = onSnapshot(dbDocRef, (doc) => {
+        console.log(">>> Data snapshot received. Exists:", doc.exists()); // <-- Snapshot Log 2
+         // ... (keep existing code for handling data) ...
+
+        renderData();
+        showToastQueued(doc.metadata.fromCache ? "cached" : "synced");
+    }, (error) => {
+        console.error(">>> ERROR loading data snapshot:", error); // <-- Error Log
+        loadingEl.innerHTML = `<p class="text-red-400">Error: Load failed.</p>`;
+        showToastQueued('error');
+    });
+}
 
         async function handleGoogleSignIn() {
             googleLoginBtn.disabled = true;
@@ -2658,4 +2721,5 @@
     </script>
 </body>
                             </html>
+
 
