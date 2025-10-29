@@ -374,7 +374,7 @@
     This is shown by default. JS will hide this after successful login.
     ============================================================================
     -->
-    <div id="login-screen" class="hidden">
+    <div id="login-screen" >
         <div class="login-card">
             <h1 class="text-3xl font-bold text-white mb-2">
                 Last Fight <span class="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-400">Tracker</span>
@@ -832,10 +832,7 @@
             if (savedView === 'table2') currentView = 'table2';
             updateViewToggleUI();
             
-            // Hide login screen initially - will be shown by auth state
-            loginScreen.classList.add('hidden');
-            mainAppContainer.classList.remove('hidden');
-            
+           
             // Populate static dropdowns
             populateSubjectAndSessionDropdowns();
 
@@ -2663,6 +2660,7 @@ function loadSettingsFromFirestore() {
     </script>
 </body>
                             </html>
+
 
 
 
