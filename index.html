@@ -1004,7 +1004,7 @@ function setupAuthStateListener() {
 
             } catch (error) {
                 console.error(">>> CRITICAL ERROR inside 'if (user)' block:", error); // <-- Catch errors inside the main block
-                alert("An error occurred after login. Check the console for details. Error: " + error.message); // Show alert
+                alert("An error occurred after login. Check the console for details. Error: ", error.message); // Show alert
             }
 
         } else {
@@ -2735,6 +2735,7 @@ function loadSettingsFromFirestore() {
     </script>
 </body>
                             </html>
+
 
 
 
