@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Title updated to reflect new version -->
-    <title>Last Fight (v4.3 - Bug Fixes & Config)</title>
+    <title>Last Fight (v4.4 - Auth Fix)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -97,15 +97,13 @@
         .edit-icon { flex-shrink: 0; color: var(--color-text-dim); cursor: pointer; padding: 5px; border-radius: 50%; transition: background-color 0.2s, color 0.2s; background: none; border: none; }
         .edit-icon:hover { background-color: var(--color-border); color: white; } .edit-icon.has-note { color: var(--color-accent-yellow); } .edit-icon.has-note:hover { color: #fde047; }
         
-        /* --- TOAST --- */
-        /* --- CHANGE 2: Removed default background and border from toast for dynamic coloring --- */
         #toast { 
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(120%); 
             padding: 12px 20px; border-radius: 8px; font-weight: 600; 
             display: flex; align-items: center; gap: 10px; z-index: 100; 
             transition: opacity 0.3s, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             opacity: 0; 
-            border: 1px solid transparent; /* Added for border color consistency */
+            border: 1px solid transparent; 
             box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
         }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -420,7 +418,8 @@
     <script type="module">
         // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // --- CHANGE 1: Added onAuthStateChanged ---
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // App State
@@ -434,8 +433,6 @@
         const toastQueue = []; 
         let isToastShowing = false;
         
-        // appData stores all topic details, indexed by a unique ID.
-        // tableData only stores the *IDs* in arrays, defining their position.
         const appData = { completedTopics: {} };
         let tableData = { table1: {}, table2: {} };
         
@@ -448,7 +445,6 @@
         
         const progressSteps = [0, 20, 40, 60, 80, 100];
         
-        // Use real 'today' date
         const today = new Date(); 
         
         const studyStatusMap = { mqb: "MQB", ret: "RET", med: "MED", camp: "CAMP", week: "WEEK", rev: "REV", new: "NEW", secret: "SECRET" };
@@ -514,7 +510,7 @@
             initDropdownDisplay(addTopicModalEl);
            }
 
-        // Firebase Initialization
+        // --- CHANGE 2: Updated Firebase Init function ---
         async function initializeAppFirebase() {
             try {
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -523,7 +519,6 @@
                     try { firebaseConfig = JSON.parse(__firebase_config); } catch (e) { firebaseConfig = null; console.warn("Could not parse __firebase_config"); }
                    }
                 if (!firebaseConfig || !firebaseConfig.apiKey) {
-                    // --- CHANGE 1: Replaced Firebase Config as requested ---
                     firebaseConfig = {
                         apiKey: "AIzaSyBWvyaFWIL0PV4VD33BJNQl3qP2k1IbQus",
                         authDomain: "rutine-f2ac1.firebaseapp.com",
@@ -538,19 +533,61 @@
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                try { await enableIndexedDbPersistence(db); } catch (err) { console.warn("Offline persistence failed:", err.code); }
-                await authenticateUser(initialAuthToken, appId);
-               } catch (error) { console.error("Firebase Init Error:", error); loadingEl.innerHTML = `<p class="text-red-400">Error: Init failed.</p>`; }
+                
+                try { 
+                    // Note: Offline persistence also helps maintain the auth state
+                    await enableIndexedDbPersistence(db); 
+                } catch (err) { 
+                    console.warn("Offline persistence failed:", err.code); 
+                }
+                
+                // This function now sets up the persistent listener
+                authenticateUser(initialAuthToken, appId);
+
+               } catch (error) { 
+                   console.error("Firebase Init Error:", error); 
+                   loadingEl.innerHTML = `<p class="text-red-400">Error: Init failed.</p>`; 
+                }
            }
 
+        // --- CHANGE 3: Rewritten authenticateUser function for Persistent Session ---
         async function authenticateUser(token, appId) {
-            try {
-                if (token) { await signInWithCustomToken(auth, token); } else { await signInAnonymously(auth); }
-                const userId = auth.currentUser.uid;
-                const docPath = `artifacts/${appId}/users/${userId}/studyProgress/data_v4`; 
-                dbDocRef = doc(db, docPath);
-                loadDataFromFirestore();
-               } catch (error) { console.error("Auth Error:", error); loadingEl.innerHTML = `<p class="text-red-400">Error: Auth failed.</p>`; }
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    // Case A: User is logged in.
+                    // This could be from a previous session (persistence)
+                    // or from the signIn...() calls below.
+                    
+                    // Prevent re-loading if listener fires multiple times
+                    if (dbDocRef) return; 
+
+                    const userId = user.uid;
+                    console.log("Persistent user session found:", userId);
+                    
+                    const docPath = `artifacts/${appId}/users/${userId}/studyProgress/data_v4`; 
+                    dbDocRef = doc(db, docPath);
+                    loadDataFromFirestore(); // Load data for THIS user
+
+                } else {
+                    // Case B: No user. We must sign them in.
+                    try {
+                        if (token) {
+                            console.log("No session. Signing in with custom token...");
+                            await signInWithCustomToken(auth, token);
+                            // Successful sign-in will re-trigger this listener.
+                            // The 'if (user)' block will then execute.
+                        } else {
+                            console.log("No session. Signing in anonymously...");
+                            await signInAnonymously(auth);
+                            // Successful sign-in will re-trigger this listener.
+                            // The 'if (user)' block will then execute.
+                        }
+                    } catch (error) {
+                        console.error("Auth Error during sign-in:", error);
+                        loadingEl.innerHTML = `<p class="text-red-400">Error: Auth failed.</p>`;
+                    }
+                }
+            });
            }
 
         // Data Validation & Migration
@@ -652,7 +689,7 @@
             renderAllCards();
             updateAllProgressUI();
             updateViewToggleUI();
-            loadingEl.classList.remove('show'); // 'show' not a valid class, but keeping for consistency
+            loadingEl.classList.remove('show'); 
             loadingEl.classList.add('hidden');
             contentEl.classList.remove('hidden');
             isFirstLoad = false;
@@ -669,7 +706,6 @@
                 const data = tableData[tableId];
                 if (!container || !data) return;
                 
-                // Cards are now sorted on render
                 const dates = Object.keys(data);
                 const sortedDates = dates.sort((a, b) => {
                     try {
@@ -856,22 +892,19 @@
             return `${d}/${m}/${y}`;
            }
 
-        // --- BUG FIX 4: Extracted card sorting logic into a helper function ---
         function sortCardsInContainer(container) {
             const cards = Array.from(container.children);
             cards.sort((a, b) => {
                 try {
                     const dateAStr = a.dataset.date;
                     const dateBStr = b.dataset.date;
-                    if (dateAStr === 'New Date') return 1; // 'New Date' always last
+                    if (dateAStr === 'New Date') return 1; 
                     if (dateBStr === 'New Date') return -1;
-                    // Parse DD/MM/YYYY
                     const dateA = new Date(dateAStr.split('/').reverse().join('-'));
                     const dateB = new Date(dateBStr.split('/').reverse().join('-'));
                     return dateA - dateB;
                    } catch (e) { return 0; }
                });
-            // Re-append in sorted order
             cards.forEach(c => container.appendChild(c));
         }
 
@@ -1355,23 +1388,19 @@
             closeModal(modalEl);
            }
 
-        // --- BUG FIX 3: Rewritten handleModalDelete for robustness ---
         function handleModalDelete() {
             const topicId = modalEl.dataset.currentTopicId;
             if (!topicId) return;
             
             showConfirmationModal("Delete this topic?", () => {
-                // 1. Delete from appData (master list)
                 delete appData.completedTopics[topicId];
                 
-                // 2. Scrub topicId from all of tableData (table1 and table2)
                 Object.keys(tableData).forEach(tableId => {
                     if (!tableData[tableId]) return;
                     Object.keys(tableData[tableId]).forEach(date => {
                         if (!tableData[tableId][date]) return;
                         Object.keys(tableData[tableId][date]).forEach(colName => {
                             if (Array.isArray(tableData[tableId][date][colName])) {
-                                // Filter out the deleted topicId
                                 tableData[tableId][date][colName] = tableData[tableId][date][colName].filter(
                                     id => id !== topicId
                                 );
@@ -1380,12 +1409,10 @@
                     });
                 });
 
-                // 3. Remove ALL DOM elements with this topicId
                 document.querySelectorAll(`.topic-item[data-topic-id="${topicId}"]`).forEach(el => el.remove());
 
-                // 4. Save changes and update UI
                 saveDataToFirestore();
-                updateAllProgressUI(); // Update progress bars
+                updateAllProgressUI(); 
                 closeModal(modalEl);
                });
            }
@@ -1425,7 +1452,6 @@
             const card = createDateCard(tableId, dateString, newCardData);
             container.appendChild(card);
             
-            // --- BUG FIX 4 (Refactor): Call the sorting helper function ---
             sortCardsInContainer(container);
             
             if (dateString === "New Date") {
@@ -1517,7 +1543,6 @@
             dateDiv.dataset.originalDate = newDate;
             card.dataset.date = newDate;
             
-            // Update progress bar IDs
             const oldDateId = oldDate.replace(/\//g, '-');
             const newDateId = newDate.replace(/\//g, '-');
             const bar = card.querySelector(`#card-progress-bar-${tableId}-${oldDateId}`);
@@ -1527,17 +1552,13 @@
             if (text) text.id = `card-progress-text-${tableId}-${newDateId}`;
             if (count) count.id = `card-progress-count-${tableId}-${newDateId}`;
             
-            // Update tableData
             if (tableData[tableId]?.[oldDate]) {
                 tableData[tableId][newDate] = tableData[tableId][oldDate];
                 delete tableData[tableId][oldDate];
                }
              
             saveDataToFirestore();
-            
-            // --- BUG FIX 4: Call sorting function after date change ---
             sortCardsInContainer(container);
-            
             setTimeout(() => { updateCardProgress(card); }, 50);
            }
 
@@ -1781,7 +1802,10 @@
 
         // Data Save & Toast
         function saveDataToFirestore() {
-            if (!dbDocRef) return;
+            if (!dbDocRef) {
+                console.warn("dbDocRef not ready. Save delayed.");
+                return; // Don't save if auth isn't ready
+            }
             pendingChanges = true;
             if (saveTimeout) clearTimeout(saveTimeout);
             
@@ -1821,7 +1845,10 @@
             clearTimeout(toastTimeout);
             let toastClass = '';
             
-            // --- CHANGE 2: Updated Toast Colors as requested ---
+            // Default spinner color (for white text)
+            spinner.style.borderColor = 'rgba(255,255,255,0.3)';
+            spinner.style.borderTopColor = 'white';
+
             switch (type) {
                 case 'syncing': 
                     toastClass = 'bg-white text-gray-900 border-gray-300'; 
@@ -1837,7 +1864,6 @@
                     spinner.style.display = 'none'; 
                     break;
                 case 'cached': 
-                    // 'offline' (cached) is now red
                     toastClass = 'bg-red-500 text-white border-red-600'; 
                     msg.textContent = customMessage || 'Offline (Cached)'; 
                     spinner.style.display = 'none'; 
@@ -1896,4 +1922,4 @@
            };
     </script>
 </body>
-                    </html>
+                                                                                                                                                                                                                                                                                                         </html>
