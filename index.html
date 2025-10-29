@@ -1072,42 +1072,7 @@ function loadDataFromFirestore() {
         // v5.0: SETTINGS & CUSTOMIZATION LOGIC
         // ========================================================================
 
-        function loadSettingsFromFirestore() {
-            if (!settingsDocRef) return;
-            if (unsubscribeSettings) unsubscribeSettings(); // Unsubscribe from old listener if exists
-
-            unsubscribeSettings = onSnapshot(settingsDocRef, (doc) => {
-                if (doc.exists()) {
-                    const settings = doc.data();
-                    if (settings.customStudyTypes) {
-                        appSettings.customStudyTypes = settings.customStudyTypes;
-                    } else {
-                        // Settings doc exists but no study types, save default
-                        appSettings.customStudyTypes = JSON.parse(JSON.stringify(DEFAULT_STUDY_TYPES));
-                        saveSettingsToFirestore(); // Save defaults for next time
-                    }
-                    
-                    // Load countdown settings
-                    if (settings.countdownSettings) {
-                        appSettings.countdownSettings = settings.countdownSettings;
-                        updateCountdownUI();
-                    }
-                } else {
-                    // No settings doc. This is a new user.
-                    appSettings.customStudyTypes = JSON.parse(JSON.stringify(DEFAULT_STUDY_TYPES));
-                    saveSettingsToFirestore(); // Save defaults
-                }
-                
-                // Once settings are loaded, populate all dropdowns
-                populateAllStudyTypeDropdowns();
-                
-                // Now load data after settings are loaded
-                loadDataFromFirestore();
-            }, (error) => {
-                console.error("Error loading settings:", error);
-                showToastQueued('error', 'Failed to load settings.');
-            });
-        }
+      
 
         async function saveSettingsToFirestore() {
             if (!settingsDocRef) return;
@@ -2721,5 +2686,6 @@ function loadDataFromFirestore() {
     </script>
 </body>
                             </html>
+
 
 
