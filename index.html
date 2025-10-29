@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Title updated to reflect new version -->
-    <title>Last Fight (v4.4 - Auth Fix)</title>
+    <title>Last Fight (v5.0 - Google Auth & Features)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -62,6 +62,27 @@
         .button-secondary { background-color: var(--color-bg-header); color: var(--color-text-main); } .button-secondary:hover { background-color: var(--color-border); }
         .button-danger { background-color: var(--color-accent-red); color: white; } .button-danger:hover { background-color: #dc2626; }
         .button-success { background-color: var(--color-accent-green); color: white; } .button-success:hover { background-color: #16a34a; }
+
+        /* --- CHANGE: Google Login Button Style --- */
+        #google-login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background-color: #ffffff;
+            color: #1f2937;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        #google-login-btn:hover {
+            background-color: #f9fafb;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
         
         .priority-indicator { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-right: 6px; }
         .priority-high { background-color: var(--color-accent-red); box-shadow: 0 0 6px var(--color-accent-red); }
@@ -87,25 +108,18 @@
         .progress-0 { background-color: var(--color-border); } .progress-20 { background-color: var(--color-accent-red); } .progress-40 { background-color: var(--color-accent-orange); } .progress-60 { background-color: var(--color-accent-yellow); } .progress-80 { background-color: var(--color-accent-blue); } .progress-100 { background-color: var(--color-accent-green); }
         .progress-box:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 5px 10px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1); } .progress-box:active { transform: translateY(0px) scale(1); }
         
-        .topic-item { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.5rem; border-radius: 8px; transition: background-color 0.2s; border-bottom: 1px solid var(--color-bg-header); }
+        /* --- CHANGE: Reduced lateral padding --- */
+        .topic-item { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.2rem; border-radius: 8px; transition: background-color 0.2s; border-bottom: 1px solid var(--color-bg-header); }
         .topic-item:last-child { border-bottom: none; } .topic-item:hover { background-color: rgba(255, 255, 255, 0.03); }
         
         .topic-name-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; gap: 0; }
-        .topic-name { font-weight: 500; color: var(--color-text-main); white-space: normal; word-break: break-word; display: flex; align-items: center; }
+        .topic-name { font-weight: 500; color: var(--color-text-main); white-space: normal; word-break: break-word; display: flex; align-items: center; flex-wrap: wrap; /* Allow tags to wrap */ }
         .topic-name-text {}
         .timed-note-display { font-size: 0.75rem; font-style: italic; color: var(--color-text-dim); line-height: 1; margin-top: 2px; }
         .edit-icon { flex-shrink: 0; color: var(--color-text-dim); cursor: pointer; padding: 5px; border-radius: 50%; transition: background-color 0.2s, color 0.2s; background: none; border: none; }
         .edit-icon:hover { background-color: var(--color-border); color: white; } .edit-icon.has-note { color: var(--color-accent-yellow); } .edit-icon.has-note:hover { color: #fde047; }
         
-        #toast { 
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(120%); 
-            padding: 12px 20px; border-radius: 8px; font-weight: 600; 
-            display: flex; align-items: center; gap: 10px; z-index: 100; 
-            transition: opacity 0.3s, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            opacity: 0; 
-            border: 1px solid transparent; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
-        }
+        #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(120%); padding: 12px 20px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 10px; z-index: 100; transition: opacity 0.3s, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; border: 1px solid transparent; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         @media (min-width: 768px) { #toast { left: auto; right: 20px; transform: translateY(120%); } #toast.show { transform: translateY(0); } }
         
@@ -132,11 +146,12 @@
         .date-header-text { font-size: 1.125rem; font-weight: 700; color: white; background-color: var(--color-blue-700-t); padding: 0.35rem 0.75rem; margin: -0.25rem 0; border-radius: 6px; border: 1px solid var(--color-accent-blue); box-shadow: 0 1px 2px rgba(0,0,0,0.2); flex-shrink: 0; transition: background-color 0.2s; }
         .date-header-text:focus { background-color: rgba(29, 78, 216, 0.5); }
         
-        .card-progress-container { flex-grow: 1; display: flex; align-items: center; gap: 0.75rem; min-width: 150px; }
-        .card-progress-text { font-size: 0.875rem; font-weight: 600; color: var(--color-text-main); flex-shrink: 0; }
-        .card-progress-bar-bg { width: 100%; height: 8px; background-color: var(--color-bg-main); border-radius: 4px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.3); }
-        .card-progress-bar-fg { height: 100%; background-color: var(--color-accent-blue); border-radius: 4px; transition: width 0.3s ease-out; }
-        .card-progress-count { font-size: 0.75rem; font-weight: 500; color: var(--color-text-dim); background-color: var(--color-bg-main); padding: 0.1rem 0.5rem; border-radius: 4px; white-space: nowrap; }
+        /* --- CHANGE: Reduced progress bar container size --- */
+        .card-progress-container { flex-grow: 1; display: flex; align-items: center; gap: 0.5rem; min-width: 150px; }
+        .card-progress-text { font-size: 0.8rem; font-weight: 600; color: var(--color-text-main); flex-shrink: 0; }
+        .card-progress-bar-bg { width: 100%; height: 6px; background-color: var(--color-bg-main); border-radius: 3px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.3); }
+        .card-progress-bar-fg { height: 100%; background-color: var(--color-accent-blue); border-radius: 3px; transition: width 0.3s ease-out; }
+        .card-progress-count { font-size: 0.7rem; font-weight: 500; color: var(--color-text-dim); background-color: var(--color-bg-main); padding: 0.1rem 0.5rem; border-radius: 4px; white-space: nowrap; }
         
         .column-section { padding: 0.75rem 1.25rem 1rem; border-bottom: 1px solid var(--color-border); } .column-section:last-child { border-bottom: none; }
         .column-title { display: inline-block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 0.25rem 0.6rem; border-radius: 6px; margin-bottom: 0.75rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
@@ -154,13 +169,7 @@
         .view-toggle-btn.active { color: var(--color-accent-blue); border-bottom-color: var(--color-accent-blue); }
         .view-toggle-btn:hover:not(.active) { color: var(--color-text-main); }
         
-        .priority-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.8rem; border: 1px solid var(--color-border); border-radius: 6px; font-weight: 500; color: var(--color-text-dim); transition: all 0.2s; background-color: var(--color-bg-header); cursor: pointer; }
-        .priority-btn .priority-indicator { margin-right: 0; }
-        .priority-btn:hover { background-color: var(--color-border); color: var(--color-text-main); }
-        .priority-btn.active { color: var(--color-text-main); font-weight: 600; background-color: var(--color-bg-hover); }
-        .priority-btn[data-priority="high"].active { border-color: var(--color-accent-red); box-shadow: 0 0 5px rgba(239, 68, 68, 0.3); background-color: var(--color-red-500-t); }
-        .priority-btn[data-priority="medium"].active { border-color: var(--color-accent-yellow); box-shadow: 0 0 5px rgba(234, 179, 8, 0.3); background-color: rgba(234, 179, 8, 0.1); }
-        .priority-btn[data-priority="low"].active { border-color: var(--color-border-light); background-color: var(--color-border); }
+        /* Removed .priority-btn styles as they are no longer used for selection */
         
         .modal-backdrop { position: fixed; inset: 0; z-index: 40; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
         .modal-backdrop.show { opacity: 1; visibility: visible; }
@@ -262,9 +271,23 @@
             <button id="view-toggle-table1" class="view-toggle-btn active" data-view="table1">Targets</button>
             <button id="view-toggle-table2" class="view-toggle-btn" data-view="table2">Daily Plan View</button>
         </div>
-        <!-- Loading Spinner -->
-        <div id="loading" class="text-center py-20"> <div class="spinner" style="margin: 0 auto; width: 40px; height: 40px; border-width: 4px;"></div> <p class="mt-4 text-lg text-slate-400">Loading Dashboard...</p> </div>
-        <!-- Main Content -->
+        
+        <!-- --- CHANGE: Loading section now includes Login --- -->
+        <div id="loading" class="text-center py-20"> 
+            <div id="loading-spinner" class="spinner" style="margin: 0 auto; width: 40px; height: 40px; border-width: 4px;"></div> 
+            <p id="loading-text" class="mt-4 text-lg text-slate-400">Loading Dashboard...</p> 
+            
+            <div id="login-container" class="hidden">
+                 <h2 class="text-2xl font-semibold text-white mb-4">Welcome to Last Fight Tracker</h2>
+                 <p class="text-slate-400 mb-8">Please sign in with your Google account to continue.</p>
+                 <button id="google-login-btn">
+                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691c-1.35 4.14-1.35 8.879 0 13.019l-5.657 5.657C-1.87 30.153-3 25.101-3 20c0-5.101 1.13-10.153 3.657-14.348l5.657 5.657z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-5.657-5.657C30.01 35.039 27.145 36 24 36c-5.223 0-9.657-3.343-11.303-7.918l-5.657 5.657C9.86 39.023 16.49 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l5.657 5.657C38.216 35.319 41.278 30.638 43.611 20.083z"></path></svg>
+                     <span>Sign in with Google</span>
+                 </button>
+            </div>
+        </div>
+
+        <!-- Main Content (hidden by default) -->
         <div id="content" class="hidden pb-8">
             <div id="main-content-area">
                 <div id="table1-section" class="mb-10"> <div id="table1-cards"></div> <button id="add-row-t1" class="add-row-button">+ Add "New Date" Card</button> </div>
@@ -274,11 +297,12 @@
     </div>
     <!-- Toast Notification -->
     <div id="toast"> <div id="toast-spinner" class="spinner"></div> <span id="toast-message">Syncing...</span> </div>
+    
     <!-- Add Topic Modal -->
     <div id="add-topic-modal" class="modal-backdrop">
         <div class="modal-content">
              <h3 class="text-xl font-semibold mb-6 text-white">Add New Topic</h3>
-             <div class="mb-5">
+             <div class="mb-4">
                  <label for="add-topic-modal-name" class="block text-sm font-medium text-slate-300 mb-1">Topic Name</label>
                  <input type="text" id="add-topic-modal-name" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
              </div>
@@ -286,6 +310,12 @@
             <div class="mb-4">
                 <label for="add-topic-modal-timed-note" class="block text-sm font-medium text-slate-300 mb-1">Timed Note <span class="text-xs text-slate-400">(Visible on card)</span></label>
                 <input type="text" id="add-topic-modal-timed-note" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white" placeholder="e.g., '30 min' or '10:00 AM'">
+            </div>
+            
+            <!-- --- CHANGE: Added Main Note to Add Modal --- -->
+            <div class="mb-4">
+                 <label for="add-topic-modal-note" class="block text-sm font-medium text-slate-300 mb-1">Main Notes <span class="text-xs text-slate-400">(Hidden)</span></label>
+                 <textarea id="add-topic-modal-note" rows="3" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white" placeholder="Add your detailed notes here..."></textarea>
             </div>
 
              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -313,9 +343,26 @@
                          <input type="hidden" id="add-topic-modal-session-value" value="Morning Session">
                      </div>
                  </div>
+                 <!-- --- CHANGE: Replaced Priority buttons with Dropdown --- -->
                  <div>
-                     <label class="block text-sm font-medium text-slate-300 mb-1">Study Type</label>
-                     <div class="custom-dropdown" data-target-input="add-topic-modal-study-value">
+                     <label class="block text-sm font-medium text-slate-300 mb-1">Priority</label>
+                     <div class="custom-dropdown" data-target-input="add-topic-modal-priority-value">
+                         <button type="button" class="custom-dropdown-button"> <span class="selected-value">Low</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
+                         <div class="custom-dropdown-options">
+                            <div class="custom-dropdown-option" data-value="high">High</div> 
+                            <div class="custom-dropdown-option" data-value="medium">Medium</div> 
+                            <div class="custom-dropdown-option selected" data-value="low">Low</div> 
+                        </div>
+                         <input type="hidden" id="add-topic-modal-priority-value" value="low">
+                     </div>
+                 </div>
+             </div>
+
+            <!-- --- CHANGE: Dual Study Type Dropdowns --- -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                 <div>
+                     <label class="block text-sm font-medium text-slate-300 mb-1">Study Type 1</label>
+                     <div class="custom-dropdown" data-target-input="add-topic-modal-study1-value">
                          <button type="button" class="custom-dropdown-button"> <span class="selected-value">MQB</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
                          <div class="custom-dropdown-options">
                              <div class="custom-dropdown-option selected" data-value="mqb">MQB</div> <div class="custom-dropdown-option" data-value="ret">Retina QB</div> 
@@ -323,23 +370,29 @@
                              <div class="custom-dropdown-option" data-value="week">Weekly Exam</div> <div class="custom-dropdown-option" data-value="rev">Revision Class</div> 
                              <div class="custom-dropdown-option" data-value="new">1st Time Reading</div> <div class="custom-dropdown-option" data-value="secret">Secret Files</div>
                          </div>
-                         <input type="hidden" id="add-topic-modal-study-value" value="mqb">
+                         <input type="hidden" id="add-topic-modal-study1-value" value="mqb">
                      </div>
                  </div>
-             </div>
-
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-slate-300 mb-2">Priority</label>
-                <div id="add-topic-priority-selector" class="flex flex-wrap gap-2">
-                    <button type="button" data-priority="high" class="priority-btn group"><span class="priority-indicator priority-high"></span> High</button>
-                    <button type="button" data-priority="medium" class="priority-btn group"><span class="priority-indicator priority-medium"></span> Medium</button>
-                    <button type="button" data-priority="low" class="priority-btn group active"><span class="priority-indicator priority-low"></span> Low</button>
-                </div>
+                 <div>
+                     <label class="block text-sm font-medium text-slate-300 mb-1">Study Type 2 (Opt.)</label>
+                     <div class="custom-dropdown" data-target-input="add-topic-modal-study2-value">
+                         <button type="button" class="custom-dropdown-button"> <span class="selected-value">None</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
+                         <div class="custom-dropdown-options">
+                             <div class="custom-dropdown-option selected" data-value="none">None</div>
+                             <div class="custom-dropdown-option" data-value="mqb">MQB</div> <div class="custom-dropdown-option" data-value="ret">Retina QB</div> 
+                             <div class="custom-dropdown-option" data-value="med">Meditrics</div> <div class="custom-dropdown-option" data-value="camp">Campus Exam</div> 
+                             <div class="custom-dropdown-option" data-value="week">Weekly Exam</div> <div class="custom-dropdown-option" data-value="rev">Revision Class</div> 
+                             <div class="custom-dropdown-option" data-value="new">1st Time Reading</div> <div class="custom-dropdown-option" data-value="secret">Secret Files</div>
+                         </div>
+                         <input type="hidden" id="add-topic-modal-study2-value" value="none">
+                     </div>
+                 </div>
             </div>
 
              <div class="flex justify-end gap-3 mt-8"> <button id="add-topic-modal-cancel" class="modern-button button-secondary">Cancel</button> <button id="add-topic-modal-save" class="modern-button button-primary">Save Topic</button> </div>
         </div>
     </div>
+    
     <!-- Edit Topic Modal -->
     <div id="edit-modal" class="modal-backdrop" style="z-index: 50;">
         <div class="modal-content">
@@ -358,6 +411,19 @@
                  <label for="modal-topic-note" class="block text-sm font-medium text-slate-300 mb-1">Main Notes <span class="text-xs text-slate-400">(Hidden)</span></label>
                  <textarea id="modal-topic-note" rows="4" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white" placeholder="Add your detailed notes here..."></textarea>
              </div>
+             
+             <!-- --- CHANGE: Added Location (Subject/Session) Editor --- -->
+             <div class="mb-4">
+                <label for="modal-topic-location-value" class="block text-sm font-medium text-slate-300 mb-1">Change Location</label>
+                <div class="custom-dropdown" data-target-input="modal-topic-location-value">
+                    <button type="button" class="custom-dropdown-button"> <span class="selected-value">Select...</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
+                    <div class="custom-dropdown-options" id="modal-topic-location-options"> 
+                        <!-- Options will be dynamically populated by JS -->
+                    </div>
+                    <input type="hidden" id="modal-topic-location-value" value="">
+                </div>
+             </div>
+             
              <div class="grid grid-cols-2 gap-4 mb-5">
                  <div>
                      <label class="block text-sm font-medium text-slate-300 mb-1">Hardness</label>
@@ -367,9 +433,26 @@
                          <input type="hidden" id="modal-topic-hardness-value" value="medium">
                      </div>
                  </div>
+                 <!-- --- CHANGE: Replaced Priority buttons with Dropdown --- -->
                  <div>
-                     <label class="block text-sm font-medium text-slate-300 mb-1">Study Type</label>
-                     <div class="custom-dropdown" data-target-input="modal-topic-study-value">
+                     <label class="block text-sm font-medium text-slate-300 mb-1">Priority</label>
+                     <div class="custom-dropdown" data-target-input="modal-topic-priority-value">
+                         <button type="button" class="custom-dropdown-button"> <span class="selected-value">Low</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
+                         <div class="custom-dropdown-options">
+                            <div class="custom-dropdown-option" data-value="high">High</div> 
+                            <div class="custom-dropdown-option" data-value="medium">Medium</div> 
+                            <div class="custom-dropdown-option" data-value="low">Low</div> 
+                        </div>
+                         <input type="hidden" id="modal-topic-priority-value" value="low">
+                     </div>
+                 </div>
+             </div>
+             
+             <!-- --- CHANGE: Dual Study Type Dropdowns --- -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                 <div>
+                     <label class="block text-sm font-medium text-slate-300 mb-1">Study Type 1</label>
+                     <div class="custom-dropdown" data-target-input="modal-topic-study1-value">
                          <button type="button" class="custom-dropdown-button"> <span class="selected-value">MQB</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
                          <div class="custom-dropdown-options">
                              <div class="custom-dropdown-option" data-value="mqb">MQB</div> <div class="custom-dropdown-option" data-value="ret">Retina QB</div> 
@@ -377,21 +460,29 @@
                              <div class="custom-dropdown-option" data-value="week">Weekly Exam</div> <div class="custom-dropdown-option" data-value="rev">Revision Class</div> 
                              <div class="custom-dropdown-option" data-value="new">1st Time Reading</div> <div class="custom-dropdown-option" data-value="secret">Secret Files</div>
                          </div>
-                         <input type="hidden" id="modal-topic-study-value" value="mqb">
+                         <input type="hidden" id="modal-topic-study1-value" value="mqb">
                      </div>
                  </div>
-             </div>
-             <div class="mb-6">
-                 <label class="block text-sm font-medium text-slate-300 mb-2">Priority</label>
-                 <div id="modal-priority-selector" class="flex flex-wrap gap-2">
-                     <button type="button" data-priority="high" class="priority-btn group"><span class="priority-indicator priority-high"></span> High</button>
-                     <button type="button" data-priority="medium" class="priority-btn group"><span class="priority-indicator priority-medium"></span> Medium</button>
-                     <button type="button" data-priority="low" class="priority-btn group"><span class="priority-indicator priority-low"></span> Low</button>
+                 <div>
+                     <label class="block text-sm font-medium text-slate-300 mb-1">Study Type 2 (Opt.)</label>
+                     <div class="custom-dropdown" data-target-input="modal-topic-study2-value">
+                         <button type="button" class="custom-dropdown-button"> <span class="selected-value">None</span> <svg class="arrow w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/></svg> </button>
+                         <div class="custom-dropdown-options">
+                             <div class="custom-dropdown-option" data-value="none">None</div>
+                             <div class="custom-dropdown-option" data-value="mqb">MQB</div> <div class="custom-dropdown-option" data-value="ret">Retina QB</div> 
+                             <div class="custom-dropdown-option" data-value="med">Meditrics</div> <div class="custom-dropdown-option" data-value="camp">Campus Exam</div> 
+                             <div class="custom-dropdown-option" data-value="week">Weekly Exam</div> <div class="custom-dropdown-option" data-value="rev">Revision Class</div> 
+                             <div class="custom-dropdown-option" data-value="new">1st Time Reading</div> <div class="custom-dropdown-option" data-value="secret">Secret Files</div>
+                         </div>
+                         <input type="hidden" id="modal-topic-study2-value" value="none">
+                     </div>
                  </div>
-             </div>
+            </div>
+
              <div class="flex justify-between items-center flex-wrap gap-4 mt-8"> <button id="modal-delete" class="modern-button button-danger">Delete Topic</button> <div class="flex gap-3"> <button id="modal-cancel" class="modern-button button-secondary">Cancel</button> <button id="modal-save" class="modern-button button-success">Save Changes</button> </div> </div>
         </div>
     </div>
+
     <!-- Confirmation Modal -->
     <div id="confirm-modal" class="modal-backdrop">
         <div class="modal-content">
@@ -400,6 +491,7 @@
              <div class="flex justify-end gap-3"> <button id="confirm-cancel" class="modern-button button-secondary">Cancel</button> <button id="confirm-yes" class="modern-button button-danger">Yes, Delete</button> </div>
         </div>
     </div>
+    
     <!-- Calendar Modal -->
     <div id="calendar-modal" class="modal-backdrop" style="z-index: 55;">
         <div class="modal-content">
@@ -412,15 +504,25 @@
 
     <!-- 
     ============================================================================
-    APP JAVASCRIPT
+    APP JAVASCRIPT (v5.0)
     ============================================================================
     -->
     <script type="module">
-        // Firebase Imports
+        // --- CHANGE: Added Google Auth imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // --- CHANGE 1: Added onAuthStateChanged ---
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged, 
+            GoogleAuthProvider, 
+            signInWithPopup 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            onSnapshot, 
+            enableIndexedDbPersistence 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // App State
         let db, auth, dbDocRef, unsubscribeSnapshot; 
@@ -432,6 +534,7 @@
         let calendarState = { month: 9, year: 2025 };
         const toastQueue = []; 
         let isToastShowing = false;
+        let currentUserId = null; // Will store the logged-in user's ID
         
         const appData = { completedTopics: {} };
         let tableData = { table1: {}, table2: {} };
@@ -444,32 +547,54 @@
          };
         
         const progressSteps = [0, 20, 40, 60, 80, 100];
-        
         const today = new Date(); 
         
-        const studyStatusMap = { mqb: "MQB", ret: "RET", med: "MED", camp: "CAMP", week: "WEEK", rev: "REV", new: "NEW", secret: "SECRET" };
-        const studyStatusFullNames = { mqB: "MQB", ret: "Retina QB", med: "Meditrics", camp: "Campus Exam", week: "Weekly Exam", rev: "Revision Class", new: "1st Time Reading", secret: "Secret Files" };
+        // --- CHANGE: Added "none" to maps ---
+        const studyStatusMap = { none: "N/A", mqb: "MQB", ret: "RET", med: "MED", camp: "CAMP", week: "WEEK", rev: "REV", new: "NEW", secret: "SECRET" };
+        const studyStatusFullNames = { none: "None", mqb: "MQB", ret: "Retina QB", med: "Meditrics", camp: "Campus Exam", week: "Weekly Exam", rev: "Revision Class", new: "1st Time Reading", secret: "Secret Files" };
         const hardnessMap = { easy: "E", medium: "M", hard: "H" };
 
         // DOM Elements
-        const loadingEl = document.getElementById('loading'), contentEl = document.getElementById('content'), 
-            modalEl = document.getElementById('edit-modal'), modalTopicName = document.getElementById('modal-topic-name'), 
-            modalTopicNote = document.getElementById('modal-topic-note'), modalTopicTimedNote = document.getElementById('modal-topic-timed-note'),
-            addTopicModalEl = document.getElementById('add-topic-modal'), addTopicModalName = document.getElementById('add-topic-modal-name'), 
-            table1Section = document.getElementById('table1-section'), table2Section = document.getElementById('table2-section'), 
-            table1CardsContainer = document.getElementById('table1-cards'), table2CardsContainer = document.getElementById('table2-cards'), 
-            viewToggleBtnTable1 = document.getElementById('view-toggle-table1'), viewToggleBtnTable2 = document.getElementById('view-toggle-table2'), 
-            addRowBtnTable1 = document.getElementById('add-row-t1'), addRowBtnTable2 = document.getElementById('add-row-t2'), 
-            confirmModalEl = document.getElementById('confirm-modal'), confirmMessageEl = document.getElementById('confirm-message'), 
-            calendarModalEl = document.getElementById('calendar-modal'), calendarDaysEl = document.getElementById('calendar-days'), 
-            calendarMonthYearEl = document.getElementById('calendar-month-year'), calendarNavBtn = document.getElementById('calendar-nav-btn');
+        const loadingEl = document.getElementById('loading'), 
+            loadingSpinner = document.getElementById('loading-spinner'),
+            loadingText = document.getElementById('loading-text'),
+            loginContainer = document.getElementById('login-container'),
+            googleLoginBtn = document.getElementById('google-login-btn'),
+            contentEl = document.getElementById('content'), 
+            modalEl = document.getElementById('edit-modal'), 
+            modalTopicName = document.getElementById('modal-topic-name'), 
+            modalTopicNote = document.getElementById('modal-topic-note'), 
+            modalTopicTimedNote = document.getElementById('modal-topic-timed-note'),
+            addTopicModalEl = document.getElementById('add-topic-modal'), 
+            addTopicModalName = document.getElementById('add-topic-modal-name'),
+            addTopicModalNote = document.getElementById('add-topic-modal-note'), // New
+            table1Section = document.getElementById('table1-section'), 
+            table2Section = document.getElementById('table2-section'), 
+            table1CardsContainer = document.getElementById('table1-cards'), 
+            table2CardsContainer = document.getElementById('table2-cards'), 
+            viewToggleBtnTable1 = document.getElementById('view-toggle-table1'), 
+            viewToggleBtnTable2 = document.getElementById('view-toggle-table2'), 
+            addRowBtnTable1 = document.getElementById('add-row-t1'), 
+            addRowBtnTable2 = document.getElementById('add-row-t2'), 
+            confirmModalEl = document.getElementById('confirm-modal'), 
+            confirmMessageEl = document.getElementById('confirm-message'), 
+            calendarModalEl = document.getElementById('calendar-modal'), 
+            calendarDaysEl = document.getElementById('calendar-days'), 
+            calendarMonthYearEl = document.getElementById('calendar-month-year'), 
+            calendarNavBtn = document.getElementById('calendar-nav-btn');
             
-        const addHardnessInput = document.getElementById('add-topic-modal-hardness-value'), 
+        // Input Elements
+        const addHardnessInput = document.getElementById('add-topic-modal-hardness-value'),
+            addPriorityInput = document.getElementById('add-topic-modal-priority-value'), // New
+            addStudy1Input = document.getElementById('add-topic-modal-study1-value'), // Renamed
+            addStudy2Input = document.getElementById('add-topic-modal-study2-value'), // New
             addSubjectInput = document.getElementById('add-topic-modal-subject-value'), 
             addSessionInput = document.getElementById('add-topic-modal-session-value'), 
-            addStudyInput = document.getElementById('add-topic-modal-study-value'), 
-            editHardnessInput = document.getElementById('modal-topic-hardness-value'), 
-            editStudyInput = document.getElementById('modal-topic-study-value');
+            editHardnessInput = document.getElementById('modal-topic-hardness-value'),
+            editPriorityInput = document.getElementById('modal-topic-priority-value'), // New
+            editStudy1Input = document.getElementById('modal-topic-study1-value'), // Renamed
+            editStudy2Input = document.getElementById('modal-topic-study2-value'), // New
+            editLocationInput = document.getElementById('modal-topic-location-value'); // New
         
         // Initialization
         document.addEventListener('DOMContentLoaded', () => {
@@ -478,7 +603,7 @@
             if (savedView === 'table2') currentView = 'table2';
             updateViewToggleUI();
             populateAddTopicDropdowns();
-            initializeAppFirebase();
+            initializeAppFirebase(); // This is now the main entry point
             startCountdown();
             setupGlobalEventListeners();
            });
@@ -496,6 +621,7 @@
                 subjectOptionsContainer.appendChild(option);
                });
             if (columnHeaders.table1.length > 0) addSubjectInput.value = columnHeaders.table1[0];
+            
             const sessionOptionsContainer = document.getElementById('add-topic-modal-session-options');
             sessionOptionsContainer.innerHTML = '';
             columnHeaders.table2.forEach((session, index) => {
@@ -507,16 +633,16 @@
                 sessionOptionsContainer.appendChild(option);
                });
             if (columnHeaders.table2.length > 0) addSessionInput.value = columnHeaders.table2[0];
+            
             initDropdownDisplay(addTopicModalEl);
            }
 
-        // --- CHANGE 2: Updated Firebase Init function ---
+        // --- CHANGE: New Firebase Auth Flow ---
         async function initializeAppFirebase() {
             try {
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
                 let firebaseConfig;
                 if (typeof __firebase_config !== 'undefined') {
-                    try { firebaseConfig = JSON.parse(__firebase_config); } catch (e) { firebaseConfig = null; console.warn("Could not parse __firebase_config"); }
+                    try { firebaseConfig = JSON.parse(__firebase_config); } catch (e) { firebaseConfig = null; }
                    }
                 if (!firebaseConfig || !firebaseConfig.apiKey) {
                     firebaseConfig = {
@@ -529,106 +655,74 @@
                         measurementId: "G-BNC489N193"
                     };
                    }
-                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                try { 
-                    // Note: Offline persistence also helps maintain the auth state
-                    await enableIndexedDbPersistence(db); 
-                } catch (err) { 
-                    console.warn("Offline persistence failed:", err.code); 
-                }
-                
-                // This function now sets up the persistent listener
-                authenticateUser(initialAuthToken, appId);
+                try { await enableIndexedDbPersistence(db); } catch (err) { console.warn("Offline persistence failed:", err.code); }
+
+                // Setup Google Login Button
+                googleLoginBtn.addEventListener('click', async () => {
+                    const provider = new GoogleAuthProvider();
+                    try {
+                        loadingText.textContent = "Redirecting to Google...";
+                        loadingSpinner.style.display = 'block';
+                        loginContainer.classList.add('hidden');
+                        await signInWithPopup(auth, provider);
+                        // onAuthStateChanged will handle the rest
+                    } catch (error) {
+                        console.error("Google Sign-in Error:", error);
+                        loadingText.textContent = "Sign in failed. Please try again.";
+                        loadingSpinner.style.display = 'none';
+                        loginContainer.classList.remove('hidden');
+                        showToastQueued('error', 'Sign in failed');
+                    }
+                });
+
+                // Auth state listener is the main entry point
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        // User is signed in
+                        currentUserId = user.uid;
+                        contentEl.classList.add('hidden'); // Hide content until data is loaded
+                        loadingSpinner.style.display = 'block';
+                        loadingText.textContent = 'Loading Dashboard...';
+                        loginContainer.classList.add('hidden');
+                        loadingEl.classList.remove('hidden');
+                        
+                        loadDataFromFirestore(currentUserId);
+                    } else {
+                        // User is signed out
+                        currentUserId = null;
+                        if (unsubscribeSnapshot) unsubscribeSnapshot(); // Stop listening to old data
+                        contentEl.classList.add('hidden');
+                        loadingSpinner.style.display = 'none';
+                        loadingText.textContent = '';
+                        loginContainer.classList.remove('hidden');
+                        loadingEl.classList.remove('hidden');
+                    }
+                });
 
                } catch (error) { 
                    console.error("Firebase Init Error:", error); 
-                   loadingEl.innerHTML = `<p class="text-red-400">Error: Init failed.</p>`; 
-                }
-           }
-
-        // --- CHANGE 3: Rewritten authenticateUser function for Persistent Session ---
-        async function authenticateUser(token, appId) {
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    // Case A: User is logged in.
-                    // This could be from a previous session (persistence)
-                    // or from the signIn...() calls below.
-                    
-                    // Prevent re-loading if listener fires multiple times
-                    if (dbDocRef) return; 
-
-                    const userId = user.uid;
-                    console.log("Persistent user session found:", userId);
-                    
-                    const docPath = `artifacts/${appId}/users/${userId}/studyProgress/data_v4`; 
-                    dbDocRef = doc(db, docPath);
-                    loadDataFromFirestore(); // Load data for THIS user
-
-                } else {
-                    // Case B: No user. We must sign them in.
-                    try {
-                        if (token) {
-                            console.log("No session. Signing in with custom token...");
-                            await signInWithCustomToken(auth, token);
-                            // Successful sign-in will re-trigger this listener.
-                            // The 'if (user)' block will then execute.
-                        } else {
-                            console.log("No session. Signing in anonymously...");
-                            await signInAnonymously(auth);
-                            // Successful sign-in will re-trigger this listener.
-                            // The 'if (user)' block will then execute.
-                        }
-                    } catch (error) {
-                        console.error("Auth Error during sign-in:", error);
-                        loadingEl.innerHTML = `<p class="text-red-400">Error: Auth failed.</p>`;
-                    }
-                }
-            });
-           }
-
-        // Data Validation & Migration
-        function isOldDataStructure(data) {
-             if (!data || (!data.table1 && !data.table2)) return false; 
-             for (const date in data.table1) {
-                 for (const col in data.table1[date]) {
-                     if (Array.isArray(data.table1[date][col]) && data.table1[date][col].length > 0) {
-                         return typeof data.table1[date][col][0] === 'string' && !data.table1[date][col][0].startsWith('topic_');
-                        }
-                    }
-                }
-             for (const date in data.table2) {
-                 for (const col in data.table2[date]) {
-                     if (Array.isArray(data.table2[date][col]) && data.table2[date][col].length > 0) {
-                         return typeof data.table2[date][col][0] === 'string' && !data.table2[date][col][0].startsWith('topic_');
-                        }
-                    }
-                }
-             return false; 
-           }
-
-        function runExamMigration() {
-            let migrated = false;
-            if (tableData.table2) {
-                Object.keys(tableData.table2).forEach(date => {
-                    if (tableData.table2[date] && tableData.table2[date]['Secret Files'] && !tableData.table2[date]['Exam']) {
-                        tableData.table2[date]['Exam'] = tableData.table2[date]['Secret Files'];
-                        delete tableData.table2[date]['Secret Files'];
-                        migrated = true;
-                       }
-                   });
-               }
-            if (migrated) {
-                console.log("Migrated 'Secret Files' to 'Exam'.");
-                pendingChanges = true;
+                   loadingSpinner.style.display = 'none';
+                   loadingText.innerHTML = `<p class="text-red-400">Error: App initialization failed.</p>`; 
                }
            }
+        
+        // --- CHANGE: loadData now requires a userId ---
+        function loadDataFromFirestore(userId) {
+            if (!userId) {
+                loadingSpinner.style.display = 'none';
+                loadingText.innerHTML = `<p class="text-red-400">Error: No user ID.</p>`;
+                return;
+            }
 
-        function loadDataFromFirestore() {
-            if (!dbDocRef) return;
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const docPath = `artifacts/${appId}/users/${userId}/studyProgress/data_v4`; 
+            dbDocRef = doc(db, docPath);
+            
             showToastQueued('syncing');
             if (unsubscribeSnapshot) unsubscribeSnapshot();
             
@@ -679,9 +773,47 @@
                 showToastQueued(doc.metadata.fromCache ? "cached" : "synced");
                }, (error) => {
                 console.error("Firestore snapshot error:", error);
-                loadingEl.innerHTML = `<p class="text-red-400">Error: Load failed.</p>`;
+                loadingSpinner.style.display = 'none';
+                loadingText.innerHTML = `<p class="text-red-400">Error: Load failed.</p>`;
                 showToastQueued('error');
                });
+           }
+
+        // Data Validation & Migration
+        function isOldDataStructure(data) {
+             if (!data || (!data.table1 && !data.table2)) return false; 
+             for (const date in data.table1) {
+                 for (const col in data.table1[date]) {
+                     if (Array.isArray(data.table1[date][col]) && data.table1[date][col].length > 0) {
+                         return typeof data.table1[date][col][0] === 'string' && !data.table1[date][col][0].startsWith('topic_');
+                        }
+                    }
+                }
+             for (const date in data.table2) {
+                 for (const col in data.table2[date]) {
+                     if (Array.isArray(data.table2[date][col]) && data.table2[date][col].length > 0) {
+                         return typeof data.table2[date][col][0] === 'string' && !data.table2[date][col][0].startsWith('topic_');
+                        }
+                    }
+                }
+             return false; 
+           }
+
+        function runExamMigration() {
+            let migrated = false;
+            if (tableData.table2) {
+                Object.keys(tableData.table2).forEach(date => {
+                    if (tableData.table2[date] && tableData.table2[date]['Secret Files'] && !tableData.table2[date]['Exam']) {
+                        tableData.table2[date]['Exam'] = tableData.table2[date]['Secret Files'];
+                        delete tableData.table2[date]['Secret Files'];
+                        migrated = true;
+                       }
+                   });
+               }
+            if (migrated) {
+                console.log("Migrated 'Secret Files' to 'Exam'.");
+                pendingChanges = true;
+               }
            }
 
         // Data Rendering
@@ -689,9 +821,8 @@
             renderAllCards();
             updateAllProgressUI();
             updateViewToggleUI();
-            loadingEl.classList.remove('show'); 
-            loadingEl.classList.add('hidden');
-            contentEl.classList.remove('hidden');
+            loadingEl.classList.add('hidden'); // Hide loading screen
+            contentEl.classList.remove('hidden'); // Show main content
             isFirstLoad = false;
            }
 
@@ -709,8 +840,7 @@
                 const dates = Object.keys(data);
                 const sortedDates = dates.sort((a, b) => {
                     try {
-                        const dateAStr = a;
-                        const dateBStr = b;
+                        const dateAStr = a; const dateBStr = b;
                         if (dateAStr === 'New Date') return 1;
                         if (dateBStr === 'New Date') return -1;
                         const dateA = new Date(dateAStr.split('/').reverse().join('-'));
@@ -786,6 +916,7 @@
             return card;
            }
 
+        // --- CHANGE: Updated createTopicElement for Dual Study Types & Priority Fallback ---
         function createTopicElement(topicId) {
             const topicData = appData.completedTopics[topicId];
             if (!topicData) {
@@ -797,10 +928,13 @@
             const note = topicData.note || '';
             const timedNote = topicData.timedNote || '';
             const displayName = topicData.name || 'Unnamed Topic';
-            const priority = topicData.priority || 'low';
-            const studyStatus = topicData.studyStatus || 'new';
+            const priority = topicData.priority || 'low'; // Priority now read from data
             const hardness = topicData.hardness || 'medium'; 
             
+            // --- Data Migration Logic for Dual Study Types ---
+            const studyStatus1 = topicData.studyStatus1 || topicData.studyStatus || 'new'; // Fallback to old 'studyStatus'
+            const studyStatus2 = topicData.studyStatus2; // Will be undefined or 'none' for old data
+
             const topicEl = document.createElement('div');
             topicEl.className = 'topic-item';
             topicEl.draggable = true;
@@ -833,12 +967,24 @@
             hardnessTag.title = `Hardness: ${hardness}`; 
             nameEl.appendChild(hardnessTag); 
 
-            const statusTag = document.createElement('span');
-            statusTag.className = `study-status study-${studyStatus}`;
-            statusTag.textContent = studyStatusMap[studyStatus] || 'NEW';
-            statusTag.title = studyStatusFullNames[studyStatus] || 'Study Type';
-            nameEl.appendChild(statusTag);
+            // Render Study Type 1
+            if(studyStatus1 && studyStatus1 !== 'none') {
+                const statusTag1 = document.createElement('span');
+                statusTag1.className = `study-status study-${studyStatus1}`;
+                statusTag1.textContent = studyStatusMap[studyStatus1] || '...';
+                statusTag1.title = studyStatusFullNames[studyStatus1] || 'Study Type 1';
+                nameEl.appendChild(statusTag1);
+            }
             
+            // Render Study Type 2 (if it exists and is not 'none')
+            if(studyStatus2 && studyStatus2 !== 'none') {
+                const statusTag2 = document.createElement('span');
+                statusTag2.className = `study-status study-${studyStatus2}`;
+                statusTag2.textContent = studyStatusMap[studyStatus2] || '...';
+                statusTag2.title = studyStatusFullNames[studyStatus2] || 'Study Type 2';
+                nameEl.appendChild(statusTag2);
+            }
+
             nameContainer.appendChild(nameEl); 
             
             if (timedNote) {
@@ -896,8 +1042,7 @@
             const cards = Array.from(container.children);
             cards.sort((a, b) => {
                 try {
-                    const dateAStr = a.dataset.date;
-                    const dateBStr = b.dataset.date;
+                    const dateAStr = a.dataset.date; const dateBStr = b.dataset.date;
                     if (dateAStr === 'New Date') return 1; 
                     if (dateBStr === 'New Date') return -1;
                     const dateA = new Date(dateAStr.split('/').reverse().join('-'));
@@ -954,16 +1099,6 @@
                 if (target.id === 'modal-save') { handleModalSave(); return; }
                 if (target.id === 'modal-cancel' || (closestTarget('#edit-modal') && target === modalEl)) { closeModal(modalEl); return; }
                 if (target.id === 'modal-delete') { handleModalDelete(); return; }
-                
-                if (closestTarget('.priority-btn')) {
-                    const btn = closestTarget('.priority-btn');
-                    const selector = btn.closest('#modal-priority-selector, #add-topic-priority-selector');
-                    if (selector) {
-                        selector.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                       }
-                    return;
-                   }
 
                 if (target.id === 'add-topic-modal-save') { handleModalAddSave(); return; }
                 if (target.id === 'add-topic-modal-cancel' || (closestTarget('#add-topic-modal') && target === addTopicModalEl)) { closeModal(addTopicModalEl); return; }
@@ -1021,7 +1156,6 @@
                    }
                }, true);
             
-            // Drag and Drop
             let draggedElement = null;
             container.addEventListener('dragstart', (e) => {
                 if (e.target.classList.contains('topic-item')) {
@@ -1051,7 +1185,6 @@
                 if (section && draggedElement) handleDragDrop(draggedElement, section);
                });
             
-            // Keyboard Shortcuts
             document.addEventListener('keydown', (e) => {
                  const target = e.target;
                  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') {
@@ -1117,10 +1250,17 @@
             closeAllDropdowns();
            }
         function setDropdownValue(dropdownElement, newValue) {
+            if (!dropdownElement) return;
             const hiddenInput = document.getElementById(dropdownElement.dataset.targetInput);
             const options = dropdownElement.querySelectorAll('.custom-dropdown-option');
             const buttonText = dropdownElement.querySelector('.selected-value');
             let found = false;
+            
+            // Handle null or undefined newValue
+            if (newValue === null || typeof newValue === 'undefined') {
+                newValue = 'none'; // Default to 'none' if value is missing
+            }
+
             options.forEach(option => {
                 option.classList.remove('selected');
                 if (option.dataset.value === newValue) {
@@ -1131,9 +1271,11 @@
                    }
                });
             if (!found && options.length > 0) {
-                options[0].classList.add('selected');
-                buttonText.textContent = options[0].textContent;
-                hiddenInput.value = options[0].dataset.value;
+                // Find 'none' or the first option as fallback
+                let defaultOption = Array.from(options).find(opt => opt.dataset.value === 'none') || options[0];
+                defaultOption.classList.add('selected');
+                buttonText.textContent = defaultOption.textContent;
+                hiddenInput.value = defaultOption.dataset.value;
                } else if (!found) {
                 buttonText.textContent = 'Select...';
                 hiddenInput.value = '';
@@ -1174,7 +1316,7 @@
                 b.innerHTML = `<span>${newProgress}%</span>`;
                });
             if (!appData.completedTopics[topicId]) {
-                 appData.completedTopics[topicId] = { progress: newProgress, note: '', timedNote: '', name: 'Unknown', priority: 'low', hardness: 'medium', studyStatus: 'new' };
+                 appData.completedTopics[topicId] = { progress: newProgress, note: '', timedNote: '', name: 'Unknown', priority: 'low', hardness: 'medium', studyStatus1: 'new', studyStatus2: 'none' };
                } else {
                  appData.completedTopics[topicId].progress = newProgress;
                }
@@ -1182,11 +1324,26 @@
             updateAllProgressUI();
            }
 
+        // --- CHANGE: handleEditClick now saves location & populates new dropdowns ---
         function handleEditClick(iconEl) {
             closeAllDropdowns();
             closeModal(addTopicModalEl);
             const topicId = iconEl.dataset.topicId;
             if (!topicId) { console.error("No topic ID"); return; }
+            
+            // --- New: Find and store current location ---
+            const card = iconEl.closest('.date-card');
+            const section = iconEl.closest('.column-section');
+            if (!card || !section) { console.error("Could not find topic location"); return; }
+            
+            const tableId = card.dataset.tableId;
+            const date = card.dataset.date;
+            const currentColName = section.dataset.colName;
+
+            modalEl.dataset.currentTopicId = topicId;
+            modalEl.dataset.currentTableId = tableId;
+            modalEl.dataset.currentDate = date;
+            modalEl.dataset.currentColName = currentColName;
             
             const currentData = appData.completedTopics[topicId] || {};
             const currentName = currentData.name || 'Unnamed Topic';
@@ -1194,24 +1351,42 @@
             const currentTimedNote = currentData.timedNote || '';
             const currentPriority = currentData.priority || 'low';
             const currentHardness = currentData.hardness || 'medium';
-            const currentStudy = currentData.studyStatus || 'mqb'; 
+            // Data migration fallback
+            const currentStudy1 = currentData.studyStatus1 || currentData.studyStatus || 'mqb';
+            const currentStudy2 = currentData.studyStatus2 || 'none';
             
-            modalEl.dataset.currentTopicId = topicId;
             modalTopicName.value = currentName;
             modalTopicNote.value = currentNote;
             modalTopicTimedNote.value = currentTimedNote; 
             
+            // Set new dropdown values
             setDropdownValue(editHardnessInput.closest('.custom-dropdown'), currentHardness);
-            setDropdownValue(editStudyInput.closest('.custom-dropdown'), currentStudy);
-            
-            document.querySelectorAll('#modal-priority-selector .priority-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.priority === currentPriority);
-               });
+            setDropdownValue(editPriorityInput.closest('.custom-dropdown'), currentPriority);
+            setDropdownValue(editStudy1Input.closest('.custom-dropdown'), currentStudy1);
+            setDropdownValue(editStudy2Input.closest('.custom-dropdown'), currentStudy2);
+
+            // --- New: Populate location editor ---
+            const locationOptionsContainer = document.getElementById('modal-topic-location-options');
+            locationOptionsContainer.innerHTML = '';
+            const headers = columnHeaders[tableId];
+            headers.forEach(header => {
+                const option = document.createElement('div');
+                option.className = 'custom-dropdown-option';
+                option.dataset.value = header;
+                option.textContent = header;
+                if(header === currentColName) {
+                    option.classList.add('selected');
+                }
+                locationOptionsContainer.appendChild(option);
+            });
+            // Set the dropdown display to the current location
+            setDropdownValue(editLocationInput.closest('.custom-dropdown'), currentColName);
             
             openModal(modalEl);
             modalTopicName.focus();
            }
 
+        // --- CHANGE: handleAddTopicClick resets new fields ---
         function handleAddTopicClick(button) {
             closeAllDropdowns();
             closeModal(modalEl);
@@ -1238,27 +1413,30 @@
                 dailyFields.style.display = 'block';
                }
             
+            // Reset all fields
             addTopicModalName.value = '';
             document.getElementById('add-topic-modal-timed-note').value = '';
+            addTopicModalNote.value = ''; // Reset main note
             setDropdownValue(addHardnessInput.closest('.custom-dropdown'), 'medium');
-            setDropdownValue(addStudyInput.closest('.custom-dropdown'), 'mqb');
-            document.querySelectorAll('#add-topic-priority-selector .priority-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.priority === 'low');
-            });
+            setDropdownValue(addPriorityInput.closest('.custom-dropdown'), 'low'); // Reset priority
+            setDropdownValue(addStudy1Input.closest('.custom-dropdown'), 'mqb'); // Reset study 1
+            setDropdownValue(addStudy2Input.closest('.custom-dropdown'), 'none'); // Reset study 2
 
             initDropdownDisplay(addTopicModalEl); 
             openModal(addTopicModalEl);
             addTopicModalName.focus();
            }
 
+        // --- CHANGE: handleModalAddSave saves new fields ---
         function handleModalAddSave() {
             const tableId = addTopicModalEl.dataset.tableId, date = addTopicModalEl.dataset.date;
             const newTopicName = addTopicModalName.value.trim();
             const hardness = addHardnessInput.value;
-            const studyStatus = addStudyInput.value;
+            const studyStatus1 = addStudy1Input.value;
+            const studyStatus2 = addStudy2Input.value;
+            const priority = addPriorityInput.value;
             const newTimedNote = document.getElementById('add-topic-modal-timed-note').value.trim();
-            const selectedPriorityBtn = document.querySelector('#add-topic-priority-selector .priority-btn.active');
-            const newPriority = selectedPriorityBtn ? selectedPriorityBtn.dataset.priority : 'low';
+            const newNote = addTopicModalNote.value.trim(); // Read main note
 
             let selectedColName = (tableId === 'table1') ? addSubjectInput.value : addSessionInput.value;
             if (!newTopicName) { showToastQueued('error', 'Name empty.'); return; }
@@ -1286,14 +1464,16 @@
             
             const topicId = createTopicId();
             
+            // Save all new fields to appData
             appData.completedTopics[topicId] = {
                 progress: 0,
-                note: '',
+                note: newNote,
                 timedNote: newTimedNote,
                 name: newTopicName,
-                priority: newPriority, 
+                priority: priority, 
                 hardness: hardness,
-                studyStatus: studyStatus
+                studyStatus1: studyStatus1,
+                studyStatus2: studyStatus2
                };
             
             if (!tableData[tableId][date]) tableData[tableId][date] = {};
@@ -1310,19 +1490,62 @@
             closeModal(addTopicModalEl);
            }
 
+        // --- CHANGE: handleModalSave saves new fields AND handles Move Logic ---
         function handleModalSave() {
             const topicId = modalEl.dataset.currentTopicId;
             if (!topicId) return;
+            
+            // Get all data from modal
             const newName = modalTopicName.value.trim();
             const newNote = modalTopicNote.value.trim();
             const newTimedNote = modalTopicTimedNote.value.trim();
             if (newName === '') { showToastQueued('error', 'Name empty.'); return; }
             
-            const selectedPriorityBtn = document.querySelector('#modal-priority-selector .priority-btn.active');
-            const newPriority = selectedPriorityBtn ? selectedPriorityBtn.dataset.priority : 'low';
+            const newPriority = editPriorityInput.value;
             const newHardness = editHardnessInput.value;
-            const newStudyStatus = editStudyInput.value;
-            
+            const newStudy1 = editStudy1Input.value;
+            const newStudy2 = editStudy2Input.value;
+            const newColName = editLocationInput.value;
+
+            // Get old location data
+            const oldTableId = modalEl.dataset.currentTableId;
+            const oldDate = modalEl.dataset.currentDate;
+            const oldColName = modalEl.dataset.currentColName;
+
+            // --- 1. Handle Topic Move (if location changed) ---
+            if (newColName && newColName !== oldColName) {
+                // Check for duplicates in the *new* location
+                const targetTopicIds = tableData[oldTableId]?.[oldDate]?.[newColName] || [];
+                const isDuplicate = targetTopicIds.some(id => appData.completedTopics[id]?.name === newName && id !== topicId);
+                
+                if (isDuplicate) {
+                    showToastQueued('error', `"${newName}" already exists in ${newColName}.`);
+                    return; // Stop save
+                }
+
+                // Move logic: Update tableData
+                if (tableData[oldTableId]?.[oldDate]?.[oldColName]) {
+                    const topics = tableData[oldTableId][oldDate][oldColName];
+                    const index = topics.indexOf(topicId);
+                    if (index > -1) { topics.splice(index, 1); }
+                }
+                if (!tableData[oldTableId][oldDate][newColName]) {
+                    tableData[oldTableId][oldDate][newColName] = [];
+                }
+                tableData[oldTableId][oldDate][newColName].push(topicId);
+
+                // Move logic: Update DOM
+                const topicEl = document.querySelector(`.topic-item[data-topic-id="${topicId}"]`);
+                const newSectionEl = document.querySelector(`.date-card[data-date="${oldDate}"][data-table-id="${oldTableId}"] .column-section[data-col-name="${newColName}"]`);
+                if (topicEl && newSectionEl) {
+                    newSectionEl.appendChild(topicEl);
+                }
+                
+                // Update dataset on modal (in case user saves again without closing)
+                modalEl.dataset.currentColName = newColName;
+            }
+
+            // --- 2. Update Topic Data in appData ---
             const currentData = appData.completedTopics[topicId] || { progress: 0 };
             
             appData.completedTopics[topicId] = {
@@ -1332,9 +1555,16 @@
                 timedNote: newTimedNote,
                 priority: newPriority,
                 hardness: newHardness,
-                studyStatus: newStudyStatus
+                studyStatus1: newStudy1,
+                studyStatus2: newStudy2
                };
             
+            // Data Migration: Delete old single studyStatus key if it exists
+            if (appData.completedTopics[topicId].hasOwnProperty('studyStatus')) {
+                delete appData.completedTopics[topicId].studyStatus;
+            }
+
+            // --- 3. Update all DOM elements for this topicId (in case of duplicates) ---
             document.querySelectorAll(`.topic-item[data-topic-id="${topicId}"]`).forEach(itemElement => {
                 const nameContainer = itemElement.querySelector('.topic-name-container');
                 if (nameContainer) {
@@ -1343,18 +1573,32 @@
                         const nameDisplay = nameEl.querySelector('.topic-name-text');
                         if (nameDisplay) nameDisplay.textContent = newName + ' ';
                         
-                        const statusTags = nameEl.querySelectorAll('.study-status');
+                        // Clear old status tags
+                        nameEl.querySelectorAll('.study-status').forEach(tag => tag.remove());
                         
-                        if (statusTags[0]) {
-                            statusTags[0].className = `study-status study-${newHardness}`;
-                            statusTags[0].textContent = hardnessMap[newHardness] || 'M';
-                            statusTags[0].title = `Hardness: ${newHardness}`;
+                        // Add Hardness Tag
+                        const hardnessTag = document.createElement('span'); 
+                        hardnessTag.className = `study-status study-${newHardness}`; 
+                        hardnessTag.textContent = hardnessMap[newHardness] || 'M'; 
+                        hardnessTag.title = `Hardness: ${newHardness}`; 
+                        nameEl.appendChild(hardnessTag); 
+
+                        // Add Study Type 1 Tag
+                        if(newStudy1 && newStudy1 !== 'none') {
+                            const statusTag1 = document.createElement('span');
+                            statusTag1.className = `study-status study-${newStudy1}`;
+                            statusTag1.textContent = studyStatusMap[newStudy1] || '...';
+                            statusTag1.title = studyStatusFullNames[newStudy1] || 'Study Type 1';
+                            nameEl.appendChild(statusTag1);
                         }
                         
-                        if (statusTags[1]) {
-                            statusTags[1].className = `study-status study-${newStudyStatus}`;
-                            statusTags[1].textContent = studyStatusMap[newStudyStatus] || 'NEW';
-                            statusTags[1].title = studyStatusFullNames[newStudyStatus] || 'Study Type';
+                        // Add Study Type 2 Tag
+                        if(newStudy2 && newStudy2 !== 'none') {
+                            const statusTag2 = document.createElement('span');
+                            statusTag2.className = `study-status study-${newStudy2}`;
+                            statusTag2.textContent = studyStatusMap[newStudy2] || '...';
+                            statusTag2.title = studyStatusFullNames[newStudy2] || 'Study Type 2';
+                            nameEl.appendChild(statusTag2);
                         }
                        }
                     
@@ -1384,10 +1628,13 @@
                    }
                });
             
+            // --- 4. Save, Update UI, Close ---
             saveDataToFirestore();
+            updateAllProgressUI(); // Update progress for all cards involved
             closeModal(modalEl);
            }
 
+        // handleModalDelete (Robust version)
         function handleModalDelete() {
             const topicId = modalEl.dataset.currentTopicId;
             if (!topicId) return;
@@ -1590,9 +1837,7 @@
             if (tableData[oldTableId]?.[oldDate]?.[oldColName]) {
                 const topics = tableData[oldTableId][oldDate][oldColName];
                 const index = topics.indexOf(topicId);
-                if (index > -1) {
-                    topics.splice(index, 1);
-                   }
+                if (index > -1) { topics.splice(index, 1); }
                }
             
             if (!tableData[newTableId]) tableData[newTableId] = {};
@@ -1803,8 +2048,8 @@
         // Data Save & Toast
         function saveDataToFirestore() {
             if (!dbDocRef) {
-                console.warn("dbDocRef not ready. Save delayed.");
-                return; // Don't save if auth isn't ready
+                console.warn("Save attempt failed: dbDocRef is not set. User might be logged out.");
+                return;
             }
             pendingChanges = true;
             if (saveTimeout) clearTimeout(saveTimeout);
@@ -1845,16 +2090,15 @@
             clearTimeout(toastTimeout);
             let toastClass = '';
             
-            // Default spinner color (for white text)
+            // Default spinner color (for white/green)
             spinner.style.borderColor = 'rgba(255,255,255,0.3)';
             spinner.style.borderTopColor = 'white';
-
+            
             switch (type) {
                 case 'syncing': 
                     toastClass = 'bg-white text-gray-900 border-gray-300'; 
                     msg.textContent = customMessage || 'Syncing...'; 
                     spinner.style.display = 'block';
-                    // Make spinner dark for white background
                     spinner.style.borderColor = 'rgba(0,0,0,0.2)';
                     spinner.style.borderTopColor = '#333';
                     break;
@@ -1922,4 +2166,5 @@
            };
     </script>
 </body>
-                                                                                                                                                                                                                                                                                                         </html>
+</html>
+
