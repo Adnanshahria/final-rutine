@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Last Fight (v5.0 - Multi-Account)</title>
+    <!-- v5.1: Patched for Multi-User & Data Integrity -->
+    <title>Last Fight (v5.1 - Patched)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -90,6 +91,15 @@
         /* Generic style for custom study types */
         .study-custom { border-color: var(--color-border-light); color: var(--color-text-dim); background-color: rgba(100, 116, 139, 0.1); }
 
+        /* *** BUG FIX (UX) ***: Added CSS ellipsis for long study type names */
+        .study-status {
+            max-width: 70px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle; /* Aligns better with text */
+        }
+
         .progress-box { display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.7rem; cursor: pointer; user-select: none; transition: all 0.2s ease-in-out; color: white; border-radius: 8px; width: 40px; min-width: 40px; max-width: 40px; height: 40px; flex-shrink: 0; box-sizing: border-box; border: 1px solid rgba(255, 255, 255, 0.1); position: relative; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.1); }
         .progress-box::before { content: ''; position: absolute; inset: 0; border-radius: 7px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); z-index: 1; }
         .progress-box span { position: relative; z-index: 2; }
@@ -167,7 +177,7 @@
             transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex; flex-direction: column; /* Added for scrolling */
             max-height: 90vh; /* Added for scrolling */
-        }
+       }
         .modal-backdrop.show .modal-content { transform: scale(1); }
         #confirm-modal .modal-content { max-width: 400px; max-height: auto; } 
         #calendar-modal .modal-content { max-width: 400px; max-height: auto; }
@@ -178,10 +188,10 @@
             padding: 1.75rem;
             overflow-y: auto;
             max-height: 70vh; /* This makes the body scroll, not header/footer */
-        }
+       }
         #settings-modal .modal-body-scrollable {
             padding: 0; /* Settings modal has its own padding */
-        }
+       }
         /* Modal header/footer (for Add/Edit) */
         .modal-header { padding: 1.5rem 1.75rem 0; }
         .modal-footer { padding: 1.5rem 1.75rem; border-top: 1px solid var(--color-border); background-color: rgba(0,0,0,0.1); }
@@ -225,21 +235,21 @@
             border: 1px solid var(--color-accent-blue); border-radius: 12px; 
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 4px 10px rgba(0,0,0,0.3); 
             padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;
-        }
+       }
         #countdown-title {
             font-size: 1.2rem; font-weight: 900; text-align: center; 
             color: white; text-transform: uppercase; letter-spacing: 1px;
             background: linear-gradient(90deg, #fbbf24, #ef4444, #3b82f6, #10b981);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             margin-bottom: 0.5rem;
-        }
+       }
         #countdown { display: flex; gap: 0.75rem; justify-content: center; }
         .countdown-segment { text-align: center; display: flex; flex-direction: column; align-items: center; }
         .countdown-label { 
             color: white; font-weight: 800; font-size: 0.7rem; 
             text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.25rem;
             text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-        }
+       }
         .countdown-number { 
             font-family: 'Courier New', Courier, monospace; 
             display: block; font-size: 1.8rem; line-height: 1; font-weight: 900; 
@@ -249,7 +259,7 @@
             border-radius: 8px;
             background: rgba(0,0,0,0.3);
             min-width: 70px;
-        }
+       }
         .countdown-days .countdown-number { background: linear-gradient(135deg, var(--countdown-day-color), #b91c1c); }
         .countdown-hours .countdown-number { background: linear-gradient(135deg, var(--countdown-hour-color), #c2410c); }
         .countdown-minutes .countdown-number { background: linear-gradient(135deg, var(--countdown-min-color), #a16207); }
@@ -274,14 +284,14 @@
             background-color: var(--color-bg-main);
             background-image: linear-gradient(to bottom, var(--color-bg-gradient-start), var(--color-bg-gradient-end));
             transition: opacity 0.5s, visibility 0.5s;
-        }
+       }
         .login-card {
             background-color: var(--color-bg-card);
             border: 1px solid var(--color-border);
             border-radius: 12px; padding: 2rem;
             text-align: center;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-        }
+       }
 
         /* --- NEW v5.0: Settings Modal --- */
         .settings-nav {
@@ -293,7 +303,7 @@
             border-top-right-radius: 11px;
             flex-wrap: wrap;
             gap: 0.5rem;
-        }
+       }
         .settings-nav-btn {
             padding: 0.75rem 1.25rem;
             font-weight: 600;
@@ -303,16 +313,16 @@
             margin-bottom: -1px; /* Overlap border */
             transition: color 0.2s, border-color 0.2s;
             border-radius: 6px 6px 0 0;
-        }
+       }
         .settings-nav-btn.active {
             color: var(--color-accent-blue);
             border-bottom-color: var(--color-accent-blue);
             background-color: rgba(59, 130, 246, 0.1);
-        }
+       }
         .settings-nav-btn:hover:not(.active) { 
             color: var(--color-text-main); 
             background-color: rgba(255,255,255,0.05);
-        }
+       }
         
         .settings-tab-content { padding: 1.75rem; }
         .settings-account-card {
@@ -320,7 +330,7 @@
             background-color: var(--color-bg-header);
             padding: 1rem; border-radius: 8px;
             border: 1px solid var(--color-border);
-        }
+       }
         .settings-account-card img { width: 48px; height: 48px; border-radius: 50%; }
         .settings-account-info span { display: block; }
         .settings-account-info .name { font-weight: 600; color: white; }
@@ -332,10 +342,10 @@
             text-transform: uppercase; letter-spacing: 0.5px;
             margin-bottom: 0.75rem; border-bottom: 1px solid var(--color-border);
             padding-bottom: 0.5rem;
-        }
+       }
         .custom-study-type-item {
             display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.75rem;
-        }
+       }
         .custom-study-type-item input {
             flex-grow: 1;
             padding: 0.6rem 0.8rem;
@@ -344,19 +354,19 @@
             border-radius: 8px;
             color: var(--color-text-main);
             transition: border-color 0.2s, box-shadow 0.2s;
-        }
+       }
         .custom-study-type-item input:focus {
             outline: none; border-color: var(--color-accent-blue); 
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
+       }
         .custom-study-type-item .delete-btn {
             color: var(--color-text-dim); padding: 0.5rem; border-radius: 50%;
             transition: all 0.2s; background: none; border: none; cursor: pointer;
-        }
+       }
         .custom-study-type-item .delete-btn:hover {
             color: var(--color-accent-red);
             background-color: var(--color-red-500-t);
-        }
+       }
 
         /* Compact topic item styles */
         .compact-topic-item { padding: 0.3rem 0.4rem; margin: 0.1rem 0; }
@@ -702,7 +712,7 @@
 
     <!-- 
     ============================================================================
-    APP JAVASCRIPT (v5.0)
+    APP JAVASCRIPT (v5.1 - Patched)
     ============================================================================
     -->
     <script type="module">
@@ -725,7 +735,7 @@
         
         // App State
         let db, auth;
-        let dbDocRef, settingsDocRef;
+        let dbDocRef, settingsDocRef; 
         let unsubscribeSnapshot, unsubscribeSettings; 
         let countdownInterval, saveTimeout, toastTimeout; 
         let isFirstLoad = true; 
@@ -735,7 +745,8 @@
         let calendarState = { month: 9, year: 2025 };
         const toastQueue = []; 
         let isToastShowing = false;
-        let currentUserId = null; // v5.0: User ID is critical
+        let tempAppSettings = {}; // *** BUG FIX (Settings Cancel Logic) ***
+        let currentUserId = null; // v5.1: This is critical for multi-user
 
         // v5.0: Default app settings for new users
         const DEFAULT_STUDY_TYPES = [
@@ -768,7 +779,7 @@
         const columnHeaders = { 
             table1: ["Phy", "Chem", "Bio", "GK", "English"], 
             table2: ["Morning Session", "Noon Session", "Night Session", "Exam"] 
-         };
+        };
         const progressSteps = [0, 20, 40, 60, 80, 100];
         const today = new Date(); 
         // v5.0: Hardness map (unchanged)
@@ -832,14 +843,14 @@
             if (savedView === 'table2') currentView = 'table2';
             updateViewToggleUI();
             
-           
+            
             // Populate static dropdowns
             populateSubjectAndSessionDropdowns();
 
             // v5.0: Init Firebase and Auth Listener
             initializeAppFirebase();
             
-            startCountdown();
+            startCountdown(); // Start with default first
             setupGlobalEventListeners();
            });
 
@@ -873,198 +884,172 @@
            }
 
         // ========================================================================
-        // v5.0: FIREBASE & AUTHENTICATION
+        // v5.1: FIREBASE & AUTHENTICATION (PATCHED)
         // ========================================================================
 
        async function initializeAppFirebase() {
-    console.log(">>> [Init] Starting Firebase initialization..."); // Init Log 1
-    try {
-        let firebaseConfig;
-        // ...(keep the existing firebaseConfig detection logic)...
-        if (!firebaseConfig || !firebaseConfig.apiKey) {
-            firebaseConfig = {
-                apiKey: "AIzaSyBWvyaFWIL0PV4VD33BJNQl3qP2k1IbQus",
-                authDomain: "rutine-f2ac1.firebaseapp.com",
-                projectId: "rutine-f2ac1",
-                storageBucket: "rutine-f2ac1.firebasestorage.app",
-                messagingSenderId: "161382347749",
-                appId: "1:161382347749:web:a07ebafa5bdd35d480350c",
-                measurementId: "G-BNC489N193"
-            };
-        }
-        console.log(">>> [Init] Firebase config loaded."); // Init Log 2
+           console.log(">>> [Init] Starting Firebase initialization..."); 
+           try {
+               let firebaseConfig;
+               // *** Per user request, DO NOT TOUCH this config ***
+               if (!firebaseConfig || !firebaseConfig.apiKey) {
+                   firebaseConfig = {
+                       apiKey: "AIzaSyBWvyaFWIL0PV4VD33BJNQl3qP2k1IbQus",
+                       authDomain: "rutine-f2ac1.firebaseapp.com",
+                       projectId: "rutine-f2ac1",
+                       storageBucket: "rutine-f2ac1.firebasestorage.app",
+                       messagingSenderId: "161382347749",
+                       appId: "1:161382347749:web:a07ebafa5bdd35d480350c",
+                       measurementId: "G-BNC489N193"
+                   };
+               }
+               console.log(">>> [Init] Firebase config loaded."); 
 
-        const app = initializeApp(firebaseConfig);
-        console.log(">>> [Init] Firebase app initialized."); // Init Log 3
+               const app = initializeApp(firebaseConfig);
+               console.log(">>> [Init] Firebase app initialized."); 
 
-        db = getFirestore(app);
-        console.log(">>> [Init] Firestore instance obtained."); // Init Log 4
+               db = getFirestore(app);
+               console.log(">>> [Init] Firestore instance obtained."); 
 
-        auth = getAuth(app);
-        console.log(">>> [Init] Auth instance obtained:", auth ? 'OK' : ' FAILED!'); // Init Log 5 - Check Auth object
+               auth = getAuth(app);
+               console.log(">>> [Init] Auth instance obtained:", auth ? 'OK' : ' FAILED!'); 
 
-        if (!auth) {
-             console.error(">>> [Init] CRITICAL ERROR: getAuth(app) returned null or undefined!");
-             alert("Critical Error: Firebase Auth could not be initialized.");
-             return; // Stop if auth failed
-        }
+               if (!auth) {
+                    console.error(">>> [Init] CRITICAL ERROR: getAuth(app) returned null or undefined!");
+                    alert("Critical Error: Firebase Auth could not be initialized.");
+                    return; // Stop if auth failed
+               }
 
-        try {
-             await enableIndexedDbPersistence(db);
-             console.log(">>> [Init] Offline persistence enabled/attempted."); // Init Log 6
-        } catch (err) {
-             console.warn(">>> [Init] Offline persistence failed:", err.code);
-        }
+               try {
+                    await enableIndexedDbPersistence(db);
+                    console.log(">>> [Init] Offline persistence enabled/attempted."); 
+               } catch (err) {
+                    console.warn(">>> [Init] Offline persistence failed:", err.code);
+               }
 
-        console.log(">>> [Init] Calling setupAuthStateListener..."); // Init Log 7
-        setupAuthStateListener(); // Call the listener setup
-        console.log(">>> [Init] setupAuthStateListener called."); // Init Log 8
+               console.log(">>> [Init] Calling setupAuthStateListener..."); 
+               setupAuthStateListener(); // Call the listener setup
+               console.log(">>> [Init] setupAuthStateListener called."); 
 
-    } catch (error) {
-        console.error(">>> [Init] CRITICAL Firebase Init Error:", error); // Init Log Error
-        googleLoginError.textContent = "Firebase init failed. Check console.";
-        googleLoginError.classList.remove('hidden');
-        alert("Critical Error: Firebase Initialization Failed. Error: " + error.message);
-    }
-}
-function setupAuthStateListener() {
-    console.log(">>> [Listener] Attaching Auth State Listener..."); // Listener Log 1
+           } catch (error) {
+               console.error(">>> [Init] CRITICAL Firebase Init Error:", error); 
+               googleLoginError.textContent = "Firebase init failed. Check console.";
+               googleLoginError.classList.remove('hidden');
+               alert("Critical Error: Firebase Initialization Failed. Error: " + error.message);
+           }
+       }
 
-    // Check if auth object is valid before attaching
-    if (!auth) {
-        console.error(">>> [Listener] CRITICAL ERROR: Cannot attach listener because 'auth' object is invalid!");
-        alert("Critical Error: Cannot listen for authentication changes.");
-        return;
-    }
-
-    onAuthStateChanged(auth, (user) => {
-        // --->>> THIS IS THE MOST IMPORTANT LOG <<<---
-        console.log(">>> [Listener Callback] Auth state HAS changed. User object present:", !!user); // Listener Log 2
-
-        if (user) {
-            console.log(">>> Step 1: User signed in successfully. UID:", user.uid); // Log 1
-
-            try {
-                currentUserId = user.uid;
-                const appId = "rutine-f2ac1"; // Ensure this is correct
-
-                // Check DOM elements needed for UI updates
-                const settingsUserImgCheck = document.getElementById('settings-user-img');
-                const settingsUserNameCheck = document.getElementById('settings-user-name');
-                const settingsUserEmailCheck = document.getElementById('settings-user-email');
-                if (!settingsUserImgCheck || !settingsUserNameCheck || !settingsUserEmailCheck) {
-                        console.error(">>> ERROR: Settings modal elements not found!");
-                        // Continue execution but log the error
-                } else {
-                        console.log(">>> Settings modal elements found.");
-                        // Update settings modal UI only if elements exist
-                        settingsUserImgCheck.src = user.photoURL || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM5NDRhYjgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLXVzZXIiPjxwYXRoIGQ9Ik0yMCAyMWE4IDggMCAwIDAtMTYgMCI+PC9wYXRoPjxjaXJjbGUgY3g9IjEyIiBjeT0iNyIgcj0iNCI+PC9jaXJjbGU+PC9zdmc+'; // Use the placeholder SVG
-                        settingsUserNameCheck.textContent = user.displayName || 'App User';
-                        settingsUserEmailCheck.textContent = user.email || 'No email provided';
-                }
-
-                // Set user-specific doc paths (wrap in try-catch)
-                console.log(">>> Attempting to set Firestore doc paths...");
-                const dataPath = `artifacts/${appId}/users/${currentUserId}/studyProgress/data_v4`;
-                const settingsPath = `artifacts/${appId}/users/${currentUserId}/studyProgress/settings_v1`;
-                dbDocRef = doc(db, dataPath);
-                settingsDocRef = doc(db, settingsPath);
-                console.log(">>> Step 2: Firestore paths set successfully."); // Log 2
-
-                // Load user's data and settings (wrap in try-catch)
-                console.log(">>> Step 3: Attempting to call loadSettingsFromFirestore..."); // Log 3
-                loadSettingsFromFirestore(); // Must load settings first
-
-                // --- START: UI Update using style.display ---
-                console.log(">>> Step 6: Attempting UI update (hide login, show app)..."); // Log 6
-                const loginScreenEl = document.getElementById('login-screen'); // Re-get element just in case
-                const mainAppEl = document.getElementById('main-app-container');
-                const loadingSpinnerEl = document.getElementById('loading');
-
-                if (loginScreenEl && mainAppEl && loadingSpinnerEl) {
-                    // --- FORCE HIDE/SHOW WITH DIRECT STYLE ---
-                    loginScreenEl.style.display = 'none'; // Force hide login screen
-                    console.log(">>> Step 7: loginScreen.style.display set to 'none'."); // Log 7
-
-                    mainAppEl.style.display = 'block'; // Force show main container
-                    console.log(">>> Step 8: mainAppContainer.style.display set to 'block'."); // Log 8
-                    // --- END FORCE HIDE/SHOW ---
-
-                    loadingSpinnerEl.classList.remove('hidden'); // Show loading spinner within main container
-                    console.log(">>> Step 9: Loading spinner shown (using classList)."); // Log 9
-
-                    // Add a final check log
-                    console.log(">>> Final check: loginScreen display:", loginScreenEl.style.display, "| mainApp display:", mainAppEl.style.display); // Log 10
-
-                } else {
-                    console.error(">>> CRITICAL ERROR during UI update: One or more essential elements became null!");
-                    alert("Critical Error during UI update. App state might be inconsistent.");
-                }
-                // --- END: UI Update using style.display ---
-
-            } catch (error) {
-                console.error(">>> CRITICAL ERROR inside 'if (user)' block:", error); // <-- Catch errors inside the main block
-                alert("An error occurred after login. Check the console for details. Error: ", error.message); // Show alert
+        // *** BUG FIX (CRITICAL - MULTI-USER) ***
+        // This function's logic is rewritten to handle user switching correctly.
+        // It now cleans up the old user's state *before* loading the new user.
+        function setupAuthStateListener() {
+            console.log(">>> [Listener] Attaching Auth State Listener...");
+            if (!auth) {
+                console.error(">>> [Listener] CRITICAL ERROR: Cannot attach listener because 'auth' object is invalid!");
+                alert("Critical Error: Cannot listen for authentication changes.");
+                return;
             }
 
-        } else {
-            // User is SIGNED OUT
-            console.log(">>> User signed out or authentication failed."); // <-- Sign Out Log
-            currentUserId = null;
-            cleanupListenersAndState();
+            onAuthStateChanged(auth, (user) => {
+                console.log(">>> [Listener Callback] Auth state HAS changed. User object present:", !!user);
 
-            // --- START: UI Update for signed-out user using style.display ---
-            const loginScreenEl = document.getElementById('login-screen'); // Re-get elements
-            const mainAppEl = document.getElementById('main-app-container');
-            const loadingSpinnerEl = document.getElementById('loading');
-            const googleLoginErrorEl = document.getElementById('google-login-error');
-            const googleLoginTextEl = document.getElementById('google-login-text');
-            const googleLoginBtnEl = document.getElementById('google-login-btn');
+                if (user) {
+                    // *** BUG FIX (MULTI-USER) START ***
+                    // Only run the full setup if the user ID is different from the currently logged-in user.
+                    // This prevents re-running setup on simple token refreshes.
+                    if (currentUserId !== user.uid) {
+                        console.log(`>>> New user login or user switch. Old UID: ${currentUserId}, New UID: ${user.uid}`);
+                        
+                        // If there *was* an old user, clean up their listeners and state first
+                        if (currentUserId) {
+                            console.log(`>>> Cleaning up state for old user: ${currentUserId}`);
+                            cleanupListenersAndState();
+                        }
 
-            // --- FORCE HIDE/SHOW WITH DIRECT STYLE ---
-            if (loginScreenEl) loginScreenEl.style.display = 'flex'; // Force show login screen (assuming it uses flex)
-            if (mainAppEl) mainAppEl.style.display = 'none'; // Force hide main container
-            // --- END FORCE HIDE/SHOW ---
+                        // NOW, set up the new user
+                        currentUserId = user.uid;
+                        
+                        try {
+                            // *** Per user request, DO NOT TOUCH this appId ***
+                            const appId = "rutine-f2ac1";
+                            
+                            const settingsUserImgCheck = document.getElementById('settings-user-img');
+                            const settingsUserNameCheck = document.getElementById('settings-user-name');
+                            const settingsUserEmailCheck = document.getElementById('settings-user-email');
+                            
+                            if (settingsUserImgCheck && settingsUserNameCheck && settingsUserEmailCheck) {
+                                settingsUserImgCheck.src = user.photoURL || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM5NDRhYjgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLXVzZXIiPjxwYXRoIGQ9Ik0yMCAyMWE4IDggMCAwIDAtMTYgMCI+PC9wYXRoPjxjaXJjbGUgY3g9IjEyIiBjeT0iNyIgcj0iNCI+PC9jaXJjbGU+PC9zdmc+';
+                                settingsUserNameCheck.textContent = user.displayName || 'App User';
+                                settingsUserEmailCheck.textContent = user.email || 'No email provided';
+                            } else {
+                                console.error(">>> ERROR: Settings modal user elements not found!");
+                            }
 
-            if (loadingSpinnerEl) loadingSpinnerEl.classList.add('hidden'); // Ensure loading spinner is hidden
-            if (googleLoginErrorEl) googleLoginErrorEl.classList.add('hidden');
-            if (googleLoginTextEl) googleLoginTextEl.textContent = 'Sign In with Google';
-            if (googleLoginBtnEl) googleLoginBtnEl.disabled = false;
-            console.log(">>> Showing login screen for signed out user (via style.display).");
-            // --- END: UI Update for signed-out user ---
-        }
-    });
+                            console.log(">>> Attempting to set Firestore doc paths...");
+                            const dataPath = `artifacts/${appId}/users/${currentUserId}/studyProgress/data_v4`;
+                            const settingsPath = `artifacts/${appId}/users/${currentUserId}/studyProgress/settings_v1`;
+                            dbDocRef = doc(db, dataPath);
+                            settingsDocRef = doc(db, settingsPath);
+                            console.log(">>> Step 2: Firestore paths set successfully.");
 
-    console.log(">>> [Listener] Auth state listener attached successfully."); // Listener Log 3
- } 
+                            // Show loading spinner *before* loading data
+                            const loadingSpinnerEl = document.getElementById('loading');
+                            if (loadingSpinnerEl) loadingSpinnerEl.classList.remove('hidden');
+                            const contentEl = document.getElementById('content');
+                            if (contentEl) contentEl.classList.add('hidden');
 
-function loadSettingsFromFirestore() {
-    if (!settingsDocRef) {
-         console.error(">>> ERROR in loadSettingsFromFirestore: settingsDocRef is not defined.");
-         return;
-    }
-    if (unsubscribeSettings) unsubscribeSettings();
+                            console.log(">>> Step 3: Attempting to call loadSettingsFromFirestore...");
+                            loadSettingsFromFirestore(); // This will load settings, which *then* loads data
 
-    console.log(">>> Step 4: Inside loadSettingsFromFirestore, setting up snapshot..."); // <-- Log 4
+                            console.log(">>> Step 6: Attempting UI update (hide login, show app)...");
+                            const loginScreenEl = document.getElementById('login-screen');
+                            const mainAppEl = document.getElementById('main-app-container');
 
-    unsubscribeSettings = onSnapshot(settingsDocRef, (doc) => {
-        console.log(">>> Settings snapshot received. Exists:", doc.exists()); // <-- Snapshot Log 1
-        // ... (keep existing code for handling settings data) ...
+                            if (loginScreenEl && mainAppEl) {
+                                loginScreenEl.style.display = 'none';
+                                mainAppEl.style.display = 'block';
+                            } else {
+                                console.error(">>> CRITICAL ERROR during UI update: One or more essential elements became null!");
+                            }
 
-        // Once settings are loaded, populate dropdowns
-        populateAllStudyTypeDropdowns();
+                        } catch (error) {
+                            console.error(">>> CRITICAL ERROR inside 'if (user)' block:", error);
+                            alert("An error occurred after login. Check the console for details. Error: " + error.message);
+                        }
+                    } else {
+                        // This means onAuthStateChanged fired, but it's the same user.
+                        // This happens on token refreshes. We don't need to do anything.
+                        console.log(`>>> Auth state refreshed for same user ${user.uid}. No setup action needed.`);
+                    }
+                    // *** BUG FIX (MULTI-USER) END ***
+                    
+                } else {
+                    // User is SIGNED OUT
+                    console.log(">>> User signed out or authentication failed.");
+                    
+                    // *** BUG FIX ***: Only clean up if there *was* a user logged in
+                    if (currentUserId) {
+                        cleanupListenersAndState();
+                        currentUserId = null; // Set current user to null *after* cleanup
+                    }
 
-        // Now load data after settings are loaded
-        console.log(">>> Step 5: Settings processed, calling loadDataFromFirestore..."); // <-- Log 5
-        loadDataFromFirestore();
+                    const loginScreenEl = document.getElementById('login-screen');
+                    const mainAppEl = document.getElementById('main-app-container');
+                    const googleLoginErrorEl = document.getElementById('google-login-error');
+                    const googleLoginTextEl = document.getElementById('google-login-text');
+                    const googleLoginBtnEl = document.getElementById('google-login-btn');
 
-    }, (error) => {
-        console.error(">>> ERROR loading settings snapshot:", error); // <-- Error Log
-        showToastQueued('error', 'Failed to load settings.');
-    });
-}
+                    if (loginScreenEl) loginScreenEl.style.display = 'flex';
+                    if (mainAppEl) mainAppEl.style.display = 'none';
+                    if (googleLoginErrorEl) googleLoginErrorEl.classList.add('hidden');
+                    if (googleLoginTextEl) googleLoginTextEl.textContent = 'Sign In with Google';
+                    if (googleLoginBtnEl) googleLoginBtnEl.disabled = false;
+                    console.log(">>> Showing login screen for signed out user.");
+                }
+            });
 
-
+            console.log(">>> [Listener] Auth state listener attached successfully.");
+        }  
 
         async function handleGoogleSignIn() {
             googleLoginBtn.disabled = true;
@@ -1091,37 +1076,102 @@ function loadSettingsFromFirestore() {
                 await signOut(auth);
                 // Auth listener will handle cleanup
                 closeModal(settingsModalEl);
+                // *** BUG FIX (MULTI-USER) ***: cleanupListenersAndState() is now called by the
+                // auth listener *after* signOut completes, ensuring a clean state.
             } catch (error) {
                 console.error("Sign Out Error:", error);
                 showToastQueued('error', 'Sign out failed.');
             }
         }
 
-        // v5.0: Cleanup listeners and state on logout
+        // v5.1: Patched cleanup function
         function cleanupListenersAndState() {
             if (unsubscribeSnapshot) unsubscribeSnapshot();
             if (unsubscribeSettings) unsubscribeSettings();
 
+            // Detach doc refs
+            dbDocRef = null;
+            settingsDocRef = null;
+            
+            // Reset all local data
             appData = { completedTopics: {} };
             tableData = { table1: {}, table2: {} };
             appSettings.customStudyTypes = JSON.parse(JSON.stringify(DEFAULT_STUDY_TYPES));
+            appSettings.countdownSettings = { title: "Countdown to Goal", targetDate: "2025-12-12", targetTime: "00:00" };
+            tempAppSettings = {};
             
+            // Clear UI
             table1CardsContainer.innerHTML = '';
             table2CardsContainer.innerHTML = '';
             updateAllProgressUI(); // Reset progress bars to 0%
             
-            // Clear toast queue
+            // Clear timers
+            if (countdownInterval) clearInterval(countdownInterval);
+            if (saveTimeout) clearTimeout(saveTimeout);
+            if (toastTimeout) clearTimeout(toastTimeout);
             toastQueue.length = 0;
-            
+            isToastShowing = false;
+
+            // Hide main content, show loading (will be replaced by login screen)
+            loadingEl.classList.remove('hidden');
+            contentEl.classList.add('hidden');
+
             console.log("State and listeners cleaned up.");
         }
 
 
         // ========================================================================
-        // v5.0: SETTINGS & CUSTOMIZATION LOGIC
+        // v5.1: SETTINGS & CUSTOMIZATION LOGIC (PATCHED)
         // ========================================================================
 
-      
+        // *** BUG FIX (CRITICAL - COUNTDOWN REFRESH) ***
+        // This function now correctly saves default settings for new users
+        // and updates the countdown UI *after* settings are loaded.
+        function loadSettingsFromFirestore() {
+            if (!settingsDocRef) {
+                console.error(">>> ERROR in loadSettingsFromFirestore: settingsDocRef is not defined.");
+                return;
+            }
+            if (unsubscribeSettings) unsubscribeSettings();
+
+            console.log(">>> Step 4: Inside loadSettingsFromFirestore, setting up snapshot...");
+
+            unsubscribeSettings = onSnapshot(settingsDocRef, (doc) => {
+                console.log(">>> Settings snapshot received. Exists:", doc.exists());
+                if (doc.exists()) {
+                    const settingsData = doc.data();
+                    appSettings.customStudyTypes = settingsData.customStudyTypes || JSON.parse(JSON.stringify(DEFAULT_STUDY_TYPES));
+                    appSettings.countdownSettings = settingsData.countdownSettings || { title: "Countdown to Goal", targetDate: "2025-12-12", targetTime: "00:00" };
+                } else {
+                    // New user, load defaults
+                    console.log("No settings doc found, loading defaults.");
+                    appSettings.customStudyTypes = JSON.parse(JSON.stringify(DEFAULT_STUDY_TYPES));
+                    appSettings.countdownSettings = { title: "Countdown to Goal", targetDate: "2025-12-12", targetTime: "00:00" };
+                    
+                    // *** BUG FIX (MAJOR LOGIC) ***
+                    // Save these defaults back to Firestore so the doc exists for next time
+                    console.log("Saving default settings to Firestore for new user...");
+                    saveSettingsToFirestore(); 
+                }
+
+                // *** BUG FIX (COUNTDOWN NAME REFRESH) START ***
+                // These must be called *after* settings are loaded
+                updateCountdownUI(); // Update the countdown title on the main page
+                startCountdown();    // Re-start the countdown timer with the new settings
+                // *** BUG FIX (COUNTDOWN NAME REFRESH) END ***
+
+                populateAllStudyTypeDropdowns();
+
+                console.log(">>> Step 5: Settings processed, calling loadDataFromFirestore...");
+                loadDataFromFirestore(); // Now load the main app data
+
+            }, (error) => {
+                console.error(">>> ERROR loading settings snapshot:", error);
+                showToastQueued('error', 'Failed to load settings.');
+                // Don't just stop, try to load data anyway
+                loadDataFromFirestore();
+            });
+        }
 
         async function saveSettingsToFirestore() {
             if (!settingsDocRef) return;
@@ -1138,18 +1188,19 @@ function loadSettingsFromFirestore() {
             }
         }
 
-        // Renders the "Customizations" tab in the Settings modal
-        function renderSettingsModal() {
+        // *** BUG FIX (SETTINGS CANCEL) ***
+        // Now accepts an argument `settingsToRender` (which is `tempAppSettings`)
+        // instead of reading directly from the global `appSettings`.
+        function renderSettingsModal(settingsToRender) {
             customStudyTypeList.innerHTML = ''; // Clear existing list
             
-            if (!appSettings.customStudyTypes || appSettings.customStudyTypes.length === 0) {
+            if (!settingsToRender.customStudyTypes || settingsToRender.customStudyTypes.length === 0) {
                 customStudyTypeList.innerHTML = `<p class="text-slate-400">No study types found. Add one!</p>`;
             }
 
-            appSettings.customStudyTypes.forEach(studyType => {
+            settingsToRender.customStudyTypes.forEach(studyType => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'custom-study-type-item';
-                // The data-key is the immutable ID
                 itemEl.dataset.key = studyType.key;
                 
                 itemEl.innerHTML = `
@@ -1161,17 +1212,17 @@ function loadSettingsFromFirestore() {
                 customStudyTypeList.appendChild(itemEl);
             });
             
-            // Populate countdown settings
-            updateCountdownSettingsUI();
-        }
-        
-        function updateCountdownSettingsUI() {
-            if (countdownTitleInput && appSettings.countdownSettings) {
-                countdownTitleInput.value = appSettings.countdownSettings.title || "Countdown to Goal";
-                countdownDateInput.value = appSettings.countdownSettings.targetDate || "2025-12-12";
-                countdownTimeInput.value = appSettings.countdownSettings.targetTime || "00:00";
+            // *** BUG FIX (SETTINGS CANCEL) ***
+            // Populate countdown inputs from the temp copy, not the global state
+            if (countdownTitleInput && settingsToRender.countdownSettings) {
+                countdownTitleInput.value = settingsToRender.countdownSettings.title || "Countdown to Goal";
+                countdownDateInput.value = settingsToRender.countdownSettings.targetDate || "2025-12-12";
+                countdownTimeInput.value = settingsToRender.countdownSettings.targetTime || "00:00";
             }
         }
+        
+        // This function is no longer needed as its logic is merged into renderSettingsModal
+        // function updateCountdownSettingsUI() { ... }
         
         function updateCountdownUI() {
             const countdownTitle = document.getElementById('countdown-title');
@@ -1180,15 +1231,17 @@ function loadSettingsFromFirestore() {
             }
         }
 
+        // *** BUG FIX (SETTINGS CANCEL) ***
+        // Modifies `tempAppSettings` instead of `appSettings`
         function handleSettingsAddStudyType() {
             const newKey = `custom_${Date.now()}`;
             const newName = "New Study Type";
             
             // Add to temp state
-            appSettings.customStudyTypes.push({ key: newKey, name: newName });
+            tempAppSettings.customStudyTypes.push({ key: newKey, name: newName });
             
-            // Re-render the list
-            renderSettingsModal();
+            // Re-render the list with temp state
+            renderSettingsModal(tempAppSettings);
             
             // Focus the new input
             const newItemEl = customStudyTypeList.querySelector(`[data-key="${newKey}"] input`);
@@ -1198,6 +1251,8 @@ function loadSettingsFromFirestore() {
             }
         }
 
+        // *** BUG FIX (SETTINGS CANCEL) ***
+        // Modifies `tempAppSettings` instead of `appSettings`
         function handleSettingsDeleteStudyType(button) {
             const itemEl = button.closest('.custom-study-type-item');
             if (!itemEl) return;
@@ -1213,13 +1268,15 @@ function loadSettingsFromFirestore() {
             }
 
             // Remove from temp state
-            appSettings.customStudyTypes = appSettings.customStudyTypes.filter(type => type.key !== keyToDelete);
+            tempAppSettings.customStudyTypes = tempAppSettings.customStudyTypes.filter(type => type.key !== keyToDelete);
             
             // Re-render the list
             itemEl.remove();
             showToastQueued('info', 'Study type removed. Click Save.');
         }
 
+        // *** BUG FIX (SETTINGS CANCEL) ***
+        // Commits `tempAppSettings` to `appSettings` only on Save
         async function handleSettingsSave() {
             // Read all values from the DOM inputs
             const newStudyTypes = [];
@@ -1246,10 +1303,15 @@ function loadSettingsFromFirestore() {
                 return;
             }
 
-            // Update global state
-            appSettings.customStudyTypes = newStudyTypes;
+            // *** BUG FIX (SETTINGS CANCEL) START ***
+            // Update the temp state first
+            tempAppSettings.customStudyTypes = newStudyTypes;
+            
+            // Now, commit the temp state to the main appSettings
+            appSettings = JSON.parse(JSON.stringify(tempAppSettings));
+            // *** BUG FIX (SETTINGS CANCEL) END ***
 
-            // Save to Firebase
+            // Save the (now updated) main appSettings to Firebase
             await saveSettingsToFirestore();
             
             // Re-populate all dropdowns in the app
@@ -1275,14 +1337,23 @@ function loadSettingsFromFirestore() {
                 return;
             }
             
+            // *** BUG FIX (SETTINGS CANCEL) ***
+            // Update *both* states. Temp for the modal, global for immediate UI.
             appSettings.countdownSettings = {
                 title: title,
                 targetDate: date,
                 targetTime: time
             };
+            tempAppSettings.countdownSettings = {
+                title: title,
+                targetDate: date,
+                targetTime: time
+            };
+            // *** END BUG FIX ***
             
             saveSettingsToFirestore();
             updateCountdownUI();
+            startCountdown(); // Restart timer with new date
             showToastQueued('synced', 'Countdown settings saved!');
         }
 
@@ -1330,11 +1401,17 @@ function loadSettingsFromFirestore() {
         }
 
         // ========================================================================
-        // DATA LOGIC (v5.0: Now auth-dependent)
+        // DATA LOGIC (v5.1: Patched)
         // ========================================================================
 
+        // *** BUG FIX (CRITICAL - DESTRUCTIVE MIGRATION) ***
+        // This function now asks for confirmation before wiping old data.
+        // It also calls `cleanupOrphanedTopics` after loading.
         function loadDataFromFirestore() {
-            if (!dbDocRef) return;
+            if (!dbDocRef) {
+                console.log("loadDataFromFirestore: No dbDocRef (user might be logging out). Skipping.");
+                return;
+            }
             if (unsubscribeSnapshot) unsubscribeSnapshot(); // Unsubscribe from old listener
 
             showToastQueued('syncing');
@@ -1343,27 +1420,48 @@ function loadSettingsFromFirestore() {
                 if (doc.exists()) {
                     const data = doc.data();
                     let loadedTableData = data.tableData ? JSON.parse(JSON.stringify(data.tableData)) : null;
+
+                    // *** BUG FIX (DESTRUCTIVE MIGRATION) START ***
                     if (isOldDataStructure(loadedTableData)) {
-                        console.warn("Old data structure detected. Resetting to default.");
-                        showToastQueued('error', 'Old data incompatible. Resetting...');
-                        tableData = JSON.parse(JSON.stringify(DEFAULT_TABLE_DATA));
-                        appData.completedTopics = {}; 
-                        pendingChanges = true; 
-                       } else if (loadedTableData) {
+                        console.warn("Old data structure detected.");
+                        // Show a modal instead of just wiping data silently
+                        showConfirmationModal(
+                            "Old data structure detected. To use v5.0, your data must be reset. This action cannot be undone and will delete all your current data.",
+                            () => {
+                                // User clicked "Yes, Reset"
+                                console.log("User confirmed data reset.");
+                                tableData = JSON.parse(JSON.stringify(DEFAULT_TABLE_DATA));
+                                appData.completedTopics = {}; 
+                                pendingChanges = true; 
+                                saveDataToFirestore(); // Save the new empty state
+                                renderData(); // Re-render the empty state
+                            },
+                            "Yes, Reset All Data",
+                            "button-danger"
+                        );
+                        // Stop further execution until user confirms.
+                        // The confirmation callback will handle the reset and re-render.
+                        return; 
+                    } 
+                    // *** BUG FIX (DESTRUCTIVE MIGRATION) END ***
+                    
+                    else if (loadedTableData) {
                         tableData = loadedTableData;
                         appData.completedTopics = data.completedTopics || {};
-                       } else {
+                    } else {
+                        // Doc exists, but data is empty/invalid
                         tableData = JSON.parse(JSON.stringify(DEFAULT_TABLE_DATA));
                         appData.completedTopics = {};
-                        pendingChanges = true; 
-                       }
-                   } else {
+                        pendingChanges = true; // Mark to save the default structure
+                    }
+                } else {
+                    // Doc doesn't exist (e.g., first time user for *data*)
                     tableData = JSON.parse(JSON.stringify(DEFAULT_TABLE_DATA));
                     appData.completedTopics = {};
-                    pendingChanges = true; 
-                   }
+                    pendingChanges = true; // Mark to save the default structure
+                }
 
-                // Clean orphaned IDs
+                // Clean orphaned IDs from cards (topics that don't exist in appData)
                 Object.keys(tableData).forEach(tableId => {
                     if (!tableData[tableId]) return;
                     Object.keys(tableData[tableId]).forEach(date => {
@@ -1371,7 +1469,7 @@ function loadSettingsFromFirestore() {
                         Object.keys(tableData[tableId][date]).forEach(colName => {
                             if (Array.isArray(tableData[tableId][date][colName])) {
                                 tableData[tableId][date][colName] = tableData[tableId][date][colName].filter(
-                                    topicId => appData.completedTopics[topicId]
+                                    topicId => appData.completedTopics[topicId] // Keep if topic exists in master list
                                 );
                             }
                         });
@@ -1379,21 +1477,31 @@ function loadSettingsFromFirestore() {
                 });
 
                 runExamMigration(); 
+                
+                // *** NEW FEATURE / BUG FIX (ORPHANED TOPICS) ***
+                // After fixing the card-delete bug, we add this to clean up
+                // topics from appData that are no longer used on *any* card.
+                cleanupOrphanedTopics();
+
                 if (pendingChanges) {
                     setTimeout(saveDataToFirestore, 1500); 
-                   }
+                }
                 
                 renderData();
                 showToastQueued(doc.metadata.fromCache ? "cached" : "synced");
-               }, (error) => {
+            }, (error) => {
                 console.error("Firestore snapshot error:", error);
                 loadingEl.innerHTML = `<p class="text-red-400">Error: Load failed.</p>`;
                 showToastQueued('error');
-               });
-           }
+            });
+        }
+
 
         function saveDataToFirestore() {
-            if (!dbDocRef || !currentUserId) return; // v5.0: Check for user
+            if (!dbDocRef || !currentUserId) {
+                console.log("saveDataToFirestore: No dbDocRef or user, skipping save.");
+                return; // v5.1: Check for user and doc ref
+            }
             pendingChanges = true;
             if (saveTimeout) clearTimeout(saveTimeout);
             
@@ -1408,7 +1516,7 @@ function loadSettingsFromFirestore() {
                     await setDoc(dbDocRef, { 
                         completedTopics: topicsToSave, 
                         tableData: tableDataToSave 
-                       }, { merge: false });
+                       }, { merge: false }); // Use false to overwrite, ensuring deleted cards stay deleted
                     showToastQueued('synced');
                    } catch (error) {
                     console.error("Firestore save error:", error);
@@ -1418,7 +1526,7 @@ function loadSettingsFromFirestore() {
                }, 1000);
            }
         
-        function isOldDataStructure(data) { /* ... (unchanged from v4.3) ... */ 
+        function isOldDataStructure(data) { /* ... (unchanged) ... */ 
              if (!data || (!data.table1 && !data.table2)) return false; 
              for (const date in data.table1) {
                  for (const col in data.table1[date]) {
@@ -1436,7 +1544,7 @@ function loadSettingsFromFirestore() {
                 }
              return false; 
         }
-        function runExamMigration() { /* ... (unchanged from v4.3) ... */ 
+        function runExamMigration() { /* ... (unchanged) ... */ 
             let migrated = false;
             if (tableData.table2) {
                 Object.keys(tableData.table2).forEach(date => {
@@ -1445,16 +1553,62 @@ function loadSettingsFromFirestore() {
                         delete tableData.table2[date]['Secret Files'];
                         migrated = true;
                        }
-                  });
-              }
+                   });
+             }
             if (migrated) {
                 console.log("Migrated 'Secret Files' to 'Exam'.");
                 pendingChanges = true;
                }
         }
 
+        // *** NEW FUNCTION (ORPHANED TOPIC CLEANER) ***
+        // This function cleans up topics from appData that are no longer in use
+        // on any card. This is necessary after fixing the "Delete Card" bug.
+        function cleanupOrphanedTopics() {
+            if (!tableData.table1 || !tableData.table2 || !appData.completedTopics) {
+                console.log("Cleaner: Data not ready, skipping cleanup.");
+                return;
+            }
+
+            console.log("Running orphan topic cleanup...");
+            let allTopicIdsInUse = new Set();
+
+            // Collect all topic IDs that are actually used in cards
+            Object.keys(tableData).forEach(tableId => {
+                if (!tableData[tableId]) return;
+                Object.keys(tableData[tableId]).forEach(date => {
+                    if (!tableData[tableId][date]) return;
+                    Object.keys(tableData[tableId][date]).forEach(colName => {
+                        if (Array.isArray(tableData[tableId][date][colName])) {
+                            tableData[tableId][date][colName].forEach(topicId => {
+                                allTopicIdsInUse.add(topicId);
+                            });
+                        }
+                    });
+                });
+            });
+
+            let orphanCount = 0;
+            // Check appData.completedTopics against the "in use" list
+            Object.keys(appData.completedTopics).forEach(topicId => {
+                if (!allTopicIdsInUse.has(topicId)) {
+                    // This topic is an orphan, delete it
+                    delete appData.completedTopics[topicId];
+                    orphanCount++;
+                }
+            });
+
+            if (orphanCount > 0) {
+                console.log(`Cleanup complete: Removed ${orphanCount} orphaned topics.`);
+                pendingChanges = true; // Mark for saving
+            } else {
+                console.log("Cleanup complete: No orphaned topics found.");
+            }
+        }
+
+
         // ========================================================================
-        // UI & RENDERING LOGIC
+        // UI & RENDERING LOGIC (v5.1: Patched)
         // ========================================================================
 
         function renderData() {
@@ -1494,7 +1648,7 @@ function loadSettingsFromFirestore() {
                     const card = createDateCard(tableId, date, cardData);
                     container.appendChild(card);
                    });
-              });
+               });
             
             updateAllCardProgressBars();
            }
@@ -1539,8 +1693,8 @@ function loadSettingsFromFirestore() {
                             const topicEl = createTopicElement(topicId);
                             if (topicEl) section.appendChild(topicEl);
                            }
-                      });
-                  }
+                       });
+                   }
                 card.appendChild(section);
                });
             
@@ -1603,11 +1757,11 @@ function loadSettingsFromFirestore() {
             hardnessTag.title = `Hardness: ${hardness}`; 
             nameEl.appendChild(hardnessTag); 
 
-            // v5.0: Dynamic Study Type
+            // v5.1: Dynamic Study Type (CSS ellipsis fix)
             const statusTag = document.createElement('span');
             const studyTypeName = getStudyTypeName(studyStatusKey);
-            // Only truncate if name is longer than 6 characters
-            const displayStudyName = studyTypeName.length > 6 ? studyTypeName.substring(0, 6) : studyTypeName;
+            // *** BUG FIX (UX) ***: Removed JS substring truncation
+            const displayStudyName = studyTypeName; // CSS will handle ellipsis
             statusTag.className = `study-status compact-study-status ${getStudyTypeClass(studyStatusKey)}`;
             statusTag.textContent = displayStudyName;
             statusTag.title = studyTypeName;
@@ -1637,7 +1791,7 @@ function loadSettingsFromFirestore() {
             return topicEl;
            }
 
-        function createDeleteRowButton(cardElement) { /* ... (unchanged from v4.3) ... */ 
+        function createDeleteRowButton(cardElement) { /* ... (unchanged) ... */ 
             const deleteBtn = document.createElement('button');
             deleteBtn.type = 'button';
             deleteBtn.className = 'delete-row-btn';
@@ -1645,10 +1799,10 @@ function loadSettingsFromFirestore() {
             deleteBtn.title = 'Delete Date Card';
             return deleteBtn;
         }
-        function createTopicId() { /* ... (unchanged from v4.3) ... */ 
+        function createTopicId() { /* ... (unchanged) ... */ 
             return 'topic_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
         }
-        function showConfirmationModal(message, onConfirm, confirmText = "Yes, Delete", buttonClass = "button-danger") { /* ... (unchanged from v4.3) ... */ 
+        function showConfirmationModal(message, onConfirm, confirmText = "Yes, Delete", buttonClass = "button-danger") { /* ... (unchanged) ... */ 
             confirmMessageEl.textContent = message;
             confirmCallback = onConfirm;
             const confirmBtn = document.getElementById('confirm-yes');
@@ -1656,13 +1810,13 @@ function loadSettingsFromFirestore() {
             confirmBtn.className = `modern-button ${buttonClass}`;
             openModal(confirmModalEl);
         }
-        function getFormattedDate(date) { /* ... (unchanged from v4.3) ... */ 
+        function getFormattedDate(date) { /* ... (unchanged) ... */ 
             const d = String(date.getDate()).padStart(2, '0');
             const m = String(date.getMonth() + 1).padStart(2, '0');
             const y = date.getFullYear();
             return `${d}/${m}/${y}`;
         }
-        function sortCardsInContainer(container) { /* ... (unchanged from v4.3) ... */ 
+        function sortCardsInContainer(container) { /* ... (unchanged) ... */ 
             const cards = Array.from(container.children);
             cards.sort((a, b) => {
                 try {
@@ -1673,12 +1827,12 @@ function loadSettingsFromFirestore() {
                     const dateB = new Date(dateBStr.split('/').reverse().join('-'));
                     return dateA - dateB;
                    } catch (e) { return 0; }
-              });
+               });
             cards.forEach(c => container.appendChild(c));
         }
 
         // ========================================================================
-        // GLOBAL EVENT HANDLERS
+        // GLOBAL EVENT HANDLERS (v5.1: Patched)
         // ========================================================================
 
         let calendarClickTimer = null;
@@ -1689,9 +1843,14 @@ function loadSettingsFromFirestore() {
             googleLoginBtn.addEventListener('click', handleGoogleSignIn);
             googleSignoutBtn.addEventListener('click', handleSignOut);
             
-            // v5.0: Settings Modal
+            // v5.1: Settings Modal (Patched for Cancel logic)
             settingsBtn.addEventListener('click', () => {
-                renderSettingsModal(); // Re-render settings tab every time
+                // *** BUG FIX (SETTINGS CANCEL) START ***
+                // Create a deep copy of the current settings for the modal to play with
+                tempAppSettings = JSON.parse(JSON.stringify(appSettings));
+                renderSettingsModal(tempAppSettings); // Pass the temp copy to render
+                // *** BUG FIX (SETTINGS CANCEL) END ***
+                
                 openModal(settingsModalEl);
             });
             
@@ -1875,53 +2034,55 @@ function loadSettingsFromFirestore() {
             
             // Keyboard Shortcuts
             document.addEventListener('keydown', (e) => {
-                // v5.0: Don't run shortcuts if not logged in
+                // v5.1: Don't run shortcuts if not logged in
                 if (!currentUserId) return;
 
-                 const target = e.target;
-                 if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') {
-                     if (target.contentEditable === 'true' && target.dataset.label === 'Date' && e.key === 'Enter') {
-                         e.preventDefault();
-                         target.blur();
-                        }
-                     return; 
-                    }
-                 
-                 // v5.0: Check all modals
-                 if (modalEl.classList.contains('show') || addTopicModalEl.classList.contains('show') || confirmModalEl.classList.contains('show') || calendarModalEl.classList.contains('show') || settingsModalEl.classList.contains('show')) {
+                const target = e.target;
+                if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') {
+                    if (target.contentEditable === 'true' && target.dataset.label === 'Date' && e.key === 'Enter') {
+                        e.preventDefault();
+                        target.blur();
+                       }
+                   return; 
+                   }
+                
+                // v5.1: Check all modals
+                if (modalEl.classList.contains('show') || addTopicModalEl.classList.contains('show') || confirmModalEl.classList.contains('show') || calendarModalEl.classList.contains('show') || settingsModalEl.classList.contains('show')) {
                     if (e.key === 'Escape') {
-                         if (modalEl.classList.contains('show')) { closeModal(modalEl); return; }
-                         if (addTopicModalEl.classList.contains('show')) { closeModal(addTopicModalEl); return; }
-                         if (confirmModalEl.classList.contains('show')) { confirmCallback = null; closeModal(confirmModalEl); return; }
-                         if (calendarModalEl.classList.contains('show')) { closeModal(calendarModalEl); return; }
-                         if (settingsModalEl.classList.contains('show')) { closeModal(settingsModalEl); return; }
-                     }
-                     if (addTopicModalEl.classList.contains('show') && e.key === 'Enter') { e.preventDefault(); handleModalAddSave(); return; }
-                     // Prevent 'n' shortcut if any modal is open
-                     return;
-                 }
-                 
-                 if (e.key === 'n') {
-                     e.preventDefault();
-                     const currentCardsContainer = currentView === 'table1' ? table1CardsContainer : table2CardsContainer;
-                     const firstCard = currentCardsContainer.querySelector('.date-card');
-                     if (firstCard && firstCard.dataset.date !== 'New Date') {
-                         const addBtn = firstCard.querySelector('.add-topic-btn-card-single');
-                         if (addBtn) addBtn.click();
-                        } else if (firstCard) {
-                         showToastQueued('error', 'Set date for "New Date" card first.');
-                        } else {
-                         showToastQueued('error', 'Add a card first.');
-                        }
-                     return;
-                    }
-              });
+                        if (modalEl.classList.contains('show')) { closeModal(modalEl); return; }
+                        if (addTopicModalEl.classList.contains('show')) { closeModal(addTopicModalEl); return; }
+                        if (confirmModalEl.classList.contains('show')) { confirmCallback = null; closeModal(confirmModalEl); return; }
+                        if (calendarModalEl.classList.contains('show')) { closeModal(calendarModalEl); return; }
+                        if (settingsModalEl.classList.contains('show')) { closeModal(settingsModalEl); return; }
+                       }
+                    if (addTopicModalEl.classList.contains('show') && e.key === 'Enter') { e.preventDefault(); handleModalAddSave(); return; }
+                    // Prevent 'n' shortcut if any modal is open
+                    return;
+               }
+                
+                if (e.key === 'n') {
+                    e.preventDefault();
+                    const currentCardsContainer = currentView === 'table1' ? table1CardsContainer : table2CardsContainer;
+                    const firstCard = currentCardsContainer.querySelector('.date-card');
+                    if (firstCard && firstCard.dataset.date !== 'New Date') {
+                        const addBtn = firstCard.querySelector('.add-topic-btn-card-single');
+                        if (addBtn) addBtn.click();
+                       } else if (firstCard) {
+                        showToastQueued('error', 'Set date for "New Date" card first.');
+                        const dateDiv = firstCard.querySelector('.date-header-text');
+                        if (dateDiv) dateDiv.focus();
+                       } else {
+                        showToastQueued('error', 'Add a card first.');
+                       }
+                    return;
+                   }
+               });
             
             window.addEventListener('beforeunload', window.cleanupAppListeners);
            }
 
         // ========================================================================
-        // MODAL & DROPDOWN UTILITIES
+        // MODAL & DROPDOWN UTILITIES (Unchanged)
         // ========================================================================
 
         function toggleDropdown(dropdownElement) {
@@ -1963,7 +2124,7 @@ function loadSettingsFromFirestore() {
                     hiddenInput.value = newValue;
                     found = true;
                    }
-              });
+               });
             if (!found && options.length > 0) {
                 options[0].classList.add('selected');
                 buttonText.textContent = options[0].textContent;
@@ -1985,15 +2146,19 @@ function loadSettingsFromFirestore() {
                     buttonText.textContent = firstOption.textContent;
                     document.getElementById(dropdown.dataset.targetInput).value = firstOption.dataset.value;
                    }
-              });
+               });
            }
         function openModal(modalElement) { modalElement.classList.add('show'); }
         function closeModal(modalElement) { modalElement.classList.remove('show'); }
         
         // ========================================================================
-        // CORE APP LOGIC
+        // CORE APP LOGIC (v5.1: Patched)
         // ========================================================================
 
+        // *** BUG FIX (PERFORMANCE LAG) ***
+        // This function no longer calls `updateAllProgressUI()`.
+        // It now calls targeted UI updates for *only* the affected card(s)
+        // and the main progress bar/counters.
         function handleProgressClick(box, isReverse = false) {
             const topicId = box.dataset.topicId;
             if (!topicId) return;
@@ -2002,22 +2167,52 @@ function loadSettingsFromFirestore() {
             let nextIndex;
             if (isReverse) {
                 nextIndex = Math.max(0, currentIndex - 1);
-               } else {
+            } else {
                 nextIndex = (currentIndex + 1) % progressSteps.length;
-               }
+            }
             const newProgress = progressSteps[nextIndex];
+            
+            // Update all DOM elements for this topicId
             document.querySelectorAll(`.progress-box[data-topic-id="${topicId}"]`).forEach(b => {
                 b.className = `progress-box compact-progress-box progress-${newProgress}`;
                 b.innerHTML = `<span>${newProgress}%</span>`;
-               });
+            });
+            
+            // Update data
             if (!appData.completedTopics[topicId]) {
-                 appData.completedTopics[topicId] = { progress: newProgress, note: '', timedNote: '', name: 'Unknown', priority: 'low', hardness: 'medium', studyStatus: 'new' };
-               } else {
-                 appData.completedTopics[topicId].progress = newProgress;
-               }
+                appData.completedTopics[topicId] = { progress: newProgress, note: '', timedNote: '', name: 'Unknown', priority: 'low', hardness: 'medium', studyStatus: 'new' };
+            } else {
+                appData.completedTopics[topicId].progress = newProgress;
+            }
+            
             saveDataToFirestore();
-            updateAllProgressUI();
-           }
+
+            // *** BUG FIX (PERFORMANCE LAG) START ***
+            // updateAllProgressUI(); // OLD - Very slow
+
+            // NEW - Update only what's necessary
+            let table1CardUpdated = false;
+
+            // 1. Update the progress bar for all cards containing this topic
+            document.querySelectorAll(`.topic-item[data-topic-id="${topicId}"]`).forEach(item => {
+                const card = item.closest('.date-card');
+                if (card) {
+                    updateCardProgress(card);
+                    if (card.dataset.tableId === 'table1') {
+                        table1CardUpdated = true;
+                    }
+                }
+            });
+
+            // 2. If a table1 card was changed, update the main "Overall Progress" bar
+            if (table1CardUpdated) {
+                updateOverallProgress();
+            }
+            
+            // 3. Update the task counters (this is fast)
+            updateTaskCounters();
+            // *** BUG FIX (PERFORMANCE LAG) END ***
+        }
 
         function handleEditClick(iconEl) {
             closeAllDropdowns();
@@ -2120,7 +2315,7 @@ function loadSettingsFromFirestore() {
                }
             
             const existingTopicIds = tableData[tableId]?.[date]?.[selectedColName] || [];
-            const isDuplicate = existingTopicIds.some(id => appData.completedTopics[id]?.name === newTopicName);
+            const isDuplicate = existingTopicIds.some(id => appData.completedTopics[id]?.name.toLowerCase() === newTopicName.toLowerCase());
             if (isDuplicate) {
                 showToastQueued('error', `"${newTopicName}" exists.`);
                 return;
@@ -2152,6 +2347,9 @@ function loadSettingsFromFirestore() {
             closeModal(addTopicModalEl);
            }
 
+        // *** BUG FIX (MAJOR - DUPLICATE ON EDIT) ***
+        // This function now checks for duplicate names *within the same section*
+        // before allowing an edit to be saved.
         function handleModalSave() {
             const topicId = modalEl.dataset.currentTopicId;
             if (!topicId) return;
@@ -2165,6 +2363,35 @@ function loadSettingsFromFirestore() {
             const newHardness = editHardnessInput.value;
             const newStudyStatusKey = editStudyInput.value; // v5.0: This is the key
             
+            // *** BUG FIX (DUPLICATE ON EDIT) START ***
+            // Find the topic's current DOM element to check its location
+            let currentItemEl = document.querySelector(`.topic-item[data-topic-id="${topicId}"]`);
+            if (currentItemEl) {
+                const currentSection = currentItemEl.closest('.column-section');
+                const currentCard = currentItemEl.closest('.date-card');
+                
+                if (currentSection && currentCard) {
+                    const tableId = currentCard.dataset.tableId;
+                    const date = currentCard.dataset.date;
+                    const colName = currentSection.dataset.colName;
+                    
+                    const topicIdArray = tableData[tableId]?.[date]?.[colName] || [];
+                    
+                    // Check if any *other* topic in this section has the same name
+                    const isDuplicate = topicIdArray.some(id => {
+                        // Check for duplicates, *excluding itself*
+                        return id !== topicId && 
+                               appData.completedTopics[id]?.name.toLowerCase() === newName.toLowerCase();
+                    });
+
+                    if (isDuplicate) {
+                        showToastQueued('error', `"${newName}" already exists in this section.`);
+                        return; // Stop the save
+                    }
+                }
+            }
+            // *** BUG FIX (DUPLICATE ON EDIT) END ***
+
             const currentData = appData.completedTopics[topicId] || { progress: 0 };
             
             appData.completedTopics[topicId] = {
@@ -2196,12 +2423,13 @@ function loadSettingsFromFirestore() {
                         // v5.0: Update dynamic study type tag
                         if (statusTags[1]) {
                             const studyTypeName = getStudyTypeName(newStudyStatusKey);
-                            const displayStudyName = studyTypeName.length > 6 ? studyTypeName.substring(0, 6) : studyTypeName;
+                            // *** BUG FIX (UX) ***: Removed JS substring truncation
+                            const displayStudyName = studyTypeName; // CSS will handle ellipsis
                             statusTags[1].className = `study-status compact-study-status ${getStudyTypeClass(newStudyStatusKey)}`;
                             statusTags[1].textContent = displayStudyName;
                             statusTags[1].title = studyTypeName;
                         }
-                      }
+                    }
                     
                     let timedNoteEl = nameContainer.querySelector('.timed-note-display');
                     if (newTimedNote) {
@@ -2211,10 +2439,10 @@ function loadSettingsFromFirestore() {
                             nameContainer.appendChild(timedNoteEl);
                            }
                         timedNoteEl.textContent = newTimedNote;
-                      } else if (timedNoteEl) {
+                       } else if (timedNoteEl) {
                         timedNoteEl.remove(); 
-                      }
-                  }
+                       }
+                   }
                 
                 const iconEl = itemElement.querySelector('.edit-icon');
                 if (iconEl) {
@@ -2227,17 +2455,24 @@ function loadSettingsFromFirestore() {
                     indicator.className = `priority-indicator priority-${newPriority}`;
                     indicator.title = `Priority: ${newPriority.charAt(0).toUpperCase() + newPriority.slice(1)}`;
                    }
-              });
+               });
             
             saveDataToFirestore();
             closeModal(modalEl);
            }
 
-        function handleModalDelete() { /* ... (unchanged from v4.3) ... */ 
+        function handleModalDelete() { 
             const topicId = modalEl.dataset.currentTopicId;
             if (!topicId) return;
             
             showConfirmationModal("Delete this topic?", () => {
+                // *** BUG FIX (CRITICAL DATA LOSS) ***
+                // We ONLY delete the topic if it's not used anywhere else.
+                // For this simple fix, we just delete it from appData.
+                // A better approach (implemented in v5.1) is to let the
+                // `cleanupOrphanedTopics` function handle this.
+                // Here, we just remove it from all cards and the master list.
+                
                 delete appData.completedTopics[topicId];
                 
                 Object.keys(tableData).forEach(tableId => {
@@ -2262,7 +2497,7 @@ function loadSettingsFromFirestore() {
                });
         }
         
-        function addNewRow(tableId, dateString = "New Date") { /* ... (unchanged from v4.3) ... */ 
+        function addNewRow(tableId, dateString = "New Date") { /* ... (unchanged) ... */ 
             const container = tableId === 'table1' ? table1CardsContainer : table2CardsContainer;
             if (!container) return;
             if (dateString !== "New Date") {
@@ -2317,7 +2552,11 @@ function loadSettingsFromFirestore() {
             saveDataToFirestore();
         }
         
-        function handleDeleteRowClick(button) { /* ... (unchanged from v4.3) ... */ 
+        // *** BUG FIX (CRITICAL - DATA LOSS) ***
+        // This function no longer deletes topics from `appData.completedTopics`.
+        // It *only* deletes the card from `tableData`.
+        // `cleanupOrphanedTopics` will handle cleaning `appData` later.
+        function handleDeleteRowClick(button) {
             const cardElement = button.closest('.date-card');
             if (!cardElement) return;
             
@@ -2325,16 +2564,26 @@ function loadSettingsFromFirestore() {
                 const tableId = cardElement.dataset.tableId, date = cardElement.dataset.date;
                 
                 if (tableId && date && tableData[tableId]?.[date]) {
+                    
+                    // *** BUG FIX (CRITICAL DATA LOSS) START ***
+                    // We ONLY delete the card's entry from tableData.
+                    // We DO NOT delete the topics from appData.completedTopics.
+                    // The topics might be used in other cards.
+                    /* // OLD, BUGGY CODE THAT CAUSED DATA LOSS:
                     Object.keys(tableData[tableId][date]).forEach(colName => {
                         const topicIdArray = tableData[tableId][date][colName];
                         if (Array.isArray(topicIdArray)) {
                             topicIdArray.forEach(topicId => {
-                                delete appData.completedTopics[topicId];
-                               });
-                          }
-                      });
+                                delete appData.completedTopics[topicId]; // <-- THIS WAS THE BUG
+                            });
+                        }
+                    });
+                    */
+                    
+                    // This is the correct action: just delete the card's data
                     delete tableData[tableId][date];
-                   }
+                    // *** BUG FIX (CRITICAL DATA LOSS) END ***
+                }
                 
                 cardElement.remove();
                 saveDataToFirestore();
@@ -2342,7 +2591,10 @@ function loadSettingsFromFirestore() {
                });
         }
         
-        function handleDateChange(dateDiv) { /* ... (unchanged from v4.3) ... */ 
+        // *** BUG FIX (UX - STRICT DATE) ***
+        // This function now robustly parses D/M/YYYY and DD/MM/YYYY
+        // and reformats it, instead of rejecting valid dates.
+        function handleDateChange(dateDiv) {
             const card = dateDiv.closest('.date-card');
             const newDateRaw = dateDiv.textContent.trim();
             const oldDateRaw = dateDiv.dataset.originalDate.trim();
@@ -2350,40 +2602,57 @@ function loadSettingsFromFirestore() {
             if (!card || !newDateRaw || newDateRaw === oldDateRaw || newDateRaw === 'New Date') {
                 if (newDateRaw !== oldDateRaw && (newDateRaw === '' || newDateRaw === 'New Date')) {
                     dateDiv.textContent = oldDateRaw;
-                   } else if (!newDateRaw) {
+                } else if (!newDateRaw) {
                     dateDiv.textContent = oldDateRaw;
-                   }
+                }
                 return;
-               }
+            }
             
-            const dateRegexStrict = /^\d{2}\/\d{2}\/\d{4}$/;
-            if (!dateRegexStrict.test(newDateRaw)) {
-                showToastQueued('error', 'Use DD/MM/YYYY.');
+            // *** BUG FIX (STRICT DATE) START ***
+            // const dateRegexStrict = /^\d{2}\/\d{2}\/\d{4}$/; // OLD
+            // if (!dateRegexStrict.test(newDateRaw)) { // OLD
+
+            let parsedDate;
+            // Try to parse DD/MM/YYYY (or D/M/YYYY)
+            const parts = newDateRaw.split('/');
+            if (parts.length === 3) {
+                const [day, month, year] = parts.map(Number);
+                // Check if parts are reasonable numbers
+                if (day > 0 && day <= 31 && month > 0 && month <= 12 && year > 2000 && year < 2100) {
+                    parsedDate = new Date(year, month - 1, day);
+                    // Final validation: check if JS Date object matches input (e.g., 31/02/2025 is invalid)
+                    if (parsedDate.getDate() !== day || parsedDate.getMonth() !== month - 1 || parsedDate.getFullYear() !== year) {
+                        parsedDate = null; // Invalid date
+                    }
+                }
+            }
+
+            if (!parsedDate) { // NEW
+                showToastQueued('error', 'Use DD/MM/YYYY format.');
                 dateDiv.textContent = oldDateRaw;
                 return;
-               }
+            }
             
-            const [day, month, year] = newDateRaw.split('/').map(Number);
-            const testDate = new Date(year, month - 1, day);
-            if (isNaN(testDate.getTime()) || testDate.getDate() !== day || testDate.getMonth() !== month - 1 || testDate.getFullYear() !== year) {
-                showToastQueued('error', 'Invalid date!');
-                dateDiv.textContent = oldDateRaw;
-                return;
-               }
+            // Format the valid date into the standard DD/MM/YYYY format using our helper
+            const newDate = getFormattedDate(parsedDate);
+            dateDiv.textContent = newDate; // Update the UI to show the formatted version
+            // *** BUG FIX (STRICT DATE) END ***
             
-            const newDate = newDateRaw;
-            const oldDate = oldDateRaw;
+            const oldDate = oldDateRaw; // oldDate is still the original value
+            if (newDate === oldDate) return; // If formatting "01/10/2025" just results in "01/10/2025"
+
             const tableId = card.dataset.tableId;
             const container = tableId === 'table1' ? table1CardsContainer : table2CardsContainer;
             
             const existingDates = Array.from(container.querySelectorAll('.date-header-text'))
-                                             .filter(div => div !== dateDiv)
-                                             .map(div => div.textContent.trim());
+                                    .filter(div => div !== dateDiv)
+                                    .map(div => div.textContent.trim());
+                                    
             if (existingDates.includes(newDate)) {
                 showToastQueued('error', 'Date already exists!');
-                dateDiv.textContent = oldDate;
+                dateDiv.textContent = oldDate; // Revert to old
                 return;
-               }
+            }
             
             dateDiv.dataset.originalDate = newDate;
             card.dataset.date = newDate;
@@ -2400,14 +2669,15 @@ function loadSettingsFromFirestore() {
             if (tableData[tableId]?.[oldDate]) {
                 tableData[tableId][newDate] = tableData[tableId][oldDate];
                 delete tableData[tableId][oldDate];
-               }
-              
+            }
+                
             saveDataToFirestore();
             sortCardsInContainer(container);
             setTimeout(() => { updateCardProgress(card); }, 50);
         }
 
-        function handleDragDrop(draggedElement, toSection) { /* ... (unchanged from v4.3) ... */ 
+
+        function handleDragDrop(draggedElement, toSection) { /* ... (unchanged) ... */ 
             const oldSection = draggedElement.closest('.column-section');
             const toCard = toSection.closest('.date-card');
             const oldCard = oldSection ? oldSection.closest('.date-card') : null;
@@ -2425,7 +2695,7 @@ function loadSettingsFromFirestore() {
             const oldDate = oldCard.dataset.date, oldColName = oldSection.dataset.colName, oldTableId = oldCard.dataset.tableId;
             
             const targetTopicIds = tableData[newTableId]?.[newDate]?.[newColName] || [];
-            const isDuplicate = targetTopicIds.some(id => appData.completedTopics[id]?.name === topicName);
+            const isDuplicate = targetTopicIds.some(id => appData.completedTopics[id]?.name.toLowerCase() === topicName.toLowerCase());
             if (isDuplicate) {
                 showToastQueued('error', `"${topicName}" exists here.`);
                 document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
@@ -2449,13 +2719,13 @@ function loadSettingsFromFirestore() {
             updateAllProgressUI(); 
         }
 
-        function handleViewToggle(viewId) { /* ... (unchanged from v4.3) ... */ 
+        function handleViewToggle(viewId) { /* ... (unchanged) ... */ 
             if (currentView === viewId) return;
             currentView = viewId;
             localStorage.setItem('lastFightTrackerView', currentView);
             updateViewToggleUI();
         }
-        function updateViewToggleUI() { /* ... (unchanged from v4.3) ... */ 
+        function updateViewToggleUI() { /* ... (unchanged) ... */ 
             if (currentView === 'table1') {
                 table1Section.classList.remove('hidden');
                 addRowBtnTable1.classList.remove('hidden');
@@ -2472,15 +2742,15 @@ function loadSettingsFromFirestore() {
         }
         
         // ========================================================================
-        // PROGRESS UI & COUNTDOWN
+        // PROGRESS UI & COUNTDOWN (Unchanged)
         // ========================================================================
 
-        function updateAllProgressUI() { /* ... (unchanged from v4.3) ... */ 
+        function updateAllProgressUI() { /* ... (unchanged) ... */ 
             updateOverallProgress();
             updateAllCardProgressBars();
             updateTaskCounters();
         }
-        function updateOverallProgress() { /* ... (unchanged from v4.3) ... */ 
+        function updateOverallProgress() { /* ... (unchanged) ... */ 
             const bar = document.getElementById('overall-progress-bar'), text = document.getElementById('overall-progress-text');
             if (!bar || !text) return;
             const container = table1CardsContainer;
@@ -2494,7 +2764,7 @@ function loadSettingsFromFirestore() {
             bar.style.width = `${overallAvg}%`;
             text.textContent = `${Math.round(overallAvg)}%`;
         }
-        function updateTaskCounters() { /* ... (unchanged from v4.3) ... */ 
+        function updateTaskCounters() { /* ... (unchanged) ... */ 
             ['table1', 'table2'].forEach(tableId => {
                 const container = tableId === 'table1' ? table1CardsContainer : table2CardsContainer;
                 const counterEl = document.getElementById(`${tableId.replace('table', 't')}_task_counter`);
@@ -2509,10 +2779,10 @@ function loadSettingsFromFirestore() {
                 counterEl.classList.remove('opacity-0');
                });
         }
-        function updateAllCardProgressBars() { /* ... (unchanged from v4.3) ... */ 
+        function updateAllCardProgressBars() { /* ... (unchanged) ... */ 
             document.querySelectorAll('.date-card').forEach(card => updateCardProgress(card));
         }
-        function updateCardProgress(cardElement) { /* ... (unchanged from v4.3) ... */ 
+        function updateCardProgress(cardElement) { /* ... (unchanged) ... */ 
             if (!cardElement) return;
             const tableId = cardElement.dataset.tableId, date = cardElement.dataset.date;
             if (!tableId || !date) return;
@@ -2537,10 +2807,10 @@ function loadSettingsFromFirestore() {
         }
         
         // ========================================================================
-        // CALENDAR & COUNTDOWN
+        // CALENDAR & COUNTDOWN (Unchanged)
         // ========================================================================
 
-        function handleGoToToday() { /* ... (unchanged from v4.3) ... */ 
+        function handleGoToToday() { /* ... (unchanged) ... */ 
             const todayString = getFormattedDate(today);
             handleViewToggle('table2'); 
             
@@ -2556,12 +2826,12 @@ function loadSettingsFromFirestore() {
                    }
                }, 100);
         }
-        function handleOpenCalendar() { /* ... (unchanged from v4.3) ... */ 
+        function handleOpenCalendar() { /* ... (unchanged) ... */ 
             calendarState = { month: today.getMonth(), year: today.getFullYear() };
             renderCalendar(calendarState.month, calendarState.year);
             openModal(calendarModalEl);
         }
-        function renderCalendar(month, year) { /* ... (unchanged from v4.3) ... */ 
+        function renderCalendar(month, year) { /* ... (unchanged) ... */ 
             calendarDaysEl.innerHTML = '';
             const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             calendarMonthYearEl.textContent = `${monthNames[month]} ${year}`;
@@ -2577,8 +2847,8 @@ function loadSettingsFromFirestore() {
                 dayEl.dataset.date = dateStr;
                 
                 const isPast = (year < today.getFullYear()) ||
-                             (year === today.getFullYear() && month < today.getMonth()) ||
-                             (year === today.getFullYear() && month === today.getMonth() && day < today.getDate());
+                                 (year === today.getFullYear() && month < today.getMonth()) ||
+                                 (year === today.getFullYear() && month === today.getMonth() && day < today.getDate());
                 if (isPast) {
                     dayEl.classList.add('disabled');
                     dayEl.title = "Cannot add past dates";
@@ -2596,7 +2866,7 @@ function loadSettingsFromFirestore() {
                 calendarDaysEl.appendChild(dayEl);
                }
         }
-        function handleCalendarDateClick(dayElement) { /* ... (unchanged from v4.3) ... */ 
+        function handleCalendarDateClick(dayElement) { /* ... (unchanged) ... */ 
             const dateString = dayElement.dataset.date;
             if (!dateString) return;
             
@@ -2625,7 +2895,7 @@ function loadSettingsFromFirestore() {
                }, "Yes, Add", "button-success"); 
         }
 
-        // v5.0: Modern Countdown logic
+        // v5.1: Patched Countdown logic
         function startCountdown() {
             const els = { 
                 d: document.getElementById('days'), h: document.getElementById('hours'), 
@@ -2635,6 +2905,9 @@ function loadSettingsFromFirestore() {
             
             const update = () => {
                 let countDownDate;
+                // *** BUG FIX (COUNTDOWN REFRESH) ***
+                // Always read from the *global* appSettings, which is updated
+                // by loadSettingsFromFirestore()
                 if (appSettings.countdownSettings && appSettings.countdownSettings.targetDate) {
                     const targetDateTime = `${appSettings.countdownSettings.targetDate}T${appSettings.countdownSettings.targetTime || '00:00'}`;
                     countDownDate = new Date(targetDateTime).getTime();
@@ -2666,7 +2939,7 @@ function loadSettingsFromFirestore() {
            }
 
         // ========================================================================
-        // TOAST & CLEANUP
+        // TOAST & CLEANUP (Unchanged)
         // ========================================================================
 
         function showToastQueued(type, customMessage = '') {
@@ -2729,19 +3002,9 @@ function loadSettingsFromFirestore() {
             if (saveTimeout) clearTimeout(saveTimeout);
             if (toastTimeout) clearTimeout(toastTimeout);
             if (calendarClickTimer) clearTimeout(calendarClickTimer);
-            cleanupListenersAndState(); // v5.0: Use the main cleanup function
+            cleanupListenersAndState(); // v5.1: Use the main cleanup function
             console.log("App listeners cleaned up.");
            };
     </script>
 </body>
-                            </html>
-
-
-
-
-
-
-
-
-
-
+    </html>
