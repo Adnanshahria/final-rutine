@@ -994,28 +994,7 @@ function loadSettingsFromFirestore() {
     });
 }
 
-function loadDataFromFirestore() {
-     if (!dbDocRef) {
-         console.error(">>> ERROR in loadDataFromFirestore: dbDocRef is not defined.");
-         return;
-    }
-    if (unsubscribeSnapshot) unsubscribeSnapshot();
 
-    console.log(">>> Inside loadDataFromFirestore, setting up snapshot..."); // <-- Data Log 1
-    showToastQueued('syncing');
-
-    unsubscribeSnapshot = onSnapshot(dbDocRef, (doc) => {
-        console.log(">>> Data snapshot received. Exists:", doc.exists()); // <-- Snapshot Log 2
-         // ... (keep existing code for handling data) ...
-
-        renderData();
-        showToastQueued(doc.metadata.fromCache ? "cached" : "synced");
-    }, (error) => {
-        console.error(">>> ERROR loading data snapshot:", error); // <-- Error Log
-        loadingEl.innerHTML = `<p class="text-red-400">Error: Load failed.</p>`;
-        showToastQueued('error');
-    });
-}
 
         async function handleGoogleSignIn() {
             googleLoginBtn.disabled = true;
@@ -2686,6 +2665,7 @@ function loadDataFromFirestore() {
     </script>
 </body>
                             </html>
+
 
 
 
