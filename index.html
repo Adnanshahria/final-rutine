@@ -927,7 +927,7 @@
         alert("Critical Error: Firebase Initialization Failed. Error: " + error.message);
     }
 }
-  function setupAuthStateListener() {
+function setupAuthStateListener() {
     console.log(">>> [Listener] Attaching Auth State Listener..."); // Listener Log 1
 
     // Check if auth object is valid before attaching
@@ -941,27 +941,102 @@
         // --->>> THIS IS THE MOST IMPORTANT LOG <<<---
         console.log(">>> [Listener Callback] Auth state HAS changed. User object present:", !!user); // Listener Log 2
 
-        // (Keep the rest of the function code from the previous step, including all the try...catch blocks and Step 1-9 logs)
         if (user) {
-             console.log(">>> Step 1: User signed in successfully. UID:", user.uid);
-             try {
-                 currentUserId = user.uid;
-                 const appId = "rutine-f2ac1";
-                 // ... rest of the code for signed-in user ...
-                 console.log(">>> Step 9: Loading spinner shown.");
-             } catch (error) {
-                 console.error(">>> CRITICAL ERROR inside 'if (user)' block:", error);
-                 alert("An error occurred after login. Check the console. Error: " + error.message);
-             }
+            console.log(">>> Step 1: User signed in successfully. UID:", user.uid); // Log 1
+
+            try {
+                currentUserId = user.uid;
+                const appId = "rutine-f2ac1"; // Ensure this is correct
+
+                // Check DOM elements needed for UI updates
+                const settingsUserImgCheck = document.getElementById('settings-user-img');
+                const settingsUserNameCheck = document.getElementById('settings-user-name');
+                const settingsUserEmailCheck = document.getElementById('settings-user-email');
+                if (!settingsUserImgCheck || !settingsUserNameCheck || !settingsUserEmailCheck) {
+                        console.error(">>> ERROR: Settings modal elements not found!");
+                        // Continue execution but log the error
+                } else {
+                        console.log(">>> Settings modal elements found.");
+                        // Update settings modal UI only if elements exist
+                        settingsUserImgCheck.src = user.photoURL || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM5NDRhYjgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0iZmVhdGhlciBmZWF0aGVyLXVzZXIiPjxwYXRoIGQ9Ik0yMCAyMWE4IDggMCAwIDAtMTYgMCI+PC9wYXRoPjxjaXJjbGUgY3g9IjEyIiBjeT0iNyIgcj0iNCI+PC9jaXJjbGU+PC9zdmc+'; // Use the placeholder SVG
+                        settingsUserNameCheck.textContent = user.displayName || 'App User';
+                        settingsUserEmailCheck.textContent = user.email || 'No email provided';
+                }
+
+                // Set user-specific doc paths (wrap in try-catch)
+                console.log(">>> Attempting to set Firestore doc paths...");
+                const dataPath = `artifacts/${appId}/users/${currentUserId}/studyProgress/data_v4`;
+                const settingsPath = `artifacts/${appId}/users/${currentUserId}/studyProgress/settings_v1`;
+                dbDocRef = doc(db, dataPath);
+                settingsDocRef = doc(db, settingsPath);
+                console.log(">>> Step 2: Firestore paths set successfully."); // Log 2
+
+                // Load user's data and settings (wrap in try-catch)
+                console.log(">>> Step 3: Attempting to call loadSettingsFromFirestore..."); // Log 3
+                loadSettingsFromFirestore(); // Must load settings first
+
+                // --- START: UI Update using style.display ---
+                console.log(">>> Step 6: Attempting UI update (hide login, show app)..."); // Log 6
+                const loginScreenEl = document.getElementById('login-screen'); // Re-get element just in case
+                const mainAppEl = document.getElementById('main-app-container');
+                const loadingSpinnerEl = document.getElementById('loading');
+
+                if (loginScreenEl && mainAppEl && loadingSpinnerEl) {
+                    // --- FORCE HIDE/SHOW WITH DIRECT STYLE ---
+                    loginScreenEl.style.display = 'none'; // Force hide login screen
+                    console.log(">>> Step 7: loginScreen.style.display set to 'none'."); // Log 7
+
+                    mainAppEl.style.display = 'block'; // Force show main container
+                    console.log(">>> Step 8: mainAppContainer.style.display set to 'block'."); // Log 8
+                    // --- END FORCE HIDE/SHOW ---
+
+                    loadingSpinnerEl.classList.remove('hidden'); // Show loading spinner within main container
+                    console.log(">>> Step 9: Loading spinner shown (using classList)."); // Log 9
+
+                    // Add a final check log
+                    console.log(">>> Final check: loginScreen display:", loginScreenEl.style.display, "| mainApp display:", mainAppEl.style.display); // Log 10
+
+                } else {
+                    console.error(">>> CRITICAL ERROR during UI update: One or more essential elements became null!");
+                    alert("Critical Error during UI update. App state might be inconsistent.");
+                }
+                // --- END: UI Update using style.display ---
+
+            } catch (error) {
+                console.error(">>> CRITICAL ERROR inside 'if (user)' block:", error); // <-- Catch errors inside the main block
+                alert("An error occurred after login. Check the console for details. Error: " + error.message); // Show alert
+            }
+
         } else {
-             // ... rest of the code for signed-out user ...
-             console.log(">>> Showing login screen for signed out user.");
+            // User is SIGNED OUT
+            console.log(">>> User signed out or authentication failed."); // <-- Sign Out Log
+            currentUserId = null;
+            cleanupListenersAndState();
+
+            // --- START: UI Update for signed-out user using style.display ---
+            const loginScreenEl = document.getElementById('login-screen'); // Re-get elements
+            const mainAppEl = document.getElementById('main-app-container');
+            const loadingSpinnerEl = document.getElementById('loading');
+            const googleLoginErrorEl = document.getElementById('google-login-error');
+            const googleLoginTextEl = document.getElementById('google-login-text');
+            const googleLoginBtnEl = document.getElementById('google-login-btn');
+
+            // --- FORCE HIDE/SHOW WITH DIRECT STYLE ---
+            if (loginScreenEl) loginScreenEl.style.display = 'flex'; // Force show login screen (assuming it uses flex)
+            if (mainAppEl) mainAppEl.style.display = 'none'; // Force hide main container
+            // --- END FORCE HIDE/SHOW ---
+
+            if (loadingSpinnerEl) loadingSpinnerEl.classList.add('hidden'); // Ensure loading spinner is hidden
+            if (googleLoginErrorEl) googleLoginErrorEl.classList.add('hidden');
+            if (googleLoginTextEl) googleLoginTextEl.textContent = 'Sign In with Google';
+            if (googleLoginBtnEl) googleLoginBtnEl.disabled = false;
+            console.log(">>> Showing login screen for signed out user (via style.display).");
+            // --- END: UI Update for signed-out user ---
         }
     });
 
     console.log(">>> [Listener] Auth state listener attached successfully."); // Listener Log 3
- }
-// --- Add logs inside Firestore loading functions ---
+ } --- Add logs inside Firestore loading functions ---
 
 function loadSettingsFromFirestore() {
     if (!settingsDocRef) {
@@ -2660,6 +2735,7 @@ function loadSettingsFromFirestore() {
     </script>
 </body>
                             </html>
+
 
 
 
