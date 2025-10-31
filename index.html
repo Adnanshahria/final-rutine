@@ -1323,7 +1323,7 @@
             tempAppSettings.customStudyTypes = newStudyTypes;
             
             // Now, commit the temp state to the main appSettings
-            appSettings = JSON.parse(JSON.stringify(tempAppSettings));
+            appSettings.customStudyTypes = JSON.parse(JSON.stringify(tempAppSettings.customStudyTypes)); appSettings.countdownSettings = JSON.parse(JSON.stringify(tempAppSettings.countdownSettings));
             // *** END BUG FIX (SETTINGS CANCEL) ***
 
             // Save the (now updated) main appSettings to Firebase
@@ -3090,3 +3090,4 @@
     </script>
 </body>
     </html>
+
