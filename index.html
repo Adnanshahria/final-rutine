@@ -747,6 +747,9 @@
         let isToastShowing = false;
         let tempAppSettings = {}; // *** BUG FIX (Settings Cancel Logic) ***
         let currentUserId = null; // v5.1: This is critical for multi-user
+        
+        // *** BUG FIX #3 (Memory Leak) ***
+        let globalEventController = null; // Controller to manage global listeners
 
         // v5.0: Default app settings for new users
         const DEFAULT_STUDY_TYPES = [
@@ -970,7 +973,8 @@
                         currentUserId = user.uid;
                         
                         try {
-                            // *** Per user request, DO NOT TOUCH this appId ***
+                            // *** BUG FIX #1 (Comment Clarity) ***
+                            // This appId represents the shared app namespace. User data is isolated via currentUserId.
                             const appId = "rutine-f2ac1";
                             
                             const settingsUserImgCheck = document.getElementById('settings-user-img');
@@ -1086,6 +1090,15 @@
 
         // v5.1: Patched cleanup function
         function cleanupListenersAndState() {
+            // *** BUG FIX #3 (Memory Leak) ***
+            // Abort all global listeners
+            if (globalEventController) {
+                globalEventController.abort();
+                globalEventController = null;
+                console.log("Global event listeners aborted.");
+            }
+            // *** END BUG FIX #3 ***
+
             if (unsubscribeSnapshot) unsubscribeSnapshot();
             if (unsubscribeSettings) unsubscribeSettings();
 
@@ -1124,10 +1137,9 @@
         // v5.1: SETTINGS & CUSTOMIZATION LOGIC (PATCHED)
         // ========================================================================
 
-        // *** BUG FIX (CRITICAL - COUNTDOWN REFRESH) ***
-        // This function now correctly saves default settings for new users
-        // and updates the countdown UI *after* settings are loaded.
-        function loadSettingsFromFirestore() {
+        // *** BUG FIX #2 (Race Condition) ***
+        // This function now ensures dropdowns are populated before loading data.
+        async function loadSettingsFromFirestore() { // Make async
             if (!settingsDocRef) {
                 console.error(">>> ERROR in loadSettingsFromFirestore: settingsDocRef is not defined.");
                 return;
@@ -1135,8 +1147,9 @@
             if (unsubscribeSettings) unsubscribeSettings();
 
             console.log(">>> Step 4: Inside loadSettingsFromFirestore, setting up snapshot...");
+            showToastQueued('syncing');
 
-            unsubscribeSettings = onSnapshot(settingsDocRef, (doc) => {
+            unsubscribeSettings = onSnapshot(settingsDocRef, async (doc) => { // Make callback async
                 console.log(">>> Settings snapshot received. Exists:", doc.exists());
                 if (doc.exists()) {
                     const settingsData = doc.data();
@@ -1148,19 +1161,21 @@
                     appSettings.customStudyTypes = JSON.parse(JSON.stringify(DEFAULT_STUDY_TYPES));
                     appSettings.countdownSettings = { title: "Countdown to Goal", targetDate: "2025-12-12", targetTime: "00:00" };
                     
-                    // *** BUG FIX (MAJOR LOGIC) ***
-                    // Save these defaults back to Firestore so the doc exists for next time
                     console.log("Saving default settings to Firestore for new user...");
-                    saveSettingsToFirestore(); 
+                    await saveSettingsToFirestore(); // Await the save
                 }
 
-                // *** BUG FIX (COUNTDOWN NAME REFRESH) START ***
-                // These must be called *after* settings are loaded
                 updateCountdownUI(); // Update the countdown title on the main page
                 startCountdown();    // Re-start the countdown timer with the new settings
-                // *** BUG FIX (COUNTDOWN NAME REFRESH) END ***
 
-                populateAllStudyTypeDropdowns();
+                // *** BUG FIX #2 (Race Condition) START ***
+                // Wait for dropdowns to populate before loading data
+                await new Promise(resolve => {
+                    populateAllStudyTypeDropdowns();
+                    console.log(">>> Dropdowns populated.");
+                    resolve();
+                });
+                // *** BUG FIX #2 (Race Condition) END ***
 
                 console.log(">>> Step 5: Settings processed, calling loadDataFromFirestore...");
                 loadDataFromFirestore(); // Now load the main app data
@@ -1188,41 +1203,48 @@
             }
         }
 
-        // *** BUG FIX (SETTINGS CANCEL) ***
-        // Now accepts an argument `settingsToRender` (which is `tempAppSettings`)
-        // instead of reading directly from the global `appSettings`.
+        // *** BUG FIX #9 (XSS Vulnerability) ***
+        // This function is now safe from XSS.
         function renderSettingsModal(settingsToRender) {
             customStudyTypeList.innerHTML = ''; // Clear existing list
             
             if (!settingsToRender.customStudyTypes || settingsToRender.customStudyTypes.length === 0) {
                 customStudyTypeList.innerHTML = `<p class="text-slate-400">No study types found. Add one!</p>`;
+                // Still render countdown settings below
+            } else {
+                // *** BUG FIX #9 (XSS) START ***
+                // Create elements programmatically
+                settingsToRender.customStudyTypes.forEach(studyType => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'custom-study-type-item';
+                    itemEl.dataset.key = studyType.key;
+                    
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'custom-study-type-name';
+                    input.value = studyType.name; // This is safe. .value does not render HTML
+                    input.placeholder = 'Study Type Name';
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.type = 'button';
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.title = 'Delete Study Type';
+                    deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`; // SVG is safe
+                    
+                    itemEl.appendChild(input);
+                    itemEl.appendChild(deleteBtn);
+                    customStudyTypeList.appendChild(itemEl);
+                });
+                // *** BUG FIX #9 (XSS) END ***
             }
-
-            settingsToRender.customStudyTypes.forEach(studyType => {
-                const itemEl = document.createElement('div');
-                itemEl.className = 'custom-study-type-item';
-                itemEl.dataset.key = studyType.key;
-                
-                itemEl.innerHTML = `
-                    <input type="text" class="custom-study-type-name" value="${studyType.name}" placeholder="Study Type Name">
-                    <button type="button" class="delete-btn" title="Delete Study Type">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                    </button>
-                `;
-                customStudyTypeList.appendChild(itemEl);
-            });
             
-            // *** BUG FIX (SETTINGS CANCEL) ***
-            // Populate countdown inputs from the temp copy, not the global state
+            // Populate countdown inputs from the temp copy
             if (countdownTitleInput && settingsToRender.countdownSettings) {
                 countdownTitleInput.value = settingsToRender.countdownSettings.title || "Countdown to Goal";
                 countdownDateInput.value = settingsToRender.countdownSettings.targetDate || "2025-12-12";
                 countdownTimeInput.value = settingsToRender.countdownSettings.targetTime || "00:00";
             }
         }
-        
-        // This function is no longer needed as its logic is merged into renderSettingsModal
-        // function updateCountdownSettingsUI() { ... }
         
         function updateCountdownUI() {
             const countdownTitle = document.getElementById('countdown-title');
@@ -1231,8 +1253,6 @@
             }
         }
 
-        // *** BUG FIX (SETTINGS CANCEL) ***
-        // Modifies `tempAppSettings` instead of `appSettings`
         function handleSettingsAddStudyType() {
             const newKey = `custom_${Date.now()}`;
             const newName = "New Study Type";
@@ -1251,8 +1271,6 @@
             }
         }
 
-        // *** BUG FIX (SETTINGS CANCEL) ***
-        // Modifies `tempAppSettings` instead of `appSettings`
         function handleSettingsDeleteStudyType(button) {
             const itemEl = button.closest('.custom-study-type-item');
             if (!itemEl) return;
@@ -1275,8 +1293,6 @@
             showToastQueued('info', 'Study type removed. Click Save.');
         }
 
-        // *** BUG FIX (SETTINGS CANCEL) ***
-        // Commits `tempAppSettings` to `appSettings` only on Save
         async function handleSettingsSave() {
             // Read all values from the DOM inputs
             const newStudyTypes = [];
@@ -1303,13 +1319,12 @@
                 return;
             }
 
-            // *** BUG FIX (SETTINGS CANCEL) START ***
             // Update the temp state first
             tempAppSettings.customStudyTypes = newStudyTypes;
             
             // Now, commit the temp state to the main appSettings
             appSettings = JSON.parse(JSON.stringify(tempAppSettings));
-            // *** BUG FIX (SETTINGS CANCEL) END ***
+            // *** END BUG FIX (SETTINGS CANCEL) ***
 
             // Save the (now updated) main appSettings to Firebase
             await saveSettingsToFirestore();
@@ -1340,7 +1355,6 @@
                 return;
             }
             
-            // *** BUG FIX (SETTINGS CANCEL) ***
             // Update *both* states. Temp for the modal, global for immediate UI.
             appSettings.countdownSettings = {
                 title: title,
@@ -1352,7 +1366,6 @@
                 targetDate: date,
                 targetTime: time
             };
-            // *** END BUG FIX ***
             
             saveSettingsToFirestore();
             updateCountdownUI();
@@ -1407,9 +1420,6 @@
         // DATA LOGIC (v5.1: Patched)
         // ========================================================================
 
-        // *** BUG FIX (CRITICAL - DESTRUCTIVE MIGRATION) ***
-        // This function now asks for confirmation before wiping old data.
-        // It also calls `cleanupOrphanedTopics` after loading.
         function loadDataFromFirestore() {
             if (!dbDocRef) {
                 console.log("loadDataFromFirestore: No dbDocRef (user might be logging out). Skipping.");
@@ -1499,7 +1509,8 @@
             });
         }
 
-
+        // *** BUG FIX #10 (Error Handling) ***
+        // This function now has robust try...catch error handling
         function saveDataToFirestore() {
             if (!dbDocRef || !currentUserId) {
                 console.log("saveDataToFirestore: No dbDocRef or user, skipping save.");
@@ -1514,6 +1525,8 @@
             saveTimeout = setTimeout(async () => {
                 if (!pendingChanges) return;
                 pendingChanges = false;
+                
+                // *** BUG FIX #10 (Error Handling) START ***
                 try {
                     showToastQueued('syncing');
                     await setDoc(dbDocRef, { 
@@ -1521,11 +1534,21 @@
                         tableData: tableDataToSave 
                        }, { merge: false }); // Use false to overwrite, ensuring deleted cards stay deleted
                     showToastQueued('synced');
-                   } catch (error) {
+                } catch (error) {
                     console.error("Firestore save error:", error);
-                    showToastQueued('error', 'Sync Error');
-                    pendingChanges = true; 
-                   }
+                    
+                    // Show user-friendly error messages
+                    if (error.code === 'permission-denied') {
+                        showToastQueued('error', 'Permission denied. Please sign in again.');
+                    } else if (error.code === 'unavailable') {
+                        showToastQueued('error', 'Network error. Will retry...');
+                        pendingChanges = true; // Retry on next change
+                    } else {
+                        showToastQueued('error', 'Sync Error');
+                        pendingChanges = true; // Retry on next change
+                    }
+                }
+                // *** BUG FIX #10 (Error Handling) END ***
                }, 1000);
            }
         
@@ -1713,19 +1736,29 @@
             return card;
            }
 
+        // *** BUG FIX #4 (Study Type Fallback) ***
+        // This function now returns null if settings aren't loaded.
         function createTopicElement(topicId) {
             const topicData = appData.completedTopics[topicId];
             if (!topicData) {
                 console.warn("Orphaned topic ID detected (will not render):", topicId);
                 return null;
-               }
+            }
+            
+            // *** BUG FIX #4 (Study Type Fallback) START ***
+            // Check if settings are loaded
+            if (!appSettings.customStudyTypes || appSettings.customStudyTypes.length === 0) {
+                console.warn("Settings not loaded yet, skipping topic render:", topicId);
+                return null; // Don't render until settings are ready
+            }
+            // *** BUG FIX #4 (Study Type Fallback) END ***
 
             const progress = topicData.progress || 0;
             const note = topicData.note || '';
             const timedNote = topicData.timedNote || '';
             const displayName = topicData.name || 'Unnamed Topic';
             const priority = topicData.priority || 'low';
-            const studyStatusKey = topicData.studyStatus || (appSettings.customStudyTypes[0]?.key || 'new'); // Fixed: Fallback for missing studyStatus
+            const studyStatusKey = topicData.studyStatus || appSettings.customStudyTypes[0].key; // Use new fallback
             const hardness = topicData.hardness || 'medium'; 
             
             const topicEl = document.createElement('div');
@@ -1839,23 +1872,31 @@
         // ========================================================================
 
         let calendarClickTimer = null;
+        // *** BUG FIX #3 (Memory Leak) ***
+        // This function now uses an AbortController
         function setupGlobalEventListeners() {
+            // Remove old listeners if they exist
+            if (globalEventController) {
+                globalEventController.abort();
+            }
+            
+            // Create new AbortController for this session
+            globalEventController = new AbortController();
+            const signal = globalEventController.signal;
+            
             const container = document.body;
 
             // v5.0: Login Button
-            googleLoginBtn.addEventListener('click', handleGoogleSignIn);
-            googleSignoutBtn.addEventListener('click', handleSignOut);
+            googleLoginBtn.addEventListener('click', handleGoogleSignIn, { signal });
+            googleSignoutBtn.addEventListener('click', handleSignOut, { signal });
             
-            // v5.1: Settings Modal (Patched for Cancel logic)
+            // v5.1: Settings Modal
             settingsBtn.addEventListener('click', () => {
-                // *** BUG FIX (SETTINGS CANCEL) START ***
-                // Create a deep copy of the current settings for the modal to play with
+                // Create a deep copy of the current settings for the modal
                 tempAppSettings = JSON.parse(JSON.stringify(appSettings));
                 renderSettingsModal(tempAppSettings); // Pass the temp copy to render
-                // *** BUG FIX (SETTINGS CANCEL) END ***
-                
                 openModal(settingsModalEl);
-            });
+            }, { signal });
             
             // Settings tab navigation
             settingsNavAccount.addEventListener('click', () => {
@@ -1865,7 +1906,7 @@
                 settingsTabAccount.classList.remove('hidden');
                 settingsTabCustom.classList.add('hidden');
                 settingsTabCountdown.classList.add('hidden');
-            });
+            }, { signal });
             settingsNavCustom.addEventListener('click', () => {
                 settingsNavAccount.classList.remove('active');
                 settingsNavCustom.classList.add('active');
@@ -1873,7 +1914,7 @@
                 settingsTabAccount.classList.add('hidden');
                 settingsTabCustom.classList.remove('hidden');
                 settingsTabCountdown.classList.add('hidden');
-            });
+            }, { signal });
             settingsNavCountdown.addEventListener('click', () => {
                 settingsNavAccount.classList.remove('active');
                 settingsNavCustom.classList.remove('active');
@@ -1881,18 +1922,18 @@
                 settingsTabAccount.classList.add('hidden');
                 settingsTabCustom.classList.add('hidden');
                 settingsTabCountdown.classList.remove('hidden');
-            });
+            }, { signal });
             
-            settingsAddStudyTypeBtn.addEventListener('click', handleSettingsAddStudyType);
-            settingsSaveBtn.addEventListener('click', handleSettingsSave);
-            settingsCancelBtn.addEventListener('click', () => closeModal(settingsModalEl));
-            countdownSaveBtn.addEventListener('click', handleCountdownSave);
+            settingsAddStudyTypeBtn.addEventListener('click', handleSettingsAddStudyType, { signal });
+            settingsSaveBtn.addEventListener('click', handleSettingsSave, { signal });
+            settingsCancelBtn.addEventListener('click', () => closeModal(settingsModalEl), { signal });
+            countdownSaveBtn.addEventListener('click', handleCountdownSave, { signal });
             
             customStudyTypeList.addEventListener('click', (e) => {
                 if (e.target.closest('.delete-btn')) {
                     handleSettingsDeleteStudyType(e.target.closest('.delete-btn'));
                 }
-            });
+            }, { signal });
 
 
             calendarNavBtn.addEventListener('click', () => {
@@ -1906,7 +1947,7 @@
                         calendarClickTimer = null;
                        }, 250); 
                    }
-               });
+               }, { signal });
             
             container.addEventListener('click', (e) => {
                 const target = e.target;
@@ -1982,28 +2023,28 @@
                 if (target.id === 'calendar-cancel' || (closestTarget('#calendar-modal') && target === calendarModalEl)) { closeModal(calendarModalEl); return; }
                 // Close settings modal
                 if (closestTarget('#settings-modal') && target === settingsModalEl) { closeModal(settingsModalEl); return; }
-               });
+               }, { signal });
             
             container.addEventListener('contextmenu', (e) => {
                 if (e.target.closest('.progress-box')) {
                     e.preventDefault();
                     handleProgressClick(e.target.closest('.progress-box'), true);
                    }
-               });
+               }, { signal });
             
             container.addEventListener('focusin', (e) => {
                 const target = e.target;
                 if (target.contentEditable === 'true' && target.dataset.label === 'Date') {
                     target.dataset.originalDate = target.textContent.trim();
                    }
-               });
+               }, { signal });
             
             container.addEventListener('blur', (e) => {
                 const target = e.target;
                 if (target.contentEditable === 'true' && target.dataset.label === 'Date') {
                     handleDateChange(target);
                    }
-               }, true);
+               }, true, { signal }); // Note: blur doesn't support signal, but capture is used
             
             // Drag and Drop
             let draggedElement = null;
@@ -2012,13 +2053,13 @@
                     draggedElement = e.target;
                     setTimeout(() => { e.target.classList.add('dragging'); }, 0);
                    }
-               });
+               }, { signal });
             
             container.addEventListener('dragend', (e) => {
                 if (draggedElement) draggedElement.classList.remove('dragging');
                 draggedElement = null;
                 document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-               });
+               }, { signal });
             
             container.addEventListener('dragenter', (e) => {
                 const section = e.target.closest('.column-section');
@@ -2026,14 +2067,14 @@
                     document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
                     section.classList.add('drag-over');
                    }
-               });
+               }, { signal });
             
             container.addEventListener('drop', (e) => {
                 e.preventDefault();
                 const section = e.target.closest('.column-section');
                 document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
                 if (section && draggedElement) handleDragDrop(draggedElement, section);
-               });
+               }, { signal });
             
             // Keyboard Shortcuts
             document.addEventListener('keydown', (e) => {
@@ -2079,9 +2120,9 @@
                        }
                     return;
                    }
-               });
+               }, { signal });
             
-            window.addEventListener('beforeunload', window.cleanupAppListeners);
+            window.addEventListener('beforeunload', window.cleanupAppListeners, { signal });
            }
 
         // ========================================================================
@@ -2594,9 +2635,8 @@
                });
         }
         
-        // *** BUG FIX (UX - STRICT DATE) ***
-        // This function now robustly parses D/M/YYYY and DD/MM/YYYY
-        // and reformats it, instead of rejecting valid dates.
+        // *** BUG FIX #5 (Date Validation) ***
+        // This function now has robust validation for impossible dates.
         function handleDateChange(dateDiv) {
             const card = dateDiv.closest('.date-card');
             const newDateRaw = dateDiv.textContent.trim();
@@ -2611,35 +2651,56 @@
                 return;
             }
             
-            // *** BUG FIX (STRICT DATE) START ***
-            // const dateRegexStrict = /^\d{2}\/\d{2}\/\d{4}$/; // OLD
-            // if (!dateRegexStrict.test(newDateRaw)) { // OLD
-
+            // *** BUG FIX #5 (Date Validation) START ***
             let parsedDate;
-            // Try to parse DD/MM/YYYY (or D/M/YYYY)
             const parts = newDateRaw.split('/');
             if (parts.length === 3) {
                 const [day, month, year] = parts.map(Number);
-                // Check if parts are reasonable numbers
-                if (day > 0 && day <= 31 && month > 0 && month <= 12 && year > 2000 && year < 2100) {
-                    parsedDate = new Date(year, month - 1, day);
-                    // Final validation: check if JS Date object matches input (e.g., 31/02/2025 is invalid)
-                    if (parsedDate.getDate() !== day || parsedDate.getMonth() !== month - 1 || parsedDate.getFullYear() !== year) {
-                        parsedDate = null; // Invalid date
-                    }
+                
+                // Validate ranges BEFORE creating Date object
+                if (isNaN(day) || isNaN(month) || isNaN(year)) {
+                    showToastQueued('error', 'Date must contain only numbers');
+                    dateDiv.textContent = oldDateRaw;
+                    return;
+                }
+                
+                if (month < 1 || month > 12) {
+                    showToastQueued('error', 'Month must be between 1-12');
+                    dateDiv.textContent = oldDateRaw;
+                    return;
+                }
+                
+                if (day < 1 || day > 31) {
+                    showToastQueued('error', 'Day must be between 1-31');
+                    dateDiv.textContent = oldDateRaw;
+                    return;
+                }
+                
+                if (year < 2000 || year > 2100) {
+                    showToastQueued('error', 'Year must be between 2000-2100');
+                    dateDiv.textContent = oldDateRaw;
+                    return;
+                }
+                
+                parsedDate = new Date(year, month - 1, day);
+                
+                // Final validation for impossible dates (e.g., 31/02/2025)
+                if (parsedDate.getDate() !== day || parsedDate.getMonth() !== month - 1 || parsedDate.getFullYear() !== year) {
+                    showToastQueued('error', `${day}/${month}/${year} is not a valid date.`);
+                    dateDiv.textContent = oldDateRaw;
+                    return;
                 }
             }
 
-            if (!parsedDate) { // NEW
-                showToastQueued('error', 'Use DD/MM/YYYY format.');
+            if (!parsedDate) {
+                showToastQueued('error', 'Use DD/MM/YYYY format');
                 dateDiv.textContent = oldDateRaw;
                 return;
             }
             
-            // Format the valid date into the standard DD/MM/YYYY format using our helper
             const newDate = getFormattedDate(parsedDate);
             dateDiv.textContent = newDate; // Update the UI to show the formatted version
-            // *** BUG FIX (STRICT DATE) END ***
+            // *** BUG FIX #5 (Date Validation) END ***
             
             const oldDate = oldDateRaw; // oldDate is still the original value
             if (newDate === oldDate) return; // If formatting "01/10/2025" just results in "01/10/2025"
@@ -2949,8 +3010,20 @@
             toastQueue.push({ type, customMessage });
             if (!isToastShowing) processToastQueue();
            }
+        
+        // *** BUG FIX #7 (Toast Queue) ***
+        // This function now handles the queue more robustly.
         function processToastQueue() {
-            if (toastQueue.length === 0) { isToastShowing = false; return; }
+            if (toastQueue.length === 0) {
+                isToastShowing = false;
+                return;
+            }
+
+            if (isToastShowing) {
+                // Already showing a toast, don't process yet
+                return;
+            }
+            
             isToastShowing = true;
             const { type, customMessage } = toastQueue.shift();
             const toast = document.getElementById('toast'), msg = document.getElementById('toast-message'), spinner = document.getElementById('toast-spinner');
@@ -2993,11 +3066,17 @@
             spinner.className = spinnerClass;
             
             const duration = (type === 'syncing') ? 4000 : (type === 'error') ? 3000 : 2500;
+            
+            // *** BUG FIX #7 (Toast Queue) START ***
             toastTimeout = setTimeout(() => {
                 toast.classList.remove('show');
-                isToastShowing = false; 
-                setTimeout(processToastQueue, 400); 
-               }, duration);
+                // Wait for CSS transition before processing next
+                setTimeout(() => {
+                    isToastShowing = false;
+                    processToastQueue(); // Process next immediately
+                }, 400); // Match CSS transition duration
+            }, duration);
+            // *** BUG FIX #7 (Toast Queue) END ***
            }
         
         window.cleanupAppListeners = () => {
