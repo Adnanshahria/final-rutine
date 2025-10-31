@@ -1293,7 +1293,7 @@
             showToastQueued('info', 'Study type removed. Click Save.');
         }
 
-        async function handleSettingsSave() {
+      async function handleSettingsSave() {
             // Read all values from the DOM inputs
             const newStudyTypes = [];
             const items = customStudyTypeList.querySelectorAll('.custom-study-type-item');
@@ -1322,9 +1322,9 @@
             // Update the temp state first
             tempAppSettings.customStudyTypes = newStudyTypes;
             
-            // Now, commit the temp state to the main appSettings
-            appSettings.customStudyTypes = JSON.parse(JSON.stringify(tempAppSettings.customStudyTypes)); appSettings.countdownSettings = JSON.parse(JSON.stringify(tempAppSettings.countdownSettings));
-            // *** END BUG FIX (SETTINGS CANCEL) ***
+            // *** BUG FIX: Only update customStudyTypes, don't touch countdown settings ***
+            // The countdown settings are saved separately via handleCountdownSave()
+            appSettings.customStudyTypes = JSON.parse(JSON.stringify(tempAppSettings.customStudyTypes));
 
             // Save the (now updated) main appSettings to Firebase
             await saveSettingsToFirestore();
@@ -1332,12 +1332,11 @@
             // Re-populate all dropdowns in the app
             populateAllStudyTypeDropdowns();
             
-            // *** v5.2 FIX: Re-render all cards to show study type name changes ***
+            // Re-render all cards to show study type name changes
             renderAllCards(); 
             
             closeModal(settingsModalEl);
         }
-        
         function handleCountdownSave() {
             if (!countdownTitleInput || !countdownDateInput) return;
             
@@ -3090,4 +3089,5 @@
     </script>
 </body>
     </html>
+
 
