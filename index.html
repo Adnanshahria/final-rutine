@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- v5.1: Patched for Multi-User & Data Integrity -->
-    <title>Last Fight (v5.1 - Patched)</title>
+    <!-- v5.2: Patched for Customization UI Refresh -->
+    <title>Last Fight (v5.2 - Patched)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -712,7 +712,7 @@
 
     <!-- 
     ============================================================================
-    APP JAVASCRIPT (v5.1 - Patched)
+    APP JAVASCRIPT (v5.2 - Patched)
     ============================================================================
     -->
     <script type="module">
@@ -756,7 +756,7 @@
             { key: 'camp', name: 'Campus Exam' },
             { key: 'week', name: 'Weekly Exam' },
             { key: 'rev', name: 'Revision Class' },
-            { key: 'new', name: '1st Time Reading' },
+            { key: 'new', name: 'Lecture' }, // Changed '1st Time Reading' to 'Lecture' as requested
             { key: 'secret', name: 'Secret Files' }
         ];
 
@@ -1316,6 +1316,9 @@
             
             // Re-populate all dropdowns in the app
             populateAllStudyTypeDropdowns();
+            
+            // *** v5.2 FIX: Re-render all cards to show study type name changes ***
+            renderAllCards(); 
             
             closeModal(settingsModalEl);
         }
